@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🎬 AI 故事影片工作室</title>
+<style>
+  :root { --bg:#f5f3ff; --card:#fff; --fg:#1e1b2e; --muted:#6b6880; --line:#e6e2f3; --brand:#7c3aed; --brand2:#db2777;
+          --ok:#16a34a; --warn:#d97706; --err:#dc2626; --blue:#2563eb; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#13111c; --card:#1d1a29; --fg:#ebe8f5; --muted:#a19cb8; --line:#2d2940; } }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:-apple-system,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif; background:var(--bg); color:var(--fg); line-height:1.55; }
+  header { background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; padding:22px 16px 60px; }
+  .wrap { max-width:980px; margin:0 auto; }
+  header .wrap { display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; align-items:center; }
+  header h1 { margin:0; font-size:23px; } header p { margin:4px 0 0; opacity:.9; font-size:14px; }
+  main { margin-top:-44px; padding:0 12px 60px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; box-shadow:0 2px 12px rgba(60,20,120,.07); padding:18px; margin-bottom:16px; }
+  .card h2 { margin:0 0 12px; font-size:18px; }
+  label.f { display:block; font-size:13px; color:var(--muted); margin:10px 0 4px; font-weight:600; }
+  input[type=text], input[type=password], textarea, select { width:100%; font:inherit; padding:10px 12px; border-radius:10px; border:1px solid var(--line); background:var(--card); color:var(--fg); }
+  textarea { min-height:220px; resize:vertical; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:12px; }
+  .row { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+  .grow { flex:1; min-width:0; }
+  .muted { color:var(--muted); font-size:13px; }
+  button { border:0; border-radius:10px; padding:10px 16px; font:inherit; font-weight:700; cursor:pointer; background:var(--line); color:var(--fg); }
+  button.primary { background:linear-gradient(135deg,var(--brand),var(--brand2)); color:#fff; padding:12px 22px; font-size:16px; }
+  button.light { background:rgba(255,255,255,.18); color:#fff; border:1px solid rgba(255,255,255,.4); }
+  button.ghost { background:transparent; border:1px solid var(--line); }
+  button.sm { padding:6px 10px; font-size:13px; }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  .notice { background:#faf5ff; border:1px solid #e9d5ff; color:#6b21a8; padding:10px 12px; border-radius:10px; font-size:14px; }
+  @media (prefers-color-scheme: dark) { .notice { background:#2a1d40; border-color:#5b3a8a; color:#d8b4fe; } }
+  .steps { list-style:none; padding:0; margin:8px 0 0; }
+  .steps li { padding:6px 0; display:flex; gap:10px; align-items:center; }
+  .bar { height:8px; background:var(--line); border-radius:99px; overflow:hidden; margin-top:10px; }
+  .bar > div { height:100%; background:linear-gradient(90deg,var(--brand),var(--brand2)); transition:width .6s; }
+  .gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:14px; }
+  .vid { border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--card); display:flex; flex-direction:column; }
+  .vid video { width:100%; aspect-ratio:16/9; background:#000; display:block; }
+  .vid .body { padding:12px; display:flex; flex-direction:column; gap:8px; flex:1; }
+  .vid h3 { margin:0; font-size:16px; }
+  .vid .acts { display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; }
+  a.btn { text-decoration:none; display:inline-block; border-radius:10px; padding:6px 10px; font-size:13px; font-weight:700; background:var(--line); color:var(--fg); }
+  .toast { position:fixed; top:16px; left:50%; transform:translateX(-50%); background:#222; color:#fff; padding:10px 16px; border-radius:10px; font-size:14px; z-index:20; display:none; max-width:90%; }
+  .spin { display:inline-block; animation:spin 1s linear infinite; } @keyframes spin { to { transform:rotate(360deg); } }
+  a { color:var(--blue); }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div>
+      <h1>🎬 AI 故事影片工作室</h1>
+      <p>寫下你的故事 → AI 分鏡、畫插畫、配旁白、上字幕 → 直接下載上傳 YouTube</p>
+    </div>
+    <button class="light" id="btnToken">🔑 登入</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="card" id="loginCard" style="display:none">
+    <h2>🔑 連結你的 GitHub（只要一次）</h2>
+    <div class="notice">不登入也能看影片；要<b>製作新影片</b>或<b>刪除影片</b>需要一組只能存取這個專案的 GitHub 金鑰，金鑰只存在這台裝置的瀏覽器裡。</div>
+    <ol class="muted" style="font-size:14px">
+      <li>點這裡 → <a id="patLink" target="_blank" rel="noopener">建立 GitHub 金鑰</a></li>
+      <li>Repository access 選 <b>Only select repositories</b> → 選 <b>ai-story-video</b></li>
+      <li>Permissions 的 <b>Contents</b> 和 <b>Actions</b> 都選 <b>Read and write</b></li>
+      <li>按 <b>Generate token</b>，把 <code>github_pat_</code> 開頭的金鑰貼到下面</li>
+    </ol>
+    <div class="row"><input id="tokenInput" class="grow" type="password" placeholder="github_pat_..." autocomplete="off"><button class="primary" id="btnSaveToken" style="padding:10px 18px;font-size:14px">儲存</button></div>
+  </div>
+
+  <div class="card">
+    <h2>✍️ 寫下你的故事</h2>
+    <label class="f" for="title">影片標題（可留空，AI 幫你取）</label>
+    <input type="text" id="title" maxlength="40" placeholder="例如：阿橘與月亮燈籠">
+    <label class="f" for="story">故事內容 <span id="count" class="muted"></span></label>
+    <textarea id="story" placeholder="從前從前，在山邊的小村莊裡，住著一隻愛冒險的橘色小貓……"></textarea>
+    <div class="grid">
+      <div><label class="f" for="length">影片長度</label>
+        <select id="length"><option value="short">短片（約 1 分鐘，6 個分鏡）</option><option value="medium" selected>中等（約 2～3 分鐘，10 個分鏡）</option><option value="long">長片（約 4～5 分鐘，16 個分鏡）</option></select></div>
+      <div><label class="f" for="voice">旁白聲音</label>
+        <select id="voice"><option value="female">女聲・曉臻（溫柔）</option><option value="female2">女聲・曉雨（活潑）</option><option value="male">男聲・雲哲（沉穩）</option></select></div>
+      <div><label class="f">&nbsp;</label>
+        <label class="row" style="padding:10px 0"><input type="checkbox" id="faithful"> 盡量保留我的原文，不要改寫</label></div>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <button class="primary" id="btnMake">🎬 生成影片</button>
+      <span class="muted">約 3～8 分鐘完成，期間可以關掉網頁，做好會出現在下方「我的影片」</span>
+    </div>
+  </div>
+
+  <div class="card" id="progressCard" style="display:none">
+    <h2 id="progTitle">⏳ 製作中…</h2>
+    <div class="bar"><div id="progBar" style="width:3%"></div></div>
+    <ul class="steps" id="progSteps"></ul>
+    <p class="muted" id="progMeta"></p>
+  </div>
+
+  <div class="card">
+    <div class="row"><h2 class="grow" style="margin:0">🎞️ 我的影片</h2><button class="ghost sm" id="btnRefresh">🔄 重新整理</button></div>
+    <div id="gallery" class="gallery" style="margin-top:12px"><p class="muted">載入中…</p></div>
+  </div>
+
+  <details class="card">
+    <summary style="cursor:pointer;font-weight:700">📺 怎麼上傳到 YouTube？</summary>
+    <ol style="font-size:14px">
+      <li>在影片卡片按「⬇️ 影片」和「🖼️ 縮圖」、「💬 字幕」下載檔案</li>
+      <li>打開 <a href="https://studio.youtube.com/" target="_blank" rel="noopener">YouTube Studio</a> → 右上角「建立」→「上傳影片」</li>
+      <li>按「📋 複製標題」「📋 複製說明」貼到 YouTube 的標題、說明欄位</li>
+      <li>「縮圖」上傳 thumbnail.jpg；「字幕」上傳 subtitles.srt（選「含時間碼」）</li>
+      <li>「是否為兒童打造」依內容選擇 → 發布 🎉</li>
+    </ol>
+    <p class="muted">插畫由 AI 生成、旁白為 AI 語音。上傳時建議在 YouTube「變造或合成內容」選項勾選「是」。</p>
+  </details>
+
+  <p class="muted" style="text-align:center">分鏡：Google Gemini｜插畫：Cloudflare Workers AI（Flux）｜旁白：Microsoft Edge 語音｜
+    <a href="https://github.com/NTCloudy/ai-story-video" target="_blank" rel="noopener">GitHub</a></p>
+</main>
+<div class="toast" id="toast"></div>
+
+<script>
+const OWNER = "NTCloudy", REPO = "ai-story-video", WF = "make-video.yml";
+const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const token = () => localStorage.getItem("story_pat") || "";
+const STEP_NAMES = [
+  ["準備環境", "準備環境"], ["安裝工具", "安裝影片工具"], ["AI 製作影片", "AI 分鏡 → 插畫 → 配音 → 合成"], ["發布影片", "發布影片"]];
+
+function toast(m, ms=2800) { const t=$("toast"); t.textContent=m; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none", ms); }
+async function gh(path, opts={}) {
+  const headers = { "Accept":"application/vnd.github+json", ...(opts.headers||{}) };
+  if (token()) headers.Authorization = `Bearer ${token()}`;
+  const r = await fetch(path.startsWith("http") ? path : API + path, { ...opts, headers });
+  if (!r.ok) { let m = `${r.status}`; try { m += " " + (await r.json()).message; } catch {}
+    if (r.status === 401) m = "金鑰無效或已過期，請重新登入";
+    if (r.status === 403 || r.status === 404) m += "（金鑰權限不足？需要 Contents 與 Actions 的 Read and write）";
+    throw new Error(m); }
+  return r.status === 204 ? null : r.json();
+}
+function needToken() { if (token()) return false; $("loginCard").style.display="block"; $("loginCard").scrollIntoView({behavior:"smooth"}); toast("請先登入 GitHub 金鑰"); return true; }
+const fmtTime = s => new Date(s).toLocaleString("zh-TW", { month:"numeric", day:"numeric", hour:"2-digit", minute:"2-digit", hour12:false });
+
+// ---------- create ----------
+const draftKeys = ["title","story","length","voice"];
+draftKeys.forEach(k => { const v = localStorage.getItem("draft_"+k); if (v) $(k).value = v;
+  $(k).addEventListener("input", () => { localStorage.setItem("draft_"+k, $(k).value); updateCount(); }); });
+function updateCount() { const n = $("story").value.trim().length; $("count").textContent = n ? `（${n} 字）` : ""; }
+updateCount();
+
+$("btnMake").onclick = async () => {
+  if (needToken()) return;
+  const story = $("story").value.trim();
+  if (story.length < 10) return toast("故事至少要 10 個字喔");
+  if (story.length > 20000) return toast("故事太長了（上限 20000 字）");
+  const rid = Math.random().toString(36).slice(2, 10);
+  $("btnMake").disabled = true;
+  try {
+    await gh(`/actions/workflows/${WF}/dispatches`, { method:"POST", body: JSON.stringify({ ref:"main", inputs: {
+      story, title: $("title").value.trim(), length: $("length").value, voice: $("voice").value,
+      faithful: $("faithful").checked ? "true" : "false", request_id: rid } }) });
+    localStorage.setItem("story_job", JSON.stringify({ rid, title: $("title").value.trim() || "AI 故事影片", at: Date.now() }));
+    toast("🎬 開始製作！");
+    trackJob();
+  } catch (e) { toast("❌ " + e.message, 6000); }
+  finally { $("btnMake").disabled = false; }
+};
+
+// ---------- progress ----------
+let trackTimer = null;
+async function trackJob() {
+  clearTimeout(trackTimer);
+  const job = JSON.parse(localStorage.getItem("story_job") || "null");
+  if (!job) { $("progressCard").style.display = "none"; return; }
+  $("progressCard").style.display = "block";
+  try {
+    const runs = await gh(`/actions/workflows/${WF}/runs?per_page=15`);
+    const run = runs.workflow_runs.find(r => (r.display_title || "").includes(`[${job.rid}]`));
+    if (!run) {
+      $("progTitle").innerHTML = `<span class="spin">⏳</span> 排隊中：${esc(job.title)}`;
+      $("progSteps").innerHTML = ""; $("progMeta").textContent = "GitHub 正在分配機器…";
+      if (Date.now() - job.at > 10*60*1000) { $("progMeta").textContent = "找不到這個工作，可能啟動失敗了。"; localStorage.removeItem("story_job"); return; }
+      trackTimer = setTimeout(trackJob, 5000); return;
+    }
+    const jobs = await gh(`/actions/runs/${run.id}/jobs`);
+    const steps = (jobs.jobs[0]?.steps) || [];
+    let done = 0;
+    $("progSteps").innerHTML = STEP_NAMES.map(([key, label]) => {
+      const s = steps.find(x => x.name.startsWith(key));
+      let icon = "⚪";
+      if (s?.status === "completed") { icon = s.conclusion === "success" ? "✅" : s.conclusion === "skipped" ? "⏭️" : "❌"; if (s.conclusion === "success") done++; }
+      else if (s?.status === "in_progress") icon = `<span class="spin">⏳</span>`;
+      return `<li>${icon} ${label}</li>`;
+    }).join("");
+    const elapsed = Math.round((Date.now() - new Date(run.run_started_at || run.created_at)) / 1000);
+    $("progMeta").innerHTML = `已經過 ${Math.floor(elapsed/60)} 分 ${elapsed%60} 秒｜<a href="${run.html_url}" target="_blank" rel="noopener">詳細紀錄</a>`;
+    if (run.status === "completed") {
+      if (run.conclusion === "success") {
+        $("progTitle").textContent = `✅ 完成：${job.title}`; $("progBar").style.width = "100%";
+        localStorage.removeItem("story_job"); toast("🎉 影片做好了！"); loadGallery();
+        setTimeout(() => $("progressCard").style.display = "none", 15000);
+      } else {
+        $("progTitle").textContent = `❌ 製作失敗：${job.title}`; $("progBar").style.width = "100%";
+        $("progMeta").innerHTML += `｜請把詳細紀錄截圖給維護者`; localStorage.removeItem("story_job");
+      }
+      return;
+    }
+    $("progTitle").innerHTML = `<span class="spin">🎬</span> 製作中：${esc(job.title)}`;
+    $("progBar").style.width = `${Math.max(5, Math.min(95, done/STEP_NAMES.length*100 + 8))}%`;
+  } catch (e) { $("progMeta").textContent = "暫時無法取得進度：" + e.message; }
+  trackTimer = setTimeout(trackJob, 6000);
+}
+
+// ---------- gallery ----------
+function section(body, name) {
+  const m = new RegExp(`### ${name}\\n([\\s\\S]*?)(?=\\n### |$)`).exec(body || "");
+  return m ? m[1].trim() : "";
+}
+async function loadGallery() {
+  try {
+    const rels = await gh(`/releases?per_page=50`);
+    const vids = rels.filter(r => r.tag_name.startsWith("video-"));
+    if (!vids.length) { $("gallery").innerHTML = `<p class="muted">還沒有影片，寫個故事試試看吧！</p>`; return; }
+    $("gallery").innerHTML = vids.map(r => {
+      const a = Object.fromEntries(r.assets.map(x => [x.name, x.browser_download_url]));
+      const dur = (/\*\*長度\*\* ([\d.]+) 秒/.exec(r.body || "") || [])[1];
+      return `<div class="vid">
+        <video controls preload="none" playsinline poster="${esc(a["thumbnail.jpg"] || "")}" src="${esc(a["video.mp4"] || "")}"></video>
+        <div class="body">
+          <h3>${esc(r.name)}</h3>
+          <span class="muted">${fmtTime(r.created_at)}${dur ? `｜${Math.floor(dur/60)} 分 ${Math.round(dur%60)} 秒` : ""}</span>
+          <div class="acts">
+            ${a["video.mp4"] ? `<a class="btn" href="${esc(a["video.mp4"])}">⬇️ 影片</a>` : ""}
+            ${a["thumbnail.jpg"] ? `<a class="btn" href="${esc(a["thumbnail.jpg"])}">🖼️ 縮圖</a>` : ""}
+            ${a["subtitles.srt"] ? `<a class="btn" href="${esc(a["subtitles.srt"])}">💬 字幕</a>` : ""}
+            <button class="sm" data-copy="title" data-id="${r.id}">📋 複製標題</button>
+            <button class="sm" data-copy="desc" data-id="${r.id}">📋 複製說明</button>
+            <button class="sm ghost" data-del="${r.id}" data-tag="${esc(r.tag_name)}" title="刪除">🗑️</button>
+          </div>
+        </div></div>`;
+    }).join("");
+    window._rels = Object.fromEntries(vids.map(r => [r.id, r]));
+  } catch (e) { $("gallery").innerHTML = `<p>❌ 載入失敗：${esc(e.message)}</p>`; }
+}
+document.addEventListener("click", async e => {
+  const c = e.target.closest("[data-copy]");
+  if (c) {
+    const r = window._rels[c.dataset.id];
+    const txt = c.dataset.copy === "title" ? (section(r.body, "YouTube 標題") || r.name)
+      : `${section(r.body, "YouTube 說明")}\n\n${section(r.body, "標籤").split(/,\s*/).filter(Boolean).map(t => "#" + t.replace(/\s+/g, "")).slice(0, 3).join(" ")}`.trim();
+    await navigator.clipboard.writeText(txt); toast("✅ 已複製"); return;
+  }
+  const d = e.target.closest("[data-del]");
+  if (d) {
+    if (needToken()) return;
+    if (!confirm("確定刪除這支影片？刪除後無法復原。")) return;
+    try { await gh(`/releases/${d.dataset.del}`, { method:"DELETE" });
+      await gh(`/git/refs/tags/${d.dataset.tag}`, { method:"DELETE" }).catch(() => {});
+      toast("🗑️ 已刪除"); loadGallery(); } catch (err) { toast("❌ " + err.message, 6000); }
+  }
+});
+$("btnRefresh").onclick = loadGallery;
+
+// ---------- login ----------
+function updateLoginUI() { $("btnToken").textContent = token() ? "🔓 登出" : "🔑 登入"; }
+$("btnToken").onclick = () => {
+  if (token()) { if (confirm("登出並移除這台裝置上的金鑰？")) { localStorage.removeItem("story_pat"); updateLoginUI(); toast("已登出"); } }
+  else { $("loginCard").style.display = "block"; $("loginCard").scrollIntoView({behavior:"smooth"}); }
+};
+$("btnSaveToken").onclick = async () => {
+  const v = $("tokenInput").value.trim(); if (!v) return;
+  localStorage.setItem("story_pat", v);
+  try { const j = await gh(``); if (!j.permissions?.push) throw new Error("這組金鑰沒有寫入權限");
+    $("loginCard").style.display = "none"; $("tokenInput").value = ""; updateLoginUI(); toast("✅ 登入成功");
+  } catch (err) { localStorage.removeItem("story_pat"); toast("❌ " + err.message, 6000); }
+};
+$("patLink").href = "https://github.com/settings/personal-access-tokens/new?" + new URLSearchParams({
+  name: "ai-story-video 工作室", description: "AI 故事影片網頁", target_name: OWNER, expires_in: "366", contents: "write", actions: "write" });
+
+updateLoginUI(); loadGallery(); trackJob();
+</script>
+</body>
+</html>

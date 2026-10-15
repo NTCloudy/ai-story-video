@@ -1,0 +1,98 @@
+name: Make Story Video
+
+run-name: "🎬 ${{ inputs.title || 'AI 故事影片' }} [${{ inputs.request_id }}]"
+
+on:
+  workflow_dispatch:
+    inputs:
+      story:
+        description: "故事內容"
+        required: true
+        type: string
+      title:
+        description: "影片標題（可留空，讓 AI 取）"
+        required: false
+        type: string
+      length:
+        description: "影片長度"
+        type: choice
+        options: [short, medium, long]
+        default: medium
+      voice:
+        description: "旁白聲音"
+        type: choice
+        options: [female, female2, male]
+        default: female
+      faithful:
+        description: "盡量保留原文（不改寫）"
+        type: boolean
+        default: false
+      request_id:
+        description: "網頁用來追蹤進度的 ID"
+        required: false
+        type: string
+        default: manual
+
+concurrency:
+  group: make-video
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  make:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: 準備環境
+        uses: actions/checkout@v4
+
+      - name: 安裝工具（ffmpeg、中文字型）
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk >/dev/null
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: AI 製作影片（分鏡 → 插畫 → 配音 → 合成）
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          CF_ACCOUNT_ID: ${{ secrets.CF_ACCOUNT_ID }}
+          CF_API_TOKEN: ${{ secrets.CF_API_TOKEN }}
+          STORY: ${{ inputs.story }}
+          TITLE: ${{ inputs.title }}
+          LENGTH: ${{ inputs.length }}
+          VOICE: ${{ inputs.voice }}
+          FAITHFUL: ${{ inputs.faithful }}
+        run: |
+          printf '%s' "$STORY" > story.txt
+          extra=""; [ "$FAITHFUL" = "true" ] && extra="--faithful"
+          python -m storyvideo --story-file story.txt --title "$TITLE" --length "$LENGTH" --voice "$VOICE" $extra --out out
+
+      - name: 發布影片
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQ: ${{ inputs.request_id }}
+        run: |
+          cp story.txt out/story.txt
+          TITLE=$(python -c "import json;print(json.load(open('out/meta.json'))['title'])")
+          TAG="video-$(date -u +%Y%m%d-%H%M%S)"
+          python - <<'EOF' > notes.md
+          import json, os
+          m = json.load(open("out/meta.json"))
+          print(f"<!-- request_id: {os.environ.get('REQ','')} -->")
+          print(f"**長度** {m['duration']} 秒｜**分鏡** {m['scenes']} 個\n")
+          print(f"### YouTube 標題\n{m['youtube_title']}\n")
+          print(f"### YouTube 說明\n{m['youtube_description']}\n")
+          print(f"### 標籤\n{', '.join(m['tags'])}")
+          EOF
+          gh release create "$TAG" --title "$TITLE" --notes-file notes.md \
+            out/video.mp4 out/thumbnail.jpg out/subtitles.srt out/youtube.txt out/script.json out/story.txt out/meta.json
+          echo "### ✅ 影片完成：$TITLE" >> "$GITHUB_STEP_SUMMARY"
+          echo "https://github.com/${GITHUB_REPOSITORY}/releases/tag/$TAG" >> "$GITHUB_STEP_SUMMARY"
