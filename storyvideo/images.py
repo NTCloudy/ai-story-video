@@ -24,7 +24,7 @@ def _cf_image(prompt: str, seed: int) -> bytes:
         r = requests.post(
             CF_URL.format(account=account, model=CF_MODEL),
             headers={"Authorization": f"Bearer {token}"},
-            json={"prompt": prompt[:2000], "steps": 8, "seed": seed},
+            json={"prompt": prompt[:2000], "steps": 8},
             timeout=120,
         )
         if r.status_code == 200:
@@ -59,7 +59,8 @@ def generate_images(scenes: list[dict], style: str, characters: str, out_dir: Pa
     paths = []
     for i, sc in enumerate(scenes):
         path = out_dir / f"scene_{i:02d}.jpg"
-        prompt = f"{sc['image_prompt']}. Style: {style}. No text, no letters, no watermark."
+        prompt = (f"{sc['image_prompt']}. Style: {style}. Wide shot, main subject in the upper-middle of the frame "
+                  "with generous space around it. No text, no letters, no watermark.")
         if characters:
             prompt = f"{prompt} Characters: {characters}"
         try:

@@ -37,7 +37,7 @@ def _motion(i: int, n: int) -> tuple[str, str, str]:
 
 
 def _fit(src: str = "0:v") -> str:
-    return f"[{src}]scale={W*2}:{H*2}:force_original_aspect_ratio=increase,crop={W*2}:{H*2},setsar=1"
+    return f"[{src}]scale={W*2}:{H*2}:force_original_aspect_ratio=increase,crop={W*2}:{H*2}:(iw-ow)/2:(ih-oh)*0.35,setsar=1"
 
 
 def scene_clip(img: Path, audio: Path, idx: int, out: Path) -> float:
@@ -129,7 +129,7 @@ def thumbnail(img: Path, title: str, out: Path) -> None:
     ass.write_text(ass_header(1280, 720) + f"Dialogue: 0,0:00:00.00,0:00:10.00,Thumb,,0,0,0,,{_ass_text(title)}\n",
                    encoding="utf-8")
     _run(["ffmpeg", "-y", "-v", "error", "-i", str(img), "-vf",
-          f"scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720,subtitles='{_esc_filter_path(ass)}'",
+          f"scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720:(iw-ow)/2:(ih-oh)*0.35,subtitles='{_esc_filter_path(ass)}'",
           "-frames:v", "1", "-q:v", "2", str(out)])
     ass.unlink(missing_ok=True)
 

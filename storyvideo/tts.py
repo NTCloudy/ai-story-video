@@ -71,7 +71,7 @@ def _gtts(text: str, mp3: Path) -> list[tuple[float, float, str]]:
     """Fallback: Google Translate TTS (no timings -> proportional cues). Sped up 1.2x for natural pace."""
     from gtts import gTTS
     raw = mp3.with_suffix(".raw.mp3")
-    gTTS(text, lang="zh-TW").save(str(raw))
+    gTTS(text, lang="zh-TW", timeout=30).save(str(raw))
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(raw), "-filter:a", "atempo=1.2", str(mp3)], check=True)
     raw.unlink(missing_ok=True)
     sentences = [s for s in re.split(r"(?<=[。！？!?])", text) if s.strip()]
@@ -98,7 +98,7 @@ def narrate(scenes: list[dict], out_dir: Path, voice: str = "female", rate: str 
         if _EDGE_OK:
             for attempt in range(3):
                 try:
-                    cues = asyncio.run(_tts(sc["narration"], v, rate, mp3))
+                    cues = asyncio.run(asyncio.wait_for(_tts(sc["narration"], v, rate, mp3), 90))
                     break
                 except Exception as e:  # network hiccups / blocked
                     print(f"[配音] 微軟語音失敗（{attempt + 1}/3）：{type(e).__name__}: {str(e)[:120]}")

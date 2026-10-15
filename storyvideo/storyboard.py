@@ -10,7 +10,23 @@ import time
 import requests
 
 GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-DEFAULT_MODELS = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-2.0-flash"]
+DEFAULT_MODELS = ["gemini-flash-latest", "gemini-3.5-flash", "gemini-flash-lite-latest"]
+LIST_URL = "https://generativelanguage.googleapis.com/v1beta/models"
+
+
+def discover_models(api_key: str) -> list[str]:
+    """Preferred order: env override, gemini-flash-latest, newest gemini-X.Y-flash, then lite fallbacks."""
+    found = []
+    try:
+        r = requests.get(LIST_URL, params={"pageSize": 200}, headers={"x-goog-api-key": api_key}, timeout=30)
+        names = [m["name"].split("/")[-1] for m in r.json().get("models", [])
+                 if "generateContent" in m.get("supportedGenerationMethods", [])]
+        ver = lambda n: tuple(int(x) for x in re.match(r"gemini-([\d.]+)-flash$", n).group(1).split("."))
+        found = sorted([n for n in names if re.match(r"gemini-[\d.]+-flash$", n)], key=ver, reverse=True)[:3]
+    except Exception as e:  # listing is best-effort
+        print(f"[分鏡] 無法列出模型：{e}")
+    order = [m for m in [os.environ.get("GEMINI_MODEL", "")] if m] + DEFAULT_MODELS[:1] + found + DEFAULT_MODELS[1:]
+    return list(dict.fromkeys(order))
 
 LENGTHS = {  # scenes, approx. narration chars per scene
     "short": (6, 45),
@@ -74,7 +90,7 @@ def generate_storyboard(story: str, title: str = "", length: str = "medium", fai
         print("[警告] 沒有 GEMINI_API_KEY，改用簡易斷句模式（插畫提示詞品質會比較差）")
         return fallback_storyboard(story, title, length)
 
-    models = [m for m in [os.environ.get("GEMINI_MODEL", "")] if m] + DEFAULT_MODELS
+    models = discover_models(api_key)
     body = {
         "contents": [{"role": "user", "parts": [{"text": _prompt(story, title, length, faithful)}]}],
         "generationConfig": {"responseMimeType": "application/json", "responseSchema": SCHEMA,
@@ -82,18 +98,21 @@ def generate_storyboard(story: str, title: str = "", length: str = "medium", fai
     }
     last_err = None
     for model in models:
-        for attempt in range(3):
+        for attempt in range(2):
             try:
-                r = requests.post(GEMINI_URL.format(model=model), params={"key": api_key}, json=body, timeout=180)
+                r = requests.post(GEMINI_URL.format(model=model), headers={"x-goog-api-key": api_key},
+                                  json=body, timeout=240)
                 if r.status_code in (429, 500, 503):
                     last_err = f"{model}: HTTP {r.status_code} {r.text[:200]}"
-                    time.sleep(10 * (attempt + 1))
+                    print(f"[分鏡] {model} 暫時無法使用（{r.status_code}），重試／換模型")
+                    time.sleep(8)
                     continue
-                if r.status_code == 404:
-                    last_err = f"{model}: not found"
+                if r.status_code in (400, 403, 404):
+                    last_err = f"{model}: HTTP {r.status_code} {r.text[:200]}"
                     break
                 r.raise_for_status()
-                text = r.json()["candidates"][0]["content"]["parts"][0]["text"]
+                parts = r.json()["candidates"][0]["content"]["parts"]
+                text = "".join(p.get("text", "") for p in parts if not p.get("thought"))
                 data = json.loads(text)
                 if title:
                     data["title"] = title
