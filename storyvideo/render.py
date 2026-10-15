@@ -86,7 +86,7 @@ def _ass_text(s: str) -> str:
 
 
 def ass_header(w: int = W, h: int = H) -> str:
-    sub = max(int(h * 0.056), 24)
+    sub = max(int(h * 0.068), 24)
     return f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {w}
@@ -95,7 +95,7 @@ WrapStyle: 0
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Sub,{FONT},{sub},&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,1,0,0,0,100,100,1,0,1,{max(sub // 18, 2)},2,2,80,80,{int(h * 0.06)},1
+Style: Sub,{FONT},{sub},&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,1,0,0,0,100,100,1,0,1,{max(sub // 14, 3)},2,2,80,80,{int(h * 0.06)},1
 Style: Title,{FONT},{int(h * 0.1)},&H00FFFFFF,&H00FFFFFF,&H00202020,&H80000000,1,0,0,0,100,100,4,0,1,{max(h // 180, 3)},4,5,100,100,0,1
 Style: Thumb,{FONT},{int(h * 0.13)},&H0000E5FF,&H0000E5FF,&H00000000,&H90000000,1,0,0,0,100,100,2,0,1,{max(h // 90, 4)},6,2,60,60,{int(h * 0.08)},1
 

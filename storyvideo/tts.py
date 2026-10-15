@@ -15,7 +15,7 @@ VOICES = {
     "male": "zh-TW-YunJheNeural",
 }
 
-MAX_LINE = 18  # max chars per subtitle line
+MAX_LINE = 16  # max chars per subtitle line
 
 
 def _split_cue(text: str, start: float, end: float) -> list[tuple[float, float, str]]:
