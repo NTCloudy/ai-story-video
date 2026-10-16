@@ -2,3 +2,4 @@ requests>=2.31
 edge-tts>=7.0
 gTTS>=2.5
 jieba>=0.42
+PyYAML>=6.0

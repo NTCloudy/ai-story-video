@@ -9,6 +9,18 @@ W, H, FPS = 1920, 1080, 30
 LEAD, TAIL = 0.35, 0.45   # silence before / after each scene's narration
 TITLE_DUR = 3.0
 FONT = "Noto Sans CJK TC"
+SHORT = False             # vertical YouTube Shorts mode
+FADE = 0.35
+ZOOM = 0.12
+
+
+def configure(fmt: str = "landscape") -> None:
+    """landscape = 1920x1080 story video; short = 1080x1920 YouTube Shorts (no title card, hook overlay)."""
+    global W, H, LEAD, TAIL, SHORT, FADE, ZOOM
+    if fmt == "short":
+        W, H, LEAD, TAIL, SHORT, FADE, ZOOM = 1080, 1920, 0.1, 0.2, True, 0.18, 0.18
+    else:
+        W, H, LEAD, TAIL, SHORT, FADE, ZOOM = 1920, 1080, 0.35, 0.45, False, 0.35, 0.12
 
 
 def _run(args: list[str]) -> None:
@@ -27,13 +39,14 @@ def _motion(i: int, n: int) -> tuple[str, str, str]:
     """Return zoompan (z, x, y) expressions; cycle through 4 camera moves."""
     cx, cy = "iw/2-(iw/zoom/2)", "ih/2-(ih/zoom/2)"
     kind = i % 4
+    z0 = 1 + ZOOM
     if kind == 0:   # slow zoom in
-        return f"1+0.12*on/{n}", cx, cy
+        return f"1+{ZOOM}*on/{n}", cx, cy
     if kind == 1:   # pan left -> right
-        return "1.12", f"(iw-iw/zoom)*on/{n}", cy
+        return f"{z0}", f"(iw-iw/zoom)*on/{n}", cy
     if kind == 2:   # slow zoom out
-        return f"1.12-0.12*on/{n}", cx, cy
-    return "1.12", f"(iw-iw/zoom)*(1-on/{n})", cy  # pan right -> left
+        return f"{z0}-{ZOOM}*on/{n}", cx, cy
+    return f"{z0}", f"(iw-iw/zoom)*(1-on/{n})", cy  # pan right -> left
 
 
 def _fit(src: str = "0:v") -> str:
@@ -45,7 +58,7 @@ def scene_clip(img: Path, audio: Path, idx: int, out: Path) -> float:
     frames = int(dur * FPS) + 1
     z, x, y = _motion(idx, frames)
     vf = (f"{_fit()},zoompan=z='{z}':x='{x}':y='{y}':d={frames}:s={W}x{H}:fps={FPS},"
-          f"fade=t=in:st=0:d=0.35,fade=t=out:st={dur - 0.35:.3f}:d=0.35,format=yuv420p[v];"
+          f"fade=t=in:st=0:d={FADE},fade=t=out:st={dur - FADE:.3f}:d={FADE},format=yuv420p[v];"
           f"[1:a]adelay={int(LEAD * 1000)}:all=1,apad,atrim=0:{dur:.3f},aresample=44100[a]")
     _run(["ffmpeg", "-y", "-v", "error", "-i", str(img), "-i", str(audio), "-filter_complex", vf,
           "-map", "[v]", "-map", "[a]", "-t", f"{dur:.3f}", "-r", str(FPS),
@@ -85,8 +98,10 @@ def _ass_text(s: str) -> str:
     return s.replace("\\", "＼").replace("{", "｛").replace("}", "｝").replace("\n", "\\N").strip()
 
 
-def ass_header(w: int = W, h: int = H) -> str:
+def ass_header(w: int | None = None, h: int | None = None) -> str:
+    w, h = w or W, h or H
     sub = max(int(h * 0.068), 24)
+    cap = int(w * 0.095)  # Shorts caption size relative to width
     return f"""[Script Info]
 ScriptType: v4.00+
 PlayResX: {w}
@@ -98,6 +113,8 @@ Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour,
 Style: Sub,{FONT},{sub},&H00FFFFFF,&H00FFFFFF,&H00000000,&H80000000,1,0,0,0,100,100,1,0,1,{max(sub // 14, 3)},2,2,80,80,{int(h * 0.06)},1
 Style: Title,{FONT},{int(h * 0.1)},&H00FFFFFF,&H00FFFFFF,&H00202020,&H80000000,1,0,0,0,100,100,4,0,1,{max(h // 180, 3)},4,5,100,100,0,1
 Style: Thumb,{FONT},{int(h * 0.13)},&H0000E5FF,&H0000E5FF,&H00000000,&H90000000,1,0,0,0,100,100,2,0,1,{max(h // 90, 4)},6,2,60,60,{int(h * 0.08)},1
+Style: Cap,{FONT},{cap},&H00FFFFFF,&H00FFFFFF,&H00000000,&H99000000,1,0,0,0,100,100,1,0,1,{max(cap // 9, 4)},3,5,40,40,0,1
+Style: Hook,{FONT},{int(w * 0.082)},&H0000E5FF,&H0000E5FF,&H00000000,&HAA000000,1,0,0,0,100,100,1,0,1,{max(w // 120, 5)},4,5,50,50,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -118,16 +135,38 @@ def layout_cues(cue_groups: list[tuple[float, list]]) -> list[tuple[float, float
     return [tuple(c) for c in cues]
 
 
-def write_subtitles(title: str, cue_groups: list[tuple[float, list]], ass_path: Path, srt_path: Path) -> None:
-    pos = f"{{\\an2\\pos({W // 2},{H - int(H * 0.06)})}}"  # fixed baseline: never moves
-    lines = [ass_header(), f"Dialogue: 1,{_ass_time(0.3)},{_ass_time(TITLE_DUR - 0.3)},Title,,0,0,0,,"
-                           f"{{\\fad(400,400)}}{_ass_text(title)}\n"]
+def write_subtitles(title: str, cue_groups: list[tuple[float, list]], ass_path: Path, srt_path: Path,
+                    hook: str = "") -> None:
+    if SHORT:
+        style, pos = "Cap", f"{{\\an5\\pos({W // 2},{int(H * 0.70)})\\fscx92\\fscy92\\t(0,90,\\fscx100\\fscy100)}}"
+        lines = [ass_header()]
+        if hook:
+            lines.append(f"Dialogue: 1,{_ass_time(0)},{_ass_time(2.6)},Hook,,0,0,0,,"
+                         f"{{\\an5\\q0\\pos({W // 2},{int(H * 0.17)})\\fad(0,300)}}{_wrap(hook.upper(), 14)}\n")
+    else:
+        style, pos = "Sub", f"{{\\an2\\pos({W // 2},{H - int(H * 0.06)})}}"  # fixed baseline: never moves
+        lines = [ass_header(), f"Dialogue: 1,{_ass_time(0.3)},{_ass_time(TITLE_DUR - 0.3)},Title,,0,0,0,,"
+                               f"{{\\fad(400,400)}}{_ass_text(title)}\n"]
     srt = []
     for n, (a, b, text) in enumerate(layout_cues(cue_groups), 1):
-        lines.append(f"Dialogue: 0,{_ass_time(a)},{_ass_time(b)},Sub,,0,0,0,,{pos}{_ass_text(text)}\n")
+        lines.append(f"Dialogue: 0,{_ass_time(a)},{_ass_time(b)},{style},,0,0,0,,{pos}{_ass_text(text)}\n")
         srt.append(f"{n}\n{_srt_time(a)} --> {_srt_time(b)}\n{text}\n")
     ass_path.write_text("".join(lines), encoding="utf-8")
     srt_path.write_text("\n".join(srt), encoding="utf-8")
+
+
+def _wrap(text: str, width: int) -> str:
+    """Balanced manual line breaks for the hook title (libass wrapping is disabled globally)."""
+    words, lines, cur = text.split(), [], ""
+    for w in words:
+        if cur and len(cur) + 1 + len(w) > width:
+            lines.append(cur)
+            cur = w
+        else:
+            cur = f"{cur} {w}".strip()
+    if cur:
+        lines.append(cur)
+    return "\\N".join(_ass_text(l) for l in lines)
 
 
 def _esc_filter_path(p: Path) -> str:
@@ -135,22 +174,25 @@ def _esc_filter_path(p: Path) -> str:
 
 
 def thumbnail(img: Path, title: str, out: Path) -> None:
+    tw, th = (720, 1280) if SHORT else (1280, 720)
     ass = out.with_suffix(".ass")
-    ass.write_text(ass_header(1280, 720) + f"Dialogue: 0,0:00:00.00,0:00:10.00,Thumb,,0,0,0,,{_ass_text(title)}\n",
+    ass.write_text(ass_header(tw, th) + f"Dialogue: 0,0:00:00.00,0:00:10.00,Thumb,,0,0,0,,{_ass_text(title)}\n",
                    encoding="utf-8")
     _run(["ffmpeg", "-y", "-v", "error", "-i", str(img), "-vf",
-          f"scale=1280:720:force_original_aspect_ratio=increase,crop=1280:720:(iw-ow)/2:(ih-oh)*0.35,subtitles='{_esc_filter_path(ass)}'",
+          f"scale={tw}:{th}:force_original_aspect_ratio=increase,crop={tw}:{th}:(iw-ow)/2:(ih-oh)*0.35,subtitles='{_esc_filter_path(ass)}'",
           "-frames:v", "1", "-q:v", "2", str(out)])
     ass.unlink(missing_ok=True)
 
 
-def assemble(title: str, images: list[Path], narrations: list[dict], work: Path, out_dir: Path) -> Path:
+def assemble(title: str, images: list[Path], narrations: list[dict], work: Path, out_dir: Path,
+             hook: str = "") -> Path:
     work.mkdir(parents=True, exist_ok=True)
     out_dir.mkdir(parents=True, exist_ok=True)
     clips, groups, t = [], [], 0.0
-    c = work / "clip_title.mp4"
-    t += title_clip(images[0], c)
-    clips.append(c)
+    if not SHORT:
+        c = work / "clip_title.mp4"
+        t += title_clip(images[0], c)
+        clips.append(c)
     for i, (img, nar) in enumerate(zip(images, narrations)):
         c = work / f"clip_{i:02d}.mp4"
         d = scene_clip(img, nar["audio"], i, c)
@@ -164,11 +206,11 @@ def assemble(title: str, images: list[Path], narrations: list[dict], work: Path,
     _run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(body)])
 
     ass, srt = work / "subs.ass", out_dir / "subtitles.srt"
-    write_subtitles(title, groups, ass, srt)
+    write_subtitles(title, groups, ass, srt, hook)
     final = out_dir / "video.mp4"
     _run(["ffmpeg", "-y", "-v", "error", "-i", str(body), "-vf", f"subtitles='{_esc_filter_path(ass)}'",
           "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
           "-c:a", "copy", "-movflags", "+faststart", str(final)])
-    thumbnail(images[0], title, out_dir / "thumbnail.jpg")
+    thumbnail(images[0], hook or title, out_dir / "thumbnail.jpg")
     print(f"[合成] 完成，影片長度 {duration(final):.1f} 秒")
     return final

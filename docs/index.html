@@ -39,6 +39,8 @@
   .gallery { display:grid; grid-template-columns:repeat(auto-fill,minmax(290px,1fr)); gap:14px; }
   .vid { border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--card); display:flex; flex-direction:column; }
   .vid video { width:100%; aspect-ratio:16/9; background:#000; display:block; }
+  .vid.short video { aspect-ratio:9/16; }
+  #queueList li { padding:3px 0; } #queueList button { margin-left:6px; }
   .vid .body { padding:12px; display:flex; flex-direction:column; gap:8px; flex:1; }
   .vid h3 { margin:0; font-size:16px; }
   .vid .acts { display:flex; flex-wrap:wrap; gap:6px; margin-top:auto; }
@@ -70,6 +72,18 @@
       <li>按 <b>Generate token</b>，把 <code>github_pat_</code> 開頭的金鑰貼到下面</li>
     </ol>
     <div class="row"><input id="tokenInput" class="grow" type="password" placeholder="github_pat_..." autocomplete="off"><button class="primary" id="btnSaveToken" style="padding:10px 18px;font-size:14px">儲存</button></div>
+  </div>
+
+  <div class="card" id="shortsCard">
+    <div class="row"><h2 class="grow" style="margin:0">📱 每日英文 Shorts</h2><span id="shortsStatus" class="muted"></span></div>
+    <p class="muted" style="margin:6px 0 10px">每天自動：AI 選題 → 上網查證 → 寫腳本 → 畫直式插畫 → 英文配音＋逐字字幕 → 上傳 YouTube（私人）。你也可以排入想做的主題。</p>
+    <div class="row">
+      <input type="text" id="topicInput" class="grow" placeholder="排入主題，例如：What if humans could photosynthesize?">
+      <button class="ghost" id="btnQueue">＋ 排入</button>
+      <button class="primary" id="btnShortNow" style="padding:10px 16px;font-size:14px">⚡ 立即做一支</button>
+    </div>
+    <ol id="queueList" style="margin:10px 0 0;padding-left:22px;font-size:14px"></ol>
+    <div id="shortsGallery" class="gallery" style="margin-top:12px;grid-template-columns:repeat(auto-fill,minmax(180px,1fr))"></div>
   </div>
 
   <div class="card">
@@ -127,8 +141,9 @@ const API = `https://api.github.com/repos/${OWNER}/${REPO}`;
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const token = () => localStorage.getItem("story_pat") || "";
-const STEP_NAMES = [
-  ["準備環境", "準備環境"], ["安裝工具", "安裝影片工具"], ["AI 製作影片", "AI 分鏡 → 插畫 → 配音 → 合成"], ["發布影片", "發布影片"]];
+const STEPS = {
+  "make-video.yml": [["準備環境", "準備環境"], ["安裝工具", "安裝影片工具"], ["AI 製作影片", "AI 分鏡 → 插畫 → 配音 → 合成"], ["發布影片", "發布影片"]],
+  "daily-short.yml": [["準備環境", "準備環境"], ["安裝工具", "安裝影片工具"], ["AI 製作 Short", "AI 選題 → 查證 → 腳本 → 插畫 → 配音 → 合成 → 上傳 YouTube"], ["發布影片", "發布影片"], ["更新頻道紀錄", "更新頻道紀錄"]]};
 
 function toast(m, ms=2800) { const t=$("toast"); t.textContent=m; t.style.display="block"; clearTimeout(t._h); t._h=setTimeout(()=>t.style.display="none", ms); }
 async function gh(path, opts={}) {
@@ -177,7 +192,8 @@ async function trackJob() {
   if (!job) { $("progressCard").style.display = "none"; return; }
   $("progressCard").style.display = "block";
   try {
-    const runs = await gh(`/actions/workflows/${WF}/runs?per_page=15`);
+    const wf = job.wf || WF, STEP_NAMES = STEPS[wf];
+    const runs = await gh(`/actions/workflows/${wf}/runs?per_page=15`);
     const run = runs.workflow_runs.find(r => (r.display_title || "").includes(`[${job.rid}]`));
     if (!run) {
       $("progTitle").innerHTML = `<span class="spin">⏳</span> 排隊中：${esc(job.title)}`;
@@ -200,7 +216,7 @@ async function trackJob() {
     if (run.status === "completed") {
       if (run.conclusion === "success") {
         $("progTitle").textContent = `✅ 完成：${job.title}`; $("progBar").style.width = "100%";
-        localStorage.removeItem("story_job"); toast("🎉 影片做好了！"); loadGallery();
+        localStorage.removeItem("story_job"); toast("🎉 影片做好了！"); loadGallery(); loadShorts();
         setTimeout(() => $("progressCard").style.display = "none", 15000);
       } else {
         $("progTitle").textContent = `❌ 製作失敗：${job.title}`; $("progBar").style.width = "100%";
@@ -227,6 +243,7 @@ function section(body, name) {
 async function loadGallery() {
   try {
     const rels = await gh(`/releases?per_page=50`);
+    window._allRels = rels;
     const vids = rels.filter(r => r.tag_name.startsWith("video-"));
     if (!vids.length) { $("gallery").innerHTML = `<p class="muted">還沒有影片，寫個故事試試看吧！</p>`; return; }
     $("gallery").innerHTML = vids.map(r => {
@@ -264,10 +281,75 @@ document.addEventListener("click", async e => {
     if (!confirm("確定刪除這支影片？刪除後無法復原。")) return;
     try { await gh(`/releases/${d.dataset.del}`, { method:"DELETE" });
       await gh(`/git/refs/tags/${d.dataset.tag}`, { method:"DELETE" }).catch(() => {});
-      toast("🗑️ 已刪除"); loadGallery(); } catch (err) { toast("❌ " + err.message, 6000); }
+      toast("🗑️ 已刪除"); window._allRels = null; loadGallery().then(loadShorts); } catch (err) { toast("❌ " + err.message, 6000); }
   }
 });
 $("btnRefresh").onclick = loadGallery;
+
+
+// ---------- daily shorts ----------
+let Q = { list: [], sha: null };
+async function loadQueue() {
+  try { const j = await gh(`/contents/channel/queue.json?ref=main&t=${Date.now()}`);
+    Q.list = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(j.content.replace(/\n/g,"")), c => c.charCodeAt(0)))) || [];
+    Q.sha = j.sha; } catch { Q.list = []; }
+  renderQueue();
+}
+function renderQueue() {
+  $("queueList").innerHTML = Q.list.length ? Q.list.map((q, i) => `<li>${esc(typeof q === "string" ? q : q.topic)}
+      <button class="sm ghost" data-qdel="${i}">✕</button></li>`).join("")
+    : `<span class="muted">（排程清單是空的，AI 會每天自己選題）</span>`;
+}
+async function saveQueue(msg) {
+  if (needToken()) return false;
+  const content = btoa(String.fromCharCode(...new TextEncoder().encode(JSON.stringify(Q.list, null, 1))));
+  try { const r = await gh(`/contents/channel/queue.json`, { method:"PUT", body: JSON.stringify({ message: msg, content, sha: Q.sha, branch:"main" }) });
+    Q.sha = r.content.sha; toast("✅ 已更新排程"); return true;
+  } catch (e) { toast("❌ " + e.message, 6000); loadQueue(); return false; }
+}
+$("btnQueue").onclick = async () => {
+  const t = $("topicInput").value.trim(); if (!t) return;
+  if (needToken()) return;
+  Q.list.push({ topic: t, series: "" }); renderQueue();
+  if (await saveQueue(`📝 Queue Short: ${t.slice(0,60)}`)) $("topicInput").value = "";
+};
+document.addEventListener("click", async e => {
+  const d = e.target.closest("[data-qdel]"); if (!d) return;
+  if (needToken()) return;
+  Q.list.splice(+d.dataset.qdel, 1); renderQueue(); await saveQueue("🗑️ Remove queued Short");
+});
+$("btnShortNow").onclick = async () => {
+  if (needToken()) return;
+  const topic = $("topicInput").value.trim();
+  const rid = Math.random().toString(36).slice(2, 10);
+  try {
+    await gh(`/actions/workflows/daily-short.yml/dispatches`, { method:"POST", body: JSON.stringify({ ref:"main",
+      inputs: { topic, force: "true", upload: "true", request_id: rid } }) });
+    localStorage.setItem("story_job", JSON.stringify({ rid, title: topic || "AI 自選主題 Short", at: Date.now(), wf: "daily-short.yml" }));
+    $("topicInput").value = ""; toast("⚡ 開始製作 Short！"); trackJob();
+  } catch (err) { toast("❌ " + err.message, 6000); }
+};
+async function loadShorts() {
+  try {
+    const rels = window._allRels || await gh(`/releases?per_page=50`);
+    const items = rels.filter(r => r.tag_name.startsWith("short-")).slice(0, 12);
+    const today = new Date(Date.now() + 8*3600000).toISOString().slice(0,10).replace(/-/g,"");
+    const doneToday = items.some(r => r.tag_name.includes(today));
+    $("shortsStatus").textContent = doneToday ? "✅ 今天的 Short 已完成" : "⏳ 今天的 Short 尚未產生（每天 08:23 起自動）";
+    $("shortsGallery").innerHTML = items.map(r => {
+      const a = Object.fromEntries(r.assets.map(x => [x.name, x.browser_download_url]));
+      const yt = (/https:\/\/youtube\.com\/shorts\/([\w-]+)/.exec(r.body || "") || [])[1];
+      return `<div class="vid short">
+        <video controls preload="none" playsinline poster="${esc(a["thumbnail.jpg"]||"")}" src="${esc(a["video.mp4"]||"")}"></video>
+        <div class="body"><h3 style="font-size:14px">${esc(r.name)}</h3>
+          <span class="muted">${fmtTime(r.created_at)}</span>
+          <div class="acts">
+            ${yt ? `<a class="btn" target="_blank" rel="noopener" href="https://studio.youtube.com/video/${yt}/edit">▶️ Studio 改公開</a>` : `<a class="btn" href="${esc(a["video.mp4"]||"")}">⬇️ 影片</a>`}
+            <button class="sm ghost" data-del="${r.id}" data-tag="${esc(r.tag_name)}">🗑️</button>
+          </div></div></div>`;
+    }).join("") || `<p class="muted">還沒有 Shorts</p>`;
+  } catch (e) { $("shortsGallery").innerHTML = `<p>❌ ${esc(e.message)}</p>`; }
+}
 
 // ---------- login ----------
 function updateLoginUI() { $("btnToken").textContent = token() ? "🔓 登出" : "🔑 登入"; }
@@ -285,7 +367,7 @@ $("btnSaveToken").onclick = async () => {
 $("patLink").href = "https://github.com/settings/personal-access-tokens/new?" + new URLSearchParams({
   name: "ai-story-video 工作室", description: "AI 故事影片網頁", target_name: OWNER, expires_in: "366", contents: "write", actions: "write" });
 
-updateLoginUI(); loadGallery(); trackJob();
+updateLoginUI(); loadGallery().then(loadShorts); loadQueue(); trackJob();
 </script>
 </body>
 </html>

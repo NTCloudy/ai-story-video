@@ -9,17 +9,21 @@ from pathlib import Path
 
 import edge_tts
 
-from .subtitles import build_cues, sentences
+from .subtitles import build_cues, build_cues_en, proportional_words, sentences
 
 VOICES = {
     "female": "zh-TW-HsiaoChenNeural",
     "female2": "zh-TW-HsiaoYuNeural",
     "male": "zh-TW-YunJheNeural",
+    "en_male": "en-US-AndrewNeural",
+    "en_male2": "en-US-ChristopherNeural",
+    "en_female": "en-US-AvaNeural",
 }
 
-async def _tts(text: str, voice: str, rate: str, mp3: Path) -> list[tuple[float, float, str]]:
-    comm = edge_tts.Communicate(text, voice, rate=rate, boundary="SentenceBoundary")
-    cues = []
+async def _tts(text: str, voice: str, rate: str, mp3: Path, lang: str = "zh") -> list[tuple[float, float, str]]:
+    boundary = "WordBoundary" if lang == "en" else "SentenceBoundary"
+    comm = edge_tts.Communicate(text, voice, rate=rate, boundary=boundary)
+    cues, words = [], []
     with open(mp3, "wb") as f:
         async for chunk in comm.stream():
             if chunk["type"] == "audio":
@@ -27,8 +31,25 @@ async def _tts(text: str, voice: str, rate: str, mp3: Path) -> list[tuple[float,
             elif chunk["type"] in ("SentenceBoundary", "WordBoundary"):
                 s = chunk["offset"] / 1e7
                 e = s + chunk["duration"] / 1e7
-                cues.extend(build_cues(chunk["text"], s, e))
+                if lang == "en":
+                    words.append((s, e, chunk["text"]))
+                else:
+                    cues.extend(build_cues(chunk["text"], s, e))
+    if lang == "en":
+        words = _attach_punct(text, words)
+        cues = build_cues_en(words)
     return cues
+
+
+def _attach_punct(text: str, words: list[tuple[float, float, str]]) -> list[tuple[float, float, str]]:
+    """Edge word boundaries drop punctuation; re-attach it from the source text so captions break naturally."""
+    toks, out, k = text.split(), [], 0
+    for s, e, w in words:
+        while k < len(toks) and w.lower().strip(".,!?;:\"'") not in toks[k].lower():
+            k += 1
+        out.append((s, e, toks[k] if k < len(toks) else w))
+        k += 1
+    return out
 
 
 def _duration(path: Path) -> float:
@@ -37,13 +58,15 @@ def _duration(path: Path) -> float:
     return float(out or 0)
 
 
-def _gtts(text: str, mp3: Path) -> list[tuple[float, float, str]]:
+def _gtts(text: str, mp3: Path, lang: str = "zh") -> list[tuple[float, float, str]]:
     """Fallback: Google Translate TTS (no timings -> proportional cues). Sped up 1.2x for natural pace."""
     from gtts import gTTS
     raw = mp3.with_suffix(".raw.mp3")
-    gTTS(text, lang="zh-TW", timeout=30).save(str(raw))
+    gTTS(text, lang="en" if lang == "en" else "zh-TW", timeout=30).save(str(raw))
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(raw), "-filter:a", "atempo=1.2", str(mp3)], check=True)
     raw.unlink(missing_ok=True)
+    if lang == "en":
+        return build_cues_en(proportional_words(text, 0.0, _duration(mp3)))
     sents = sentences(text)
     total = sum(len(x) for x in sents) or 1
     dur, t, cues = _duration(mp3), 0.0, []
@@ -57,7 +80,8 @@ def _gtts(text: str, mp3: Path) -> list[tuple[float, float, str]]:
 _EDGE_OK = True
 
 
-def narrate(scenes: list[dict], out_dir: Path, voice: str = "female", rate: str = "+0%") -> list[dict]:
+def narrate(scenes: list[dict], out_dir: Path, voice: str = "female", rate: str = "+0%",
+            lang: str = "zh") -> list[dict]:
     global _EDGE_OK
     out_dir.mkdir(parents=True, exist_ok=True)
     v = VOICES.get(voice, voice)
@@ -68,7 +92,7 @@ def narrate(scenes: list[dict], out_dir: Path, voice: str = "female", rate: str 
         if _EDGE_OK:
             for attempt in range(3):
                 try:
-                    cues = asyncio.run(asyncio.wait_for(_tts(sc["narration"], v, rate, mp3), 90))
+                    cues = asyncio.run(asyncio.wait_for(_tts(sc["narration"], v, rate, mp3, lang), 90))
                     break
                 except Exception as e:  # network hiccups / blocked
                     print(f"[配音] 微軟語音失敗（{attempt + 1}/3）：{type(e).__name__}: {str(e)[:120]}")
@@ -76,7 +100,7 @@ def narrate(scenes: list[dict], out_dir: Path, voice: str = "female", rate: str 
                 print("[配音] 改用 Google 語音備援")
                 _EDGE_OK = False
         if cues is None:
-            cues = _gtts(sc["narration"], mp3)
+            cues = _gtts(sc["narration"], mp3, lang)
         if not cues:
             cues = [(0.0, _duration(mp3), sc["narration"])]
         results.append({"audio": mp3, "cues": cues})

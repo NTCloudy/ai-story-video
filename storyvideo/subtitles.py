@@ -119,3 +119,47 @@ def build_cues(sentence: str, start: float, end: float) -> list[tuple[float, flo
 
 def sentences(text: str) -> list[str]:
     return [s for s in re.split(r"(?<=[。！？!?])", text) if _spoken_len(s)]
+
+
+# ---------------- English (Shorts word-by-word captions) ----------------
+EN_MAX_WORDS = 3
+EN_MAX_CHARS = 15
+_EN_STRIP = re.compile(r"[^\w'%$&+\-./:]+", re.UNICODE)
+
+
+def _en_clean(w: str) -> str:
+    return _EN_STRIP.sub("", w).strip(".,:;!?-")
+
+
+def build_cues_en(words: list[tuple[float, float, str]]) -> list[tuple[float, float, str]]:
+    """Group timed words into 1-3 word captions; break on pauses/punctuation. Display uppercase, no punctuation."""
+    cues, cur = [], []
+
+    def flush():
+        if cur:
+            text = " ".join(_en_clean(w) for _, _, w in cur if _en_clean(w)).upper()
+            if text:
+                cues.append((cur[0][0], cur[-1][1], text))
+            cur.clear()
+
+    for i, (s, e, w) in enumerate(words):
+        if cur:
+            gap = s - cur[-1][1]
+            chars = len(" ".join(x[2] for x in cur)) + 1 + len(w)
+            if len(cur) >= EN_MAX_WORDS or chars > EN_MAX_CHARS or gap > 0.25 or re.search(r"[.,!?;:]$", cur[-1][2]):
+                flush()
+        cur.append((s, e, w))
+    flush()
+    return cues
+
+
+def proportional_words(text: str, start: float, end: float) -> list[tuple[float, float, str]]:
+    """Approximate per-word timing when the TTS engine gives no word boundaries."""
+    words = text.split()
+    total = sum(len(w) + 1 for w in words) or 1
+    out, t = [], start
+    for w in words:
+        d = (end - start) * (len(w) + 1) / total
+        out.append((t, t + d, w))
+        t += d
+    return out

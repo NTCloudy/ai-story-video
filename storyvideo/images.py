@@ -107,7 +107,7 @@ def make_character_refs(characters: list[dict], style: str, out_dir: Path) -> di
     return refs
 
 
-def scene_prompt(scene: dict, chars: list[dict], ref_names: list[str], style: str) -> str:
+def scene_prompt(scene: dict, chars: list[dict], ref_names: list[str], style: str, vertical: bool = False) -> str:
     by_name = {c["name"]: c["appearance"] for c in chars}
     parts = [scene["image_prompt"].strip().rstrip(".") + "."]
     for k, n in enumerate(ref_names):
@@ -116,12 +116,14 @@ def scene_prompt(scene: dict, chars: list[dict], ref_names: list[str], style: st
     for n in scene.get("characters") or []:
         if n not in ref_names and n in by_name:
             parts.append(f"{n}: {by_name[n]}.")
-    parts.append(f"Art style: {style}. Wide cinematic 16:9 composition, main subject in the upper-middle "
-                 f"of the frame. No text, no letters, no watermark.")
+    comp = ("Vertical 9:16 composition, main subject centered in the upper two-thirds of the frame"
+            if vertical else "Wide cinematic 16:9 composition, main subject in the upper-middle of the frame")
+    parts.append(f"Art style: {style}. {comp}. No text, no letters, no watermark.")
     return " ".join(parts)
 
 
-def generate_images(scenes: list[dict], style: str, characters, out_dir: Path) -> list[Path]:
+def generate_images(scenes: list[dict], style: str, characters, out_dir: Path, vertical: bool = False) -> list[Path]:
+    w, h = (SCENE_H, SCENE_W) if vertical else (SCENE_W, SCENE_H)
     out_dir.mkdir(parents=True, exist_ok=True)
     chars = normalize_characters(characters)
     refs = make_character_refs(chars, style, out_dir) if chars else {}
@@ -129,16 +131,16 @@ def generate_images(scenes: list[dict], style: str, characters, out_dir: Path) -
     for i, sc in enumerate(scenes):
         path = out_dir / f"scene_{i:02d}.jpg"
         names = [n for n in (sc.get("characters") or []) if n in refs][:MAX_REFS]
-        prompt = scene_prompt(sc, chars, names, style)
+        prompt = scene_prompt(sc, chars, names, style, vertical)
         try:
-            path.write_bytes(flux2(prompt, [refs[n] for n in names]))
+            path.write_bytes(flux2(prompt, [refs[n] for n in names], w, h))
             print(f"[插畫] 分鏡 {i + 1}/{len(scenes)} 完成（參考 {len(names)} 個角色）")
         except QuotaExceeded:
             raise
         except Exception as e1:
             print(f"[插畫] 分鏡 {i + 1} FLUX.2 失敗，改用 FLUX.1：{e1}")
             try:
-                full = scene_prompt(sc, chars, [], style)
+                full = scene_prompt(sc, chars, [], style, vertical)
                 path.write_bytes(flux1(full))
             except QuotaExceeded:
                 raise

@@ -1,0 +1,18 @@
+# ============================================================
+#  英文好奇心科普 Shorts 頻道設定（網頁控制台也可以改）
+# ============================================================
+shorts_per_day: 1          # 每天自動產生幾支
+paused: false              # true = 暫停每日自動產生
+upload: true               # 有 YouTube 授權時自動上傳
+privacy: private           # 未通過 Google 審核前只能是 private
+made_for_kids: false
+category: "27"             # 27 = Education
+voice: en_male             # en_male（Andrew）/ en_male2（Christopher）/ en_female（Ava）
+voice_rate: "+8%"
+series:
+  - "What If (hypothetical science scenarios, e.g. what if the Moon disappeared)"
+  - "Your Body (surprising facts about the human body)"
+  - "Psychology (why our brains do weird things)"
+  - "History Mysteries (strange but true moments in history)"
+  - "Space (mind-blowing facts about the universe)"
+  - "Animal Superpowers (incredible real animal abilities)"
