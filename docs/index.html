@@ -204,7 +204,12 @@ async function trackJob() {
         setTimeout(() => $("progressCard").style.display = "none", 15000);
       } else {
         $("progTitle").textContent = `❌ 製作失敗：${job.title}`; $("progBar").style.width = "100%";
-        $("progMeta").innerHTML += `｜請把詳細紀錄截圖給維護者`; localStorage.removeItem("story_job");
+        let reason = "";
+        try { const ann = await gh(`/check-runs/${jobs.jobs[0].id}/annotations`);
+              reason = (ann.find(a => a.annotation_level === "failure" && a.title) || {}).message || ""; } catch {}
+        $("progMeta").innerHTML = reason ? `❗ ${esc(reason)}` + (reason.includes("額度") ? "｜這次沒有扣到額度，明天早上 8 點後再按一次生成即可" : "")
+          : $("progMeta").innerHTML + `｜請把詳細紀錄截圖給維護者`;
+        localStorage.removeItem("story_job");
       }
       return;
     }

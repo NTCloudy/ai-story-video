@@ -35,7 +35,12 @@ def main(argv=None) -> int:
     print(f"標題：{sb['title']}｜{len(sb['scenes'])} 個分鏡｜模型 {sb.get('model')}")
 
     print("== 2/4 AI 繪製插畫 ==")
-    imgs = images.generate_images(sb["scenes"], args.style, sb.get("characters", ""), work / "images")
+    try:
+        imgs = images.generate_images(sb["scenes"], args.style, sb.get("characters", []), work / "images")
+    except Exception as e:
+        print(f"::error title=插畫失敗::{e}")
+        print(f"❌ {e}")
+        return 3
 
     print("== 3/4 旁白配音 ==")
     nars = tts.narrate(sb["scenes"], work / "audio", args.voice)
