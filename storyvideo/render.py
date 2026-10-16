@@ -91,7 +91,7 @@ def ass_header(w: int = W, h: int = H) -> str:
 ScriptType: v4.00+
 PlayResX: {w}
 PlayResY: {h}
-WrapStyle: 0
+WrapStyle: 2
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
@@ -104,18 +104,28 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 """
 
 
+def layout_cues(cue_groups: list[tuple[float, list]]) -> list[tuple[float, float, str]]:
+    """Absolute, non-overlapping subtitle cues (overlap makes libass stack lines -> jumping text)."""
+    cues = []
+    for start, group in cue_groups:
+        for s, e, text in group:
+            if text.strip():
+                cues.append([start + LEAD + s, start + LEAD + max(e, s + 0.5), text.strip()])
+    cues.sort(key=lambda c: c[0])
+    for a, b in zip(cues, cues[1:]):
+        if a[1] > b[0] - 0.02:
+            a[1] = max(a[0] + 0.2, b[0] - 0.02)
+    return [tuple(c) for c in cues]
+
+
 def write_subtitles(title: str, cue_groups: list[tuple[float, list]], ass_path: Path, srt_path: Path) -> None:
+    pos = f"{{\\an2\\pos({W // 2},{H - int(H * 0.06)})}}"  # fixed baseline: never moves
     lines = [ass_header(), f"Dialogue: 1,{_ass_time(0.3)},{_ass_time(TITLE_DUR - 0.3)},Title,,0,0,0,,"
                            f"{{\\fad(400,400)}}{_ass_text(title)}\n"]
-    srt, n = [], 0
-    for start, cues in cue_groups:
-        for s, e, text in cues:
-            if not text.strip():
-                continue
-            a, b = start + LEAD + s, start + LEAD + max(e, s + 0.5)
-            lines.append(f"Dialogue: 0,{_ass_time(a)},{_ass_time(b)},Sub,,0,0,0,,{_ass_text(text)}\n")
-            n += 1
-            srt.append(f"{n}\n{_srt_time(a)} --> {_srt_time(b)}\n{text.strip()}\n")
+    srt = []
+    for n, (a, b, text) in enumerate(layout_cues(cue_groups), 1):
+        lines.append(f"Dialogue: 0,{_ass_time(a)},{_ass_time(b)},Sub,,0,0,0,,{pos}{_ass_text(text)}\n")
+        srt.append(f"{n}\n{_srt_time(a)} --> {_srt_time(b)}\n{text}\n")
     ass_path.write_text("".join(lines), encoding="utf-8")
     srt_path.write_text("\n".join(srt), encoding="utf-8")
 

@@ -26,7 +26,10 @@ def discover_models(api_key: str) -> list[str]:
     except Exception as e:  # listing is best-effort
         print(f"[分鏡] 無法列出模型：{e}")
     order = [m for m in [os.environ.get("GEMINI_MODEL", "")] if m] + DEFAULT_MODELS[:1] + found + DEFAULT_MODELS[1:]
-    return list(dict.fromkeys(order))
+    order = list(dict.fromkeys(order))
+    main = [m for m in order if "lite" not in m]
+    # retry strong models twice (they are often briefly overloaded) before falling back to lite
+    return main + main + [m for m in order if "lite" in m]
 
 LENGTHS = {  # scenes, approx. narration chars per scene
     "short": (6, 45),
@@ -35,15 +38,22 @@ LENGTHS = {  # scenes, approx. narration chars per scene
 }
 
 DEFAULT_STYLE = (
-    "warm cinematic storybook illustration, soft painterly lighting, rich colors, "
-    "highly detailed, wide 16:9 composition"
+    "warm hand-drawn storybook watercolor illustration, soft natural lighting, gentle colors, "
+    "clean linework, consistent children's picture-book art style"
 )
 
 SCHEMA = {
     "type": "OBJECT",
     "properties": {
         "title": {"type": "STRING"},
-        "characters": {"type": "STRING"},
+        "characters": {
+            "type": "ARRAY",
+            "items": {
+                "type": "OBJECT",
+                "properties": {"name": {"type": "STRING"}, "appearance": {"type": "STRING"}},
+                "required": ["name", "appearance"],
+            },
+        },
         "scenes": {
             "type": "ARRAY",
             "items": {
@@ -51,8 +61,9 @@ SCHEMA = {
                 "properties": {
                     "narration": {"type": "STRING"},
                     "image_prompt": {"type": "STRING"},
+                    "characters": {"type": "ARRAY", "items": {"type": "STRING"}},
                 },
-                "required": ["narration", "image_prompt"],
+                "required": ["narration", "image_prompt", "characters"],
             },
         },
         "youtube_title": {"type": "STRING"},
@@ -71,10 +82,11 @@ def _prompt(story: str, title: str, length: str, faithful: bool) -> str:
 
 規則：
 1. 分成約 {n} 個分鏡（可依故事長短 ±3），每個分鏡的旁白約 {chars} 個中文字，使用台灣慣用的繁體中文、口語自然、適合朗讀。{mode}。
-2. 每個分鏡的 image_prompt 用「英文」詳細描述畫面（場景、角色動作、表情、構圖、光線、鏡頭），不要出現任何文字或字幕。
-3. 角色外觀要一致：先在 characters 欄位用英文定義每個主要角色的固定外觀（年齡、髮型、服裝、顏色、物種等），並在每個 image_prompt 裡重複寫出出場角色的完整外觀描述。
-4. title：影片標題（繁體中文，15 字內）{f'，使用者指定的標題是「{title}」，請直接使用' if title else ''}。
-5. youtube_title：吸引人的 YouTube 標題（繁體中文，60 字內）。youtube_description：YouTube 影片說明（繁體中文，含故事簡介 2～3 句與 3～5 個 hashtag）。tags：8～12 個 YouTube 標籤。
+2. characters：列出最多 4 個主要角色。name 用簡短英文名字（例如 Jiji），appearance 用英文詳細定義固定外觀（物種、年齡、體型、毛色或髮型、服裝、顏色、配件），之後整支影片都不會改變。
+3. 每個分鏡的 image_prompt 用「英文」描述畫面：場景、角色動作與表情、構圖、鏡頭、光線。角色只用 name 稱呼，不要重複外觀，也「不要寫任何畫風或媒材」（例如 digital art、watercolor、3D），畫風由系統統一指定。畫面中不要出現文字。
+4. 每個分鏡的 characters 欄位列出這個畫面裡出現的角色 name（沒有角色就給空陣列）。
+5. title：影片標題（繁體中文，15 字內）{f'，使用者指定的標題是「{title}」，請直接使用' if title else ''}。
+6. youtube_title：吸引人的 YouTube 標題（繁體中文，60 字內）。youtube_description：YouTube 影片說明（繁體中文，含故事簡介 2～3 句與 3～5 個 hashtag）。tags：8～12 個 YouTube 標籤。
 
 故事：
 \"\"\"
@@ -97,15 +109,17 @@ def generate_storyboard(story: str, title: str = "", length: str = "medium", fai
                              "temperature": 0.8},
     }
     last_err = None
-    for model in models:
-        for attempt in range(2):
+    for n, model in enumerate(models):
+        if n and n % max(len(models) // 2, 1) == 0:
+            time.sleep(20)
+        for attempt in range(1):
             try:
                 r = requests.post(GEMINI_URL.format(model=model), headers={"x-goog-api-key": api_key},
                                   json=body, timeout=240)
                 if r.status_code in (429, 500, 503):
                     last_err = f"{model}: HTTP {r.status_code} {r.text[:200]}"
-                    print(f"[分鏡] {model} 暫時無法使用（{r.status_code}），重試／換模型")
-                    time.sleep(8)
+                    print(f"[分鏡] {model} 暫時無法使用（{r.status_code}），換下一個模型")
+                    time.sleep(5)
                     continue
                 if r.status_code in (400, 403, 404):
                     last_err = f"{model}: HTTP {r.status_code} {r.text[:200]}"
@@ -141,7 +155,7 @@ def fallback_storyboard(story: str, title: str = "", length: str = "medium") -> 
         scenes.append(buf.strip())
     t = title or (story.strip().splitlines()[0][:15] if story.strip() else "我的故事")
     return {
-        "title": t, "characters": "",
-        "scenes": [{"narration": s, "image_prompt": f"storybook illustration of: {s}"} for s in scenes],
+        "title": t, "characters": [],
+        "scenes": [{"narration": s, "image_prompt": f"illustration of: {s}", "characters": []} for s in scenes],
         "youtube_title": t, "youtube_description": t, "tags": [], "model": "fallback",
     }

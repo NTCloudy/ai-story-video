@@ -9,43 +9,13 @@ from pathlib import Path
 
 import edge_tts
 
+from .subtitles import build_cues, sentences
+
 VOICES = {
     "female": "zh-TW-HsiaoChenNeural",
     "female2": "zh-TW-HsiaoYuNeural",
     "male": "zh-TW-YunJheNeural",
 }
-
-MAX_LINE = 16  # max chars per subtitle line
-
-
-def _split_cue(text: str, start: float, end: float) -> list[tuple[float, float, str]]:
-    """Split a long sentence into subtitle-sized chunks, timing proportional to char count."""
-    text = text.strip()
-    if len(text) <= MAX_LINE:
-        return [(start, end, text)]
-    parts = [p for p in re.split(r"(?<=[，、；：,;:])", text) if p.strip()]
-    chunks, buf = [], ""
-    for p in parts:
-        while len(p) > MAX_LINE:  # hard wrap very long clauses
-            if buf:
-                chunks.append(buf)
-                buf = ""
-            chunks.append(p[:MAX_LINE])
-            p = p[MAX_LINE:]
-        if buf and len(buf) + len(p) > MAX_LINE:
-            chunks.append(buf)
-            buf = ""
-        buf += p
-    if buf:
-        chunks.append(buf)
-    total = sum(len(c) for c in chunks) or 1
-    out, t = [], start
-    for c in chunks:
-        d = (end - start) * len(c) / total
-        out.append((t, t + d, c))
-        t += d
-    return out
-
 
 async def _tts(text: str, voice: str, rate: str, mp3: Path) -> list[tuple[float, float, str]]:
     comm = edge_tts.Communicate(text, voice, rate=rate, boundary="SentenceBoundary")
@@ -57,7 +27,7 @@ async def _tts(text: str, voice: str, rate: str, mp3: Path) -> list[tuple[float,
             elif chunk["type"] in ("SentenceBoundary", "WordBoundary"):
                 s = chunk["offset"] / 1e7
                 e = s + chunk["duration"] / 1e7
-                cues.extend(_split_cue(chunk["text"], s, e))
+                cues.extend(build_cues(chunk["text"], s, e))
     return cues
 
 
@@ -74,12 +44,12 @@ def _gtts(text: str, mp3: Path) -> list[tuple[float, float, str]]:
     gTTS(text, lang="zh-TW", timeout=30).save(str(raw))
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(raw), "-filter:a", "atempo=1.2", str(mp3)], check=True)
     raw.unlink(missing_ok=True)
-    sentences = [s for s in re.split(r"(?<=[。！？!?])", text) if s.strip()]
-    total = sum(len(s) for s in sentences) or 1
+    sents = sentences(text)
+    total = sum(len(x) for x in sents) or 1
     dur, t, cues = _duration(mp3), 0.0, []
-    for s in sentences:
-        d = dur * len(s) / total
-        cues.extend(_split_cue(s, t, t + d))
+    for x in sents:
+        d = dur * len(x) / total
+        cues.extend(build_cues(x, t, t + d))
         t += d
     return cues
 
