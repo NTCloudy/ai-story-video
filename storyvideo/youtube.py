@@ -21,7 +21,8 @@ from pathlib import Path
 
 import requests
 
-SCOPES = "https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly"
+SCOPES = ("https://www.googleapis.com/auth/youtube.upload https://www.googleapis.com/auth/youtube.readonly "
+          "https://www.googleapis.com/auth/youtube")  # youtube = manage channel branding (banner, description, watermark)
 DEVICE_URL = "https://oauth2.googleapis.com/device/code"
 TOKEN_URL = "https://oauth2.googleapis.com/token"
 UPLOAD_URL = "https://www.googleapis.com/upload/youtube/v3/videos"
@@ -104,6 +105,47 @@ def channel_info() -> dict:
     return items[0] if items else {}
 
 
+def apply_branding(banner: Path | None, watermark: Path | None, description: str, keywords: list[str],
+                   country: str = "TW", language: str = "en") -> None:
+    """Set banner, description, keywords, country, default language and video watermark.
+    (YouTube API cannot change the profile picture.)"""
+    token = access_token()
+    auth = {"Authorization": f"Bearer {token}"}
+    ch = requests.get(f"{API}/channels", params={"part": "brandingSettings", "mine": "true"}, headers=auth, timeout=30)
+    ch.raise_for_status()
+    item = ch.json()["items"][0]
+    cid, bs = item["id"], item.get("brandingSettings", {})
+    channel = bs.get("channel", {})
+    channel.update(description=description[:1000], country=country, defaultLanguage=language,
+                   keywords=" ".join(f'"{k}"' if " " in k else k for k in keywords)[:500])
+    body = {"id": cid, "brandingSettings": {"channel": channel}}
+    if banner:
+        r = requests.post("https://www.googleapis.com/upload/youtube/v3/channelBanners/insert",
+                          params={"uploadType": "media"}, headers={**auth, "Content-Type": "image/png"},
+                          data=banner.read_bytes(), timeout=120)
+        if r.status_code != 200:
+            raise RuntimeError(f"橫幅上傳失敗：{r.status_code} {r.text[:400]}")
+        body["brandingSettings"]["image"] = {"bannerExternalUrl": r.json()["url"]}
+        print("✅ 橫幅已上傳")
+    r = requests.put(f"{API}/channels", params={"part": "brandingSettings"},
+                     headers={**auth, "Content-Type": "application/json"}, data=json.dumps(body), timeout=60)
+    if r.status_code != 200:
+        raise RuntimeError(f"頻道設定失敗：{r.status_code} {r.text[:400]}")
+    print("✅ 說明、關鍵字、國家、語言已更新")
+    if watermark:
+        boundary = "wmboundary7f3a"
+        meta = json.dumps({"timing": {"type": "offsetFromStart", "offsetMs": 0},
+                           "position": {"type": "corner", "cornerPosition": "bottomRight"}})
+        payload = (f"--{boundary}\r\nContent-Type: application/json; charset=UTF-8\r\n\r\n{meta}\r\n"
+                   f"--{boundary}\r\nContent-Type: image/png\r\n\r\n").encode() + watermark.read_bytes() + \
+                  f"\r\n--{boundary}--".encode()
+        r = requests.post("https://www.googleapis.com/upload/youtube/v3/watermarks/set",
+                          params={"channelId": cid, "uploadType": "multipart"},
+                          headers={**auth, "Content-Type": f"multipart/related; boundary={boundary}"},
+                          data=payload, timeout=120)
+        print("✅ 影片浮水印已設定" if r.status_code in (200, 204) else f"⚠️ 浮水印設定失敗：{r.status_code} {r.text[:300]}")
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="storyvideo.youtube")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -112,9 +154,15 @@ def main(argv=None) -> int:
     a.add_argument("--client-secret", required=True)
     sub.add_parser("whoami")
     sub.add_parser("check", help="verify auth + upload permission without uploading anything")
+    sub.add_parser("branding", help="apply channel/branding.json (banner, description, keywords, watermark)")
     args = p.parse_args(argv)
     if args.cmd == "auth":
         print("YT_REFRESH_TOKEN=" + device_auth(args.client_id, args.client_secret))
+    elif args.cmd == "branding":
+        cfg = json.loads(Path("channel/branding.json").read_text(encoding="utf-8"))
+        apply_branding(Path(cfg["banner"]) if cfg.get("banner") else None,
+                       Path(cfg["watermark"]) if cfg.get("watermark") else None,
+                       cfg["description"], cfg["keywords"], cfg.get("country", "TW"), cfg.get("language", "en"))
     elif args.cmd == "check":
         info = channel_info()
         print(f"頻道：{info.get('snippet', {}).get('title')}（{info.get('id')}）")
