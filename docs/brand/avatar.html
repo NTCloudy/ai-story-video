@@ -1,0 +1,84 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>html,body{margin:0;padding:0;background:transparent}</style></head>
+<body>
+<svg id="avatar" xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <defs>
+    <radialGradient id="bg" cx="35%" cy="30%" r="85%">
+      <stop offset="0" stop-color="#3b82f6"/>
+      <stop offset="0.55" stop-color="#6d28d9"/>
+      <stop offset="1" stop-color="#1e0b4b"/>
+    </radialGradient>
+    <linearGradient id="cloud" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#dbe7ff"/>
+    </linearGradient>
+    <radialGradient id="planet" cx="35%" cy="35%" r="75%">
+      <stop offset="0" stop-color="#7dd3fc"/>
+      <stop offset="0.6" stop-color="#0ea5e9"/>
+      <stop offset="1" stop-color="#075985"/>
+    </radialGradient>
+    <linearGradient id="ring" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fde047"/>
+      <stop offset="1" stop-color="#f97316"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="10" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="14" stdDeviation="14" flood-color="#0b0420" flood-opacity="0.55"/>
+    </filter>
+    <clipPath id="lens"><circle cx="560" cy="520" r="112"/></clipPath>
+  </defs>
+
+  <!-- background -->
+  <rect width="800" height="800" fill="url(#bg)"/>
+  <!-- stars -->
+  <g fill="#fff" filter="url(#glow)">
+    <circle cx="140" cy="150" r="7"/><circle cx="660" cy="130" r="5"/><circle cx="700" cy="300" r="4"/>
+    <circle cx="110" cy="560" r="5"/><circle cx="250" cy="90" r="4"/><circle cx="600" cy="720" r="4"/>
+    <path d="M655 210 l10 26 26 10 -26 10 -10 26 -10 -26 -26 -10 26 -10z" fill="#fde047"/>
+    <path d="M170 300 l7 18 18 7 -18 7 -7 18 -7 -18 -18 -7 18 -7z" fill="#fde047"/>
+  </g>
+
+  <g transform="translate(400 400) scale(0.80) translate(-415 -440)">
+  <!-- cloud character -->
+  <g filter="url(#shadow)">
+    <path d="M190 470
+             C130 470 105 420 120 380 C135 335 185 318 222 335
+             C230 260 300 215 370 228 C425 238 465 280 474 330
+             C520 310 585 335 595 395 C605 450 565 490 515 490
+             L215 490 C205 490 198 482 190 470Z" fill="url(#cloud)"/>
+  </g>
+  <!-- eyes -->
+  <g>
+    <ellipse cx="300" cy="392" rx="30" ry="38" fill="#1e1b4b"/>
+    <ellipse cx="420" cy="392" rx="30" ry="38" fill="#1e1b4b"/>
+    <circle cx="311" cy="378" r="11" fill="#fff"/><circle cx="431" cy="378" r="11" fill="#fff"/>
+    <circle cx="292" cy="404" r="5" fill="#fff" opacity=".8"/><circle cx="412" cy="404" r="5" fill="#fff" opacity=".8"/>
+  </g>
+  <!-- cheeks + smile -->
+  <ellipse cx="258" cy="440" rx="22" ry="12" fill="#fb7185" opacity=".55"/>
+  <ellipse cx="462" cy="440" rx="22" ry="12" fill="#fb7185" opacity=".55"/>
+  <path d="M330 440 Q360 472 390 440" stroke="#1e1b4b" stroke-width="12" fill="none" stroke-linecap="round"/>
+
+  <!-- magnifying glass with planet inside -->
+  <g filter="url(#shadow)">
+    <line x1="640" y1="600" x2="715" y2="680" stroke="#f59e0b" stroke-width="38" stroke-linecap="round"/>
+    <line x1="640" y1="600" x2="715" y2="680" stroke="#fbbf24" stroke-width="20" stroke-linecap="round"/>
+    <circle cx="560" cy="520" r="128" fill="#0b1a3a"/>
+    <g clip-path="url(#lens)">
+      <rect x="430" y="390" width="260" height="260" fill="#0b1a3a"/>
+      <circle cx="560" cy="530" r="70" fill="url(#planet)"/>
+      <path d="M505 505 q25 -20 50 -5 q20 12 40 -2 q8 18 -8 30 q-25 14 -45 0 q-20 -10 -37 -23z" fill="#22c55e" opacity=".9"/>
+      <path d="M530 575 q20 -10 40 0 q-10 15 -40 0z" fill="#22c55e" opacity=".9"/>
+      <ellipse cx="560" cy="530" rx="118" ry="30" fill="none" stroke="url(#ring)" stroke-width="12" transform="rotate(-18 560 530)"/>
+      <circle cx="505" cy="455" r="30" fill="#fff" opacity=".18"/>
+    </g>
+    <circle cx="560" cy="520" r="122" fill="none" stroke="#fbbf24" stroke-width="22"/>
+    <circle cx="560" cy="520" r="122" fill="none" stroke="#fde68a" stroke-width="6" opacity=".8"/>
+  </g>
+  </g>
+</svg>
+</body></html>
