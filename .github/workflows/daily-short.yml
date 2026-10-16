@@ -28,6 +28,10 @@ on:
         required: false
         type: string
         default: manual
+      test_placeholder:
+        description: "（測試用）插畫額度用完時用預設背景"
+        type: boolean
+        default: false
 
 concurrency:
   group: daily-short
@@ -67,6 +71,7 @@ jobs:
           TOPIC: ${{ inputs.topic }}
           FORCE: ${{ inputs.force }}
           UPLOAD: ${{ inputs.upload }}
+          ALLOW_PLACEHOLDER: ${{ inputs.test_placeholder && '1' || '' }}
         run: |
           args=()
           [ -n "$TOPIC" ] && args+=(--topic "$TOPIC")

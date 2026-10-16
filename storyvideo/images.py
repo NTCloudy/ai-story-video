@@ -55,7 +55,7 @@ def _post(model: str, **kwargs) -> bytes:
             if r.status_code == 200:
                 return _decode(r)
             last = f"HTTP {r.status_code}: {r.text[:300]}"
-            if "4006" in r.text or "daily free allocation" in r.text:
+            if ("4006" in r.text or "daily free allocation" in r.text) and not os.environ.get("ALLOW_PLACEHOLDER"):
                 raise QuotaExceeded("Cloudflare 今日免費插畫額度已用完（每天早上 8 點重置）")
             if r.status_code in (400, 401, 403, 413):
                 break
@@ -149,6 +149,6 @@ def generate_images(scenes: list[dict], style: str, characters, out_dir: Path, v
                 placeholder(path, i)
                 failed += 1
         paths.append(path)
-    if failed > max(1, len(scenes) // 4):
+    if failed > max(1, len(scenes) // 4) and not os.environ.get("ALLOW_PLACEHOLDER"):
         raise RuntimeError(f"有 {failed}/{len(scenes)} 張插畫失敗，為避免產生品質不佳的影片已停止")
     return paths
