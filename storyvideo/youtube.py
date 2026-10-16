@@ -111,9 +111,23 @@ def main(argv=None) -> int:
     a.add_argument("--client-id", required=True)
     a.add_argument("--client-secret", required=True)
     sub.add_parser("whoami")
+    sub.add_parser("check", help="verify auth + upload permission without uploading anything")
     args = p.parse_args(argv)
     if args.cmd == "auth":
         print("YT_REFRESH_TOKEN=" + device_auth(args.client_id, args.client_secret))
+    elif args.cmd == "check":
+        info = channel_info()
+        print(f"頻道：{info.get('snippet', {}).get('title')}（{info.get('id')}）")
+        token = access_token()
+        meta = {"snippet": {"title": "preflight", "categoryId": "27"},
+                "status": {"privacyStatus": "private", "selfDeclaredMadeForKids": False, "containsSyntheticMedia": True}}
+        r = requests.post(UPLOAD_URL, params={"uploadType": "resumable", "part": "snippet,status"},
+                          headers={"Authorization": f"Bearer {token}", "Content-Type": "application/json",
+                                   "X-Upload-Content-Type": "video/mp4", "X-Upload-Content-Length": "1000000"},
+                          data=json.dumps(meta), timeout=60)
+        ok = r.status_code == 200 and "Location" in r.headers
+        print("上傳權限：" + ("✅ 正常（預檢通道已建立，未上傳任何影片）" if ok else f"❌ {r.status_code} {r.text[:300]}"))
+        return 0 if ok else 1
     else:
         info = channel_info()
         print(json.dumps({"title": info.get("snippet", {}).get("title"), "stats": info.get("statistics")},
