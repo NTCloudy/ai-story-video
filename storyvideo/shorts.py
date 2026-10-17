@@ -25,10 +25,76 @@ TOPIC_SCHEMA = {
     "properties": {
         "series": {"type": "STRING"},
         "topic": {"type": "STRING"},
+        "concept": {"type": "STRING"},
         "why_viral": {"type": "STRING"},
     },
-    "required": ["series", "topic", "why_viral"],
+    "required": ["series", "topic", "concept", "why_viral"],
 }
+
+DUP_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {"duplicate": {"type": "BOOLEAN"}, "similar_to": {"type": "STRING"}},
+    "required": ["duplicate", "similar_to"],
+}
+
+# ---------------- topic de-duplication ----------------
+import difflib
+import re as _re
+
+_STOP = set("""a an the of to in on for and or is are was were be been being do does did if what why how when where
+who which your you our we it its this that these those would could should will can just only really ever happens happen
+happened make makes made feel feels get gets got into from with without about by at as than then so very most more one
+day second seconds minute minutes earth's""".split())
+
+
+def _words(text: str) -> set[str]:
+    out = set()
+    for w in _re.findall(r"[a-z0-9]+", text.lower()):
+        if w in _STOP or len(w) < 3:
+            continue
+        for suf in ("ing", "ies", "es", "ed", "s"):  # crude stemming
+            if w.endswith(suf) and len(w) - len(suf) >= 3:
+                w = w[: -len(suf)] + ("y" if suf == "ies" else "")
+                break
+        out.add(w)
+    return out
+
+
+def lexical_duplicate(topic: str, concept: str, history: list[dict]) -> str:
+    """Returns the previous topic this one duplicates (empty string if unique)."""
+    tw, cw = _words(topic), _words(concept)
+    for h in history:
+        ht, hc = h.get("topic", ""), h.get("concept", "")
+        hw, hcw = _words(ht), _words(hc)
+        if cw and hcw and (cw == hcw or cw <= hw or hcw <= tw):
+            return ht
+        if tw and hw and len(tw & hw) / len(tw | hw) >= 0.5:
+            return ht
+        if difflib.SequenceMatcher(None, topic.lower(), ht.lower()).ratio() >= 0.75:
+            return ht
+    return ""
+
+
+def semantic_duplicate(topic: str, history: list[dict]) -> str:
+    """Ask Gemini whether the topic is essentially the same video as any previous one (best effort)."""
+    if not history:
+        return ""
+    listing = "\n".join(f"- {h.get('topic', '')}" for h in history[-400:])
+    prompt = (f"New YouTube Shorts topic: \"{topic}\"\n\nPrevious topics:\n{listing}\n\n"
+              "Is the new topic essentially the SAME video as any previous topic (same core phenomenon or same "
+              "hypothetical scenario, even if worded differently)? Different angles on a broad field (e.g. two "
+              "different facts about the Moon) are NOT duplicates. Answer duplicate true/false and similar_to.")
+    try:
+        text, _ = gemini.call(prompt, DUP_SCHEMA, temperature=0.0, max_models=4)
+        d = json.loads(text)
+        return d.get("similar_to", "") or "(similar)" if d.get("duplicate") else ""
+    except Exception as e:
+        print(f"[Topic] semantic check skipped: {e}")
+        return ""
+
+
+def find_duplicate(topic: str, concept: str, history: list[dict]) -> str:
+    return lexical_duplicate(topic, concept, history) or semantic_duplicate(topic, history)
 
 SHORT_SCHEMA = {
     "type": "OBJECT",
@@ -57,9 +123,25 @@ SHORT_SCHEMA = {
 }
 
 
-def pick_topic(history: list[str], series: list[str] | None = None) -> dict:
+def pick_topic(history: list[dict], series: list[str] | None = None, attempts: int = 6) -> dict:
+    """Pick a topic guaranteed (lexical + semantic checks) not to overlap any previous Short."""
+    rejected: list[str] = []
+    for _ in range(attempts):
+        t = _propose_topic(history, series, rejected)
+        dup = find_duplicate(t["topic"], t.get("concept", ""), history)
+        if not dup:
+            return t
+        print(f"[Topic] 重複，換一個：{t['topic']} ≈ {dup}")
+        rejected.append(t["topic"])
+    raise RuntimeError("連續多次都選到重複主題，請在網頁排入新主題")
+
+
+def _propose_topic(history: list[dict], series: list[str] | None, rejected: list[str]) -> dict:
     series = series or DEFAULT_SERIES
-    recent = "\n".join(f"- {t}" for t in history[-120:]) or "(none yet)"
+    recent = "\n".join(f"- {h.get('topic', '')} [{h.get('concept', '')}]" for h in history[-300:]) or "(none yet)"
+    if rejected:
+        recent += "\nAlso rejected just now (too similar to past videos):\n" + "\n".join(f"- {r}" for r in rejected)
+    last_series = [h.get("series", "") for h in history[-6:]]
     prompt = f"""You run a fast-growing English YouTube Shorts channel about curiosity and science for a global
 audience (teens and adults). Pick ONE new video topic for today.
 
@@ -71,8 +153,9 @@ Rules:
 - Must have a strong curiosity hook that makes people stop scrolling in 1 second.
 - Must NOT repeat or closely resemble any of these previous topics:
 {recent}
-- Prefer the series that was used least recently.
-Return the series name (short form, e.g. "What If"), the topic phrased as the video question, and why it will go viral."""
+- Prefer the series that was used least recently (recent series, newest last: {last_series}).
+Return the series name (short form, e.g. "What If"), the topic phrased as the video question, the core concept
+(1-4 lowercase words naming the exact phenomenon, e.g. "hypnic jerk", "earth stops spinning"), and why it will go viral."""
     text, _ = gemini.call(prompt, TOPIC_SCHEMA, temperature=1.0)
     return json.loads(text)
 

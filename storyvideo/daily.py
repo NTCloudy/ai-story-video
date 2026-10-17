@@ -95,16 +95,25 @@ def main(argv=None) -> int:
         (out / "SKIPPED").write_text("paused")
         return 0
 
-    # 1. topic
-    series = ""
+    # 1. topic (never repeat a previous Short)
+    series, concept, topic = "", "", ""
     if args.topic.strip():
+        dup = shorts.find_duplicate(args.topic.strip(), "", history)
+        if dup:
+            print(f"::error title=主題重複::「{args.topic.strip()}」和先前的影片「{dup}」重複，請換一個主題")
+            return 4
         topic = args.topic.strip()
-    elif queue:
+    while not topic and queue:
         item = queue.pop(0)
-        topic, series = (item.get("topic", ""), item.get("series", "")) if isinstance(item, dict) else (str(item), "")
-    else:
-        t = shorts.pick_topic([h["topic"] for h in history], cfg.get("series"))
-        topic, series = t["topic"], t["series"]
+        cand, ser = (item.get("topic", ""), item.get("series", "")) if isinstance(item, dict) else (str(item), "")
+        dup = shorts.find_duplicate(cand, "", history)
+        if dup:
+            print(f"::warning title=排程主題重複，已略過::「{cand}」≈「{dup}」")
+            continue
+        topic, series = cand, ser
+    if not topic:
+        t = shorts.pick_topic(history, cfg.get("series"))
+        topic, series, concept = t["topic"], t["series"], t.get("concept", "")
     print(f"== 主題：{topic}（{series or '自訂'}）==")
 
     # 2. research + script
@@ -135,7 +144,8 @@ def main(argv=None) -> int:
     if facts and sb.get("sources"):
         desc += "\n\nSources:\n" + "\n".join(f"- {s}" for s in sb["sources"][:3])
     desc += "\n\nVisuals and voice are AI-generated."
-    entry = {"date": today, "topic": topic, "series": series or sb.get("series", ""), "title": sb["youtube_title"],
+    entry = {"date": today, "topic": topic, "concept": concept, "series": series or sb.get("series", ""),
+             "title": sb["youtube_title"],
              "duration": round(dur, 1), "video_id": "", "privacy": ""}
     if not args.no_upload and cfg.get("upload", True) and youtube.configured():
         try:
