@@ -4,7 +4,8 @@
 shorts_per_day: 1          # 每天自動產生幾支
 paused: false              # true = 暫停每日自動產生
 upload: true               # 有 YouTube 授權時自動上傳
-privacy: private           # 未通過 Google 審核前只能是 private
+privacy: private           # 上傳時的狀態（未通過 Google 審核前 API 只能用 private 上傳）
+auto_publish: true         # 上傳後自動改成公開；失敗的話下次排程會再補公開
 made_for_kids: false
 category: "27"             # 27 = Education
 voice: en_male             # en_male（Andrew）/ en_male2（Christopher）/ en_female（Ava）

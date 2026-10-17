@@ -76,7 +76,7 @@
 
   <div class="card" id="shortsCard">
     <div class="row"><h2 class="grow" style="margin:0">📱 每日英文 Shorts</h2><span id="shortsStatus" class="muted"></span></div>
-    <p class="muted" style="margin:6px 0 10px">每天自動：AI 選題 → 上網查證 → 寫腳本 → 畫直式插畫 → 英文配音＋逐字字幕 → 上傳 YouTube（私人）。你也可以排入想做的主題。</p>
+    <p class="muted" style="margin:6px 0 10px">每天自動：AI 選題 → 維基百科查證 → 寫腳本 → 畫直式插畫 → 英文配音＋逐字字幕 → 上傳 YouTube 並自動公開。你也可以排入想做的主題。</p>
     <div class="row">
       <input type="text" id="topicInput" class="grow" placeholder="排入主題，例如：What if humans could photosynthesize?">
       <button class="ghost" id="btnQueue">＋ 排入</button>
@@ -344,7 +344,10 @@ async function loadShorts() {
         <div class="body"><h3 style="font-size:14px">${esc(r.name)}</h3>
           <span class="muted">${fmtTime(r.created_at)}</span>
           <div class="acts">
-            ${yt ? `<a class="btn" target="_blank" rel="noopener" href="https://studio.youtube.com/video/${yt}/edit">▶️ Studio 改公開</a>` : `<a class="btn" href="${esc(a["video.mp4"]||"")}">⬇️ 影片</a>`}
+            ${yt ? ((r.body || "").includes("（public）")
+                ? `<a class="btn" target="_blank" rel="noopener" href="https://youtube.com/shorts/${yt}">▶️ 在 YouTube 觀看</a>`
+                : `<a class="btn" target="_blank" rel="noopener" href="https://studio.youtube.com/video/${yt}/edit">🔒 Studio</a>`)
+              : `<a class="btn" href="${esc(a["video.mp4"]||"")}">⬇️ 影片</a>`}
             <button class="sm ghost" data-del="${r.id}" data-tag="${esc(r.tag_name)}">🗑️</button>
           </div></div></div>`;
     }).join("") || `<p class="muted">還沒有 Shorts</p>`;

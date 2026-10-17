@@ -36,6 +36,36 @@ def _save(path: Path, data) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
+def publish_video(video_id: str, attempts: int = 6, wait: int = 20) -> str:
+    """Make an uploaded video public (uploads from unaudited API projects start as private)."""
+    import time
+    last = ""
+    for i in range(attempts):
+        try:
+            st = youtube.set_privacy(video_id, "public")
+            if st.get("privacyStatus") == "public":
+                print(f"[YouTube] 🌐 已公開：https://youtube.com/shorts/{video_id}")
+                return "public"
+            last = st.get("privacyStatus", "")
+        except Exception as e:
+            last = str(e)[:200]
+        time.sleep(wait)
+    print(f"::warning title=自動公開失敗，下次排程會再試::{video_id} {last}")
+    return "private"
+
+
+def publish_pending(history: list[dict]) -> bool:
+    """Catch-up: publish any earlier Shorts that are still private (e.g. publishing failed last time)."""
+    changed = False
+    for h in history:
+        if h.get("video_id") and h.get("privacy") != "public" and not h.get("keep_private"):
+            print(f"[YouTube] 補公開先前的影片：{h['title']}")
+            if publish_video(h["video_id"], attempts=2, wait=10) == "public":
+                h["privacy"] = "public"
+                changed = True
+    return changed
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="storyvideo.daily")
     p.add_argument("--topic", default="")
@@ -50,6 +80,10 @@ def main(argv=None) -> int:
     today = datetime.now(TZ).date().isoformat()
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
+
+    auto_publish = bool(cfg.get("auto_publish", False)) and youtube.configured() and not args.no_upload
+    if auto_publish and publish_pending(history):
+        _save(CH / "history.json", history)
 
     per_day = int(cfg.get("shorts_per_day", 1))
     if not args.force and not args.topic and sum(1 for h in history if h.get("date") == today) >= per_day:
@@ -109,6 +143,10 @@ def main(argv=None) -> int:
                                category=str(cfg.get("category", "27")), privacy=cfg.get("privacy", "private"),
                                made_for_kids=bool(cfg.get("made_for_kids", False)))
             entry.update(video_id=v["id"], privacy=v["status"]["privacyStatus"])
+            if auto_publish and entry["privacy"] != "public":
+                time_mod = __import__("time")
+                time_mod.sleep(15)  # give YouTube a moment to register the upload
+                entry["privacy"] = publish_video(v["id"])
         except Exception as e:
             print(f"::warning title=YouTube 上傳失敗::{e}")
     else:
