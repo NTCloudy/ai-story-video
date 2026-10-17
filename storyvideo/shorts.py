@@ -77,8 +77,37 @@ Return the series name (short form, e.g. "What If"), the topic phrased as the vi
     return json.loads(text)
 
 
+WIKI_API = "https://en.wikipedia.org/w/api.php"
+WIKI_HEADERS = {"User-Agent": "CloudFindsTheWorld-ShortsBot/1.0 (https://github.com/NTCloudy/ai-story-video)"}
+
+
+def wikipedia_notes(topic: str, pages: int = 3, chars: int = 2500) -> str:
+    """Free, reliable research source: intro sections of the most relevant Wikipedia articles."""
+    import requests
+    try:
+        q, _ = gemini.call(f"Give 2-4 English Wikipedia search keywords (just the words, no quotes) for: {topic}",
+                           temperature=0.0, max_models=3)
+        q = q.strip().splitlines()[0][:100]
+    except Exception:
+        q = topic
+    r = requests.get(WIKI_API, headers=WIKI_HEADERS, timeout=30, params={
+        "action": "query", "format": "json", "generator": "search", "gsrsearch": q, "gsrlimit": pages,
+        "prop": "extracts|info", "exintro": 1, "explaintext": 1, "inprop": "url"})
+    r.raise_for_status()
+    found = sorted((r.json().get("query") or {}).get("pages", {}).values(), key=lambda p: p.get("index", 99))
+    notes = [f"[{p['title']}] ({p.get('fullurl', '')})\n{p.get('extract', '')[:chars]}" for p in found if p.get("extract")]
+    return "\n\n".join(notes)
+
+
 def research(topic: str) -> str:
-    """Collect verified facts with Google Search grounding (best effort)."""
+    """Collect verified facts: Wikipedia first (free), then Google Search grounding if available."""
+    try:
+        notes = wikipedia_notes(topic)
+        if notes:
+            print(f"[Research] Wikipedia: {notes.count('[')} articles")
+            return notes
+    except Exception as e:
+        print(f"[Research] Wikipedia failed: {e}")
     prompt = (f"Research this YouTube Shorts topic and list 8-12 accurate, surprising, verifiable facts with "
               f"numbers where possible, plus the source website for each fact. Topic: {topic}")
     try:
@@ -111,7 +140,9 @@ Requirements:
 7. title: short internal title. youtube_title: under 70 characters, curiosity-driven, ends with " #shorts".
    youtube_description: 2 sentences + 4 relevant hashtags. tags: 10-15 search keywords.
 8. sources: up to 3 source websites used.
-9. Must be accurate, family-friendly, and original. Hypotheticals must be clearly framed as hypothetical."""
+9. Must be accurate, family-friendly, and original. Hypotheticals must be clearly framed as hypothetical.
+10. Never overstate science: no pop-science myths, no "scientists proved" unless the notes say so, use
+    "may", "scientists think" for uncertain claims. sources: list the Wikipedia URLs you actually used."""
     text, model = gemini.call(prompt, SHORT_SCHEMA, temperature=0.9)
     data = json.loads(text)
     data["scenes"] = [s for s in data.get("scenes", []) if s.get("narration", "").strip()]
