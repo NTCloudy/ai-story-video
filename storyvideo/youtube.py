@@ -97,6 +97,26 @@ def upload(video: Path, title: str, description: str, tags: list[str], category:
     raise RuntimeError("YouTube 上傳多次失敗")
 
 
+def set_privacy(video_id: str, privacy: str = "public") -> dict:
+    token = access_token()
+    auth = {"Authorization": f"Bearer {token}"}
+    cur = requests.get(f"{API}/videos", params={"part": "status", "id": video_id}, headers=auth, timeout=30).json()
+    if not cur.get("items"):
+        raise RuntimeError(f"找不到影片 {video_id}")
+    status = cur["items"][0]["status"]
+    body = {"id": video_id, "status": {"privacyStatus": privacy,
+                                       "selfDeclaredMadeForKids": status.get("madeForKids", False),
+                                       "embeddable": status.get("embeddable", True),
+                                       "license": status.get("license", "youtube"),
+                                       "publicStatsViewable": status.get("publicStatsViewable", True),
+                                       "containsSyntheticMedia": status.get("containsSyntheticMedia", True)}}
+    r = requests.put(f"{API}/videos", params={"part": "status"}, headers={**auth, "Content-Type": "application/json"},
+                     data=json.dumps(body), timeout=60)
+    if r.status_code != 200:
+        raise RuntimeError(f"{r.status_code} {r.text[:600]}")
+    return r.json()["status"]
+
+
 def channel_info() -> dict:
     r = requests.get(f"{API}/channels", params={"part": "snippet,statistics", "mine": "true"},
                      headers={"Authorization": f"Bearer {access_token()}"}, timeout=30)
@@ -155,9 +175,15 @@ def main(argv=None) -> int:
     sub.add_parser("whoami")
     sub.add_parser("check", help="verify auth + upload permission without uploading anything")
     sub.add_parser("branding", help="apply channel/branding.json (banner, description, keywords, watermark)")
+    pub = sub.add_parser("publish", help="set a video's privacy (public/unlisted/private)")
+    pub.add_argument("video_id")
+    pub.add_argument("--privacy", default="public")
     args = p.parse_args(argv)
     if args.cmd == "auth":
         print("YT_REFRESH_TOKEN=" + device_auth(args.client_id, args.client_secret))
+    elif args.cmd == "publish":
+        st = set_privacy(args.video_id, args.privacy)
+        print(f"PUBLISH {args.video_id} -> {st.get('privacyStatus')}")
     elif args.cmd == "branding":
         cfg = json.loads(Path("channel/branding.json").read_text(encoding="utf-8"))
         apply_branding(Path(cfg["banner"]) if cfg.get("banner") else None,
