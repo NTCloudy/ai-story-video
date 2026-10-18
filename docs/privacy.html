@@ -1,29 +1,40 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Privacy Policy – Shorts Uploader</title>
+<title>Privacy Policy – Shorts Uploader / Cloud Auto Poster</title>
 <style>body{font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:760px;margin:40px auto;padding:0 16px;line-height:1.6;color:#222}h1{font-size:26px}h2{font-size:18px;margin-top:28px}</style></head><body>
-<h1>Privacy Policy – Shorts Uploader</h1>
-<p>Last updated: October 16, 2026</p>
-<p>Shorts Uploader ("the app") is a personal automation tool operated by the owner of the GitHub repository
-<a href="https://github.com/NTCloudy/ai-story-video">NTCloudy/ai-story-video</a>. It generates short educational videos and uploads them
-to the owner's own YouTube channel.</p>
+<h1>Privacy Policy – Shorts Uploader / Cloud Auto Poster</h1>
+<p>Last updated: October 18, 2026</p>
+<p>Shorts Uploader and Cloud Auto Poster ("the app") are a personal automation tool operated by the owner of the GitHub repository
+<a href="https://github.com/NTCloudy/ai-story-video">NTCloudy/ai-story-video</a>. It generates short educational videos and publishes them
+to the owner's own YouTube channel, Facebook Page and Instagram professional account. It has no other users.</p>
 <h2>Data we access</h2>
 <ul>
-<li>With your explicit consent via Google OAuth, the app uses the YouTube Data API scopes
-<code>youtube.upload</code> (to upload videos to your channel) and <code>youtube.readonly</code> (to read your channel name and statistics).</li>
-<li>The app does not access any other Google account data.</li>
+<li><b>YouTube</b> – with explicit consent via Google OAuth, the app uses the YouTube Data API scopes
+<code>youtube.upload</code> (to upload videos to the owner's channel) and <code>youtube.readonly</code> (to read the channel name and statistics).
+The app does not access any other Google account data.</li>
+<li><b>Facebook and Instagram</b> – with explicit consent via Facebook Login, the app uses the permissions
+<code>pages_show_list</code>, <code>pages_read_engagement</code>, <code>pages_manage_posts</code>, <code>business_management</code>,
+<code>instagram_basic</code>, <code>instagram_content_publish</code> and <code>instagram_manage_comments</code>, only for the owner's own Facebook Page
+and the Instagram account linked to it: to read their names and IDs, publish the owner's videos as Reels, and read the resulting posts.</li>
+<li>The app does not collect data about any other person, and does not read private messages.</li>
 </ul>
 <h2>How data is used and stored</h2>
 <ul>
-<li>The OAuth refresh token is stored only as an encrypted GitHub Actions secret in the owner's repository and is used solely to upload videos the owner generated.</li>
+<li>Access tokens are stored only as encrypted GitHub Actions secrets in the owner's repository and are used solely to publish videos the owner generated.</li>
+<li>Post IDs and links of published videos are kept in the repository file <code>channel/history.json</code>.</li>
 <li>No personal data is sold, shared with third parties, or used for advertising.</li>
 <li>The app's use and transfer of information received from Google APIs adheres to the
-<a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</li>
-<li>Use of YouTube data is also subject to the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a> and the
+<a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.
+Use of YouTube data is also subject to the <a href="https://www.youtube.com/t/terms">YouTube Terms of Service</a> and the
 <a href="https://policies.google.com/privacy">Google Privacy Policy</a>.</li>
+<li>Use of Facebook and Instagram data follows the <a href="https://developers.facebook.com/terms/">Meta Platform Terms</a>.</li>
 </ul>
-<h2>Revoking access</h2>
-<p>You can revoke the app's access at any time at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.
-Deleting the GitHub secret also removes the stored token.</p>
+<h2 id="data-deletion">Revoking access and deleting data</h2>
+<ul>
+<li>Google: revoke access at <a href="https://myaccount.google.com/permissions">myaccount.google.com/permissions</a>.</li>
+<li>Facebook / Instagram: remove "Cloud Auto Poster" under Facebook <i>Settings &amp; privacy → Settings → Business integrations</i>
+(or Instagram <i>Settings → Website permissions → Apps and websites</i>).</li>
+<li>Deleting the GitHub secrets removes every stored token. To have any remaining data deleted, email the address below; it is removed within 7 days.</li>
+</ul>
 <h2>Contact</h2>
 <p>robinhood126936@gmail.com</p>
 </body></html>
