@@ -117,6 +117,46 @@ def set_privacy(video_id: str, privacy: str = "public") -> dict:
     return r.json()["status"]
 
 
+def video_stats(ids: list[str]) -> dict[str, dict]:
+    """{video_id: {views, likes, comments}} for our own videos (1 quota unit per 50 ids)."""
+    out = {}
+    auth = {"Authorization": f"Bearer {access_token()}"}
+    for i in range(0, len(ids), 50):
+        r = requests.get(f"{API}/videos", params={"part": "statistics", "id": ",".join(ids[i:i + 50])},
+                         headers=auth, timeout=30).json()
+        for v in r.get("items", []):
+            st = v.get("statistics", {})
+            out[v["id"]] = {"views": int(st.get("viewCount", 0)), "likes": int(st.get("likeCount", 0)),
+                            "comments": int(st.get("commentCount", 0))}
+    return out
+
+
+def trending_shorts(queries: list[str], days: int = 30, per_query: int = 12) -> list[dict]:
+    """Most-viewed recent English Shorts for niche keywords (search.list = 100 quota units per query)."""
+    from datetime import datetime, timedelta, timezone
+    auth = {"Authorization": f"Bearer {access_token()}"}
+    after = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    found: dict[str, dict] = {}
+    for q in queries:
+        r = requests.get(f"{API}/search", headers=auth, timeout=30, params={
+            "part": "snippet", "type": "video", "videoDuration": "short", "order": "viewCount", "q": q,
+            "publishedAfter": after, "relevanceLanguage": "en", "maxResults": per_query, "safeSearch": "strict"})
+        if r.status_code != 200:
+            print(f"[Trends] search failed for {q!r}: {r.status_code} {r.text[:200]}")
+            continue
+        for it in r.json().get("items", []):
+            vid = it["id"].get("videoId")
+            if vid:
+                found[vid] = {"id": vid, "title": it["snippet"]["title"], "channel": it["snippet"]["channelTitle"], "query": q}
+    ids = list(found)
+    for i in range(0, len(ids), 50):
+        r = requests.get(f"{API}/videos", params={"part": "statistics", "id": ",".join(ids[i:i + 50])},
+                         headers=auth, timeout=30).json()
+        for v in r.get("items", []):
+            found[v["id"]]["views"] = int(v.get("statistics", {}).get("viewCount", 0))
+    return sorted((v for v in found.values() if v.get("views")), key=lambda v: -v["views"])
+
+
 def channel_info() -> dict:
     r = requests.get(f"{API}/channels", params={"part": "snippet,statistics", "mine": "true"},
                      headers={"Authorization": f"Bearer {access_token()}"}, timeout=30)

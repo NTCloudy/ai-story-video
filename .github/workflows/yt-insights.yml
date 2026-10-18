@@ -1,0 +1,33 @@
+name: YouTube Insights
+
+on:
+  workflow_dispatch:
+
+jobs:
+  insights:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests PyYAML
+      - name: 頻道數據與熱門 Shorts
+        env:
+          YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+          YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+          YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+        run: |
+          python - <<'PY'
+          import json
+          from storyvideo import youtube
+          h = json.load(open("channel/history.json"))
+          st = youtube.video_stats([x["video_id"] for x in h if x.get("video_id")])
+          for x in h:
+              s = st.get(x.get("video_id"), {})
+              print("OWN", x["date"], s.get("views"), s.get("likes"), x["series"], "|", x["title"])
+          t = youtube.trending_shorts(["what if science", "human body facts", "psychology facts", "space facts", "history facts", "animal facts"])
+          for v in t[:40]:
+              print("TREND", v["views"], "|", v["query"], "|", v["title"][:90], "|", v["channel"])
+          PY
