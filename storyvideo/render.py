@@ -173,17 +173,42 @@ def _esc_filter_path(p: Path) -> str:
     return str(p).replace("\\", "/").replace(":", "\\:").replace("'", "\\'")
 
 
-def thumbnail(img: Path, title: str, out: Path) -> None:
+def _thumb_ass(title: str, tw: int, th: int, size: int) -> str:
+    # libass wrapping is disabled (WrapStyle 2), so break the vertical cover title by hand
+    text = _wrap(title.upper(), 11) if SHORT else _ass_text(title)
+    return ass_header(tw, th) + f"Dialogue: 0,0:00:00.00,0:00:10.00,Thumb,,0,0,0,,{{\\fs{size}}}{text}\n"
+
+
+def text_touches_edges(ass: Path, w: int, h: int, edge: int = 16) -> bool:
+    """Render only the subtitle on a black canvas; lit pixels near the frame edges mean the title is cut off."""
+    raw = subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", f"color=black:s={w}x{h}:d=1",
+                          "-vf", f"subtitles='{_esc_filter_path(ass)}'", "-frames:v", "1",
+                          "-f", "rawvideo", "-pix_fmt", "gray", "-"], capture_output=True, check=True).stdout
+    if len(raw) < w * h:
+        return False
+    if max(raw[:w * edge]) > 60:  # top rows
+        return True
+    return any(max(raw[y * w:y * w + edge]) > 60 or max(raw[(y + 1) * w - edge:(y + 1) * w]) > 60 for y in range(h))
+
+
+def thumbnail(img: Path, title: str, out: Path) -> int:
+    """Cover image with the hook title; shrinks the title until it fits inside the frame. Returns the font size."""
     tw, th = (720, 1280) if SHORT else (1280, 720)
-    # libass wrapping is disabled (WrapStyle 2), so break the vertical cover title by hand or it runs off the frame
-    text = f"{{\\fs{int(tw * 0.12)}}}{_wrap(title.upper(), 11)}" if SHORT else _ass_text(title)
+    size = int(tw * 0.12) if SHORT else int(th * 0.13)
     ass = out.with_suffix(".ass")
-    ass.write_text(ass_header(tw, th) + f"Dialogue: 0,0:00:00.00,0:00:10.00,Thumb,,0,0,0,,{text}\n",
-                   encoding="utf-8")
+    for attempt in range(10):
+        ass.write_text(_thumb_ass(title, tw, th, size), encoding="utf-8")
+        if not text_touches_edges(ass, tw, th):
+            break
+        if attempt == 9:
+            print(f"::warning title=縮圖標題太長::「{title}」縮到最小字還是超出畫面")
+            break
+        size = int(size * 0.88)
     _run(["ffmpeg", "-y", "-v", "error", "-i", str(img), "-vf",
           f"scale={tw}:{th}:force_original_aspect_ratio=increase,crop={tw}:{th}:(iw-ow)/2:(ih-oh)*0.35,subtitles='{_esc_filter_path(ass)}'",
           "-frames:v", "1", "-q:v", "2", str(out)])
     ass.unlink(missing_ok=True)
+    return size
 
 
 def assemble(title: str, images: list[Path], narrations: list[dict], work: Path, out_dir: Path,
