@@ -7,7 +7,9 @@
   "duration": 42.0,
   "video_id": "AHTIzfBBwy8",
   "privacy": "public",
-  "concept": "earth stops spinning"
+  "concept": "earth stops spinning",
+  "views": 667,
+  "likes": 25
  },
  {
   "date": "2026-10-17",
@@ -17,7 +19,9 @@
   "duration": 27.9,
   "video_id": "QbQ1cab3sCM",
   "privacy": "public",
-  "concept": "phantom phone vibration"
+  "concept": "phantom phone vibration",
+  "views": 42,
+  "likes": 0
  },
  {
   "date": "2026-10-18",
@@ -27,6 +31,8 @@
   "title": "Why Outer Space Smells Like Burnt Steak #shorts",
   "duration": 42.9,
   "video_id": "gop4k8wR-po",
-  "privacy": "public"
+  "privacy": "public",
+  "views": 717,
+  "likes": 22
  }
 ]
