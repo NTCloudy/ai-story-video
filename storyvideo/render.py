@@ -175,8 +175,10 @@ def _esc_filter_path(p: Path) -> str:
 
 def thumbnail(img: Path, title: str, out: Path) -> None:
     tw, th = (720, 1280) if SHORT else (1280, 720)
+    # libass wrapping is disabled (WrapStyle 2), so break the vertical cover title by hand or it runs off the frame
+    text = f"{{\\fs{int(tw * 0.12)}}}{_wrap(title.upper(), 11)}" if SHORT else _ass_text(title)
     ass = out.with_suffix(".ass")
-    ass.write_text(ass_header(tw, th) + f"Dialogue: 0,0:00:00.00,0:00:10.00,Thumb,,0,0,0,,{_ass_text(title)}\n",
+    ass.write_text(ass_header(tw, th) + f"Dialogue: 0,0:00:00.00,0:00:10.00,Thumb,,0,0,0,,{text}\n",
                    encoding="utf-8")
     _run(["ffmpeg", "-y", "-v", "error", "-i", str(img), "-vf",
           f"scale={tw}:{th}:force_original_aspect_ratio=increase,crop={tw}:{th}:(iw-ow)/2:(ih-oh)*0.35,subtitles='{_esc_filter_path(ass)}'",

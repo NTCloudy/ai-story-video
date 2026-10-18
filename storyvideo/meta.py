@@ -150,14 +150,26 @@ def publish_instagram(video: Path | None, text: str, cover_url: str = "", video_
     if status != "FINISHED":
         raise RuntimeError(f"Instagram processing failed ({status})")
     media = api("POST", f"{ig}/media_publish", creation_id=container)
-    info = api("GET", media["id"], fields="permalink")
+    info = _get_soon(media["id"], fields="permalink")
     return {"id": media["id"], "url": info.get("permalink", "")}
+
+
+def _get_soon(path: str, wait: int = 90, **params) -> dict:
+    """GET an object that was just created: Meta can answer "does not exist" for a few seconds."""
+    deadline = time.time() + wait
+    while True:
+        try:
+            return api("GET", path, **params)
+        except RuntimeError as e:
+            if "does not exist" not in str(e) or time.time() > deadline:
+                raise
+            time.sleep(5)
 
 
 def _wait_fb(video_id: str, timeout: int = 900) -> str:
     deadline, last = time.time() + timeout, ""
     while time.time() < deadline:
-        st = api("GET", video_id, fields="status").get("status", {})
+        st = _get_soon(video_id, fields="status").get("status", {})
         vs = st.get("video_status", "")
         pub = (st.get("publishing_phase") or {}).get("status", "")
         proc = (st.get("processing_phase") or {}).get("status", "")
@@ -185,7 +197,7 @@ def publish_facebook(video: Path, text: str, thumb: Path | None = None) -> dict:
                                      data={"is_preferred": "true", "access_token": _token()}))
         except Exception as e:
             print(f"[FB] custom cover not set: {str(e)[:200]}")
-    link = api("GET", vid, fields="permalink_url").get("permalink_url", "")
+    link = _get_soon(vid, fields="permalink_url").get("permalink_url", "")
     url = link if link.startswith("http") else (f"https://www.facebook.com{link}" if link else
                                                  f"https://www.facebook.com/reel/{vid}")
     return {"id": vid, "url": url, "status": status}
