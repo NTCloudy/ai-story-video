@@ -123,11 +123,50 @@ SHORT_SCHEMA = {
 }
 
 
-def pick_topic(history: list[dict], series: list[str] | None = None, attempts: int = 6) -> dict:
-    """Pick a topic guaranteed (lexical + semantic checks) not to overlap any previous Short."""
+VIRAL_PATTERNS = """Patterns of the most-viewed curiosity Shorts on YouTube (use them, never copy titles):
+- danger / fear / survival ("the deadliest...", "what would kill you first...")
+- extreme superlatives and scale ("the most powerful...", "bigger than...", "hotter than the Sun")
+- unsolved mysteries, lost treasures, strange true events
+- catastrophic or mind-bending what-ifs (black holes, Earth changes, time travel)
+- counter-intuitive facts about YOUR body that viewers can test or feel themselves
+- weird animal abilities and predators
+- rankings with numbers ("5 animals that...")
+Avoid: abstract self-help / mindset content, dry definitions, topics that need long setup."""
+
+
+def performance_summary(history: list[dict]) -> str:
+    rows = [h for h in history if h.get("views") is not None]
+    if not rows:
+        return "(no data yet)"
+    by_series: dict[str, list[int]] = {}
+    for h in rows:
+        by_series.setdefault(h.get("series") or "?", []).append(h["views"])
+    lines = [f"- {k}: avg {sum(v) // len(v)} views over {len(v)} Shorts" for k, v in
+             sorted(by_series.items(), key=lambda kv: -sum(kv[1]) / len(kv[1]))]
+    best = sorted(rows, key=lambda h: -h["views"])[:5]
+    lines.append("Best performers: " + "; ".join(f"{h['topic']} ({h['views']} views)" for h in best))
+    worst = sorted(rows, key=lambda h: h["views"])[:3]
+    lines.append("Weakest: " + "; ".join(f"{h['topic']} ({h['views']} views)" for h in worst))
+    return "\n".join(lines)
+
+
+def trends_summary(trends: list[dict], n: int = 30) -> str:
+    def english(t: str) -> bool:
+        return sum(c.isascii() for c in t) / max(len(t), 1) > 0.9
+    good = [t for t in trends if english(t["title"]) and "#kids" not in t["title"].lower()][:n]
+    return "\n".join(f"- {t['views']:,} views: {t['title']}" for t in good) or "(no trend data)"
+
+
+def pick_topic(history: list[dict], series: list[str] | None = None, attempts: int = 6,
+               trends: list[dict] | None = None) -> dict:
+    """Pick a topic guaranteed (lexical + semantic checks) not to overlap any previous Short.
+    70% of days exploit proven high-view patterns (own stats + YouTube-wide trends), 30% explore."""
+    import random
+    mode = "exploit" if random.random() < 0.7 else "explore"
+    print(f"[Topic] mode: {mode}")
     rejected: list[str] = []
     for _ in range(attempts):
-        t = _propose_topic(history, series, rejected)
+        t = _propose_topic(history, series, rejected, trends or [], mode)
         dup = find_duplicate(t["topic"], t.get("concept", ""), history)
         if not dup:
             return t
@@ -136,7 +175,8 @@ def pick_topic(history: list[dict], series: list[str] | None = None, attempts: i
     raise RuntimeError("連續多次都選到重複主題，請在網頁排入新主題")
 
 
-def _propose_topic(history: list[dict], series: list[str] | None, rejected: list[str]) -> dict:
+def _propose_topic(history: list[dict], series: list[str] | None, rejected: list[str],
+                   trends: list[dict] | None = None, mode: str = "explore") -> dict:
     series = series or DEFAULT_SERIES
     recent = "\n".join(f"- {h.get('topic', '')} [{h.get('concept', '')}]" for h in history[-300:]) or "(none yet)"
     if rejected:
@@ -153,7 +193,17 @@ Rules:
 - Must have a strong curiosity hook that makes people stop scrolling in 1 second.
 - Must NOT repeat or closely resemble any of these previous topics:
 {recent}
-- Prefer the series that was used least recently (recent series, newest last: {last_series}).
+- Recent series, newest last: {last_series}. Do not use the same series 3 days in a row.
+
+Our channel's performance so far:
+{performance_summary(history)}
+
+Most-viewed similar Shorts on YouTube in the last 30 days:
+{trends_summary(trends or [])}
+
+{VIRAL_PATTERNS}
+
+Today's strategy: {"EXPLOIT - choose a topic in the style/theme that is proven to get the most views (our best series and the YouTube-wide winners above), but with a fresh, original angle" if mode == "exploit" else "EXPLORE - try a promising series or theme we have not tested much yet, still using the viral patterns"}.
 Return the series name (short form, e.g. "What If"), the topic phrased as the video question, the core concept
 (1-4 lowercase words naming the exact phenomenon, e.g. "hypnic jerk", "earth stops spinning"), and why it will go viral."""
     text, _ = gemini.call(prompt, TOPIC_SCHEMA, temperature=1.0)

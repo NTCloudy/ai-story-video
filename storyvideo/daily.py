@@ -36,6 +36,27 @@ def _save(path: Path, data) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
+TREND_QUERIES = ["what if science", "human body facts", "space facts", "history mysteries", "animal facts",
+                 "scary facts", "ocean facts", "science facts"]
+
+
+def load_trends(cfg: dict) -> list[dict]:
+    """Most-viewed niche Shorts on YouTube, cached for 3 days (search costs 100 quota units per query)."""
+    path = CH / "trends.json"
+    cache = _load(path, {})
+    fresh = cache.get("fetched") and (datetime.now(TZ) - datetime.fromisoformat(cache["fetched"])).days < 3
+    if fresh or not youtube.configured():
+        return cache.get("items", [])
+    try:
+        items = youtube.trending_shorts(cfg.get("trend_queries", TREND_QUERIES))
+        _save(path, {"fetched": datetime.now(TZ).isoformat(), "items": items[:150]})
+        print(f"[Trends] {len(items)} trending Shorts collected")
+        return items
+    except Exception as e:
+        print(f"[Trends] skipped: {e}")
+        return cache.get("items", [])
+
+
 def publish_video(video_id: str, attempts: int = 6, wait: int = 20) -> str:
     """Make an uploaded video public (uploads from unaudited API projects start as private)."""
     import time
@@ -85,6 +106,18 @@ def main(argv=None) -> int:
     if auto_publish and publish_pending(history):
         _save(CH / "history.json", history)
 
+    # refresh view counts for our previous Shorts (cheap: 1 quota unit)
+    if youtube.configured() and history:
+        try:
+            stats = youtube.video_stats([h["video_id"] for h in history if h.get("video_id")])
+            for h in history:
+                if h.get("video_id") in stats:
+                    h["views"] = stats[h["video_id"]]["views"]
+                    h["likes"] = stats[h["video_id"]]["likes"]
+            _save(CH / "history.json", history)
+        except Exception as e:
+            print(f"[Stats] skipped: {e}")
+
     per_day = int(cfg.get("shorts_per_day", 1))
     if not args.force and not args.topic and sum(1 for h in history if h.get("date") == today) >= per_day:
         print(f"今天（{today}）已經做過 {per_day} 支 Shorts，略過。")
@@ -112,7 +145,7 @@ def main(argv=None) -> int:
             continue
         topic, series = cand, ser
     if not topic:
-        t = shorts.pick_topic(history, cfg.get("series"))
+        t = shorts.pick_topic(history, cfg.get("series"), trends=load_trends(cfg))
         topic, series, concept = t["topic"], t["series"], t.get("concept", "")
     print(f"== 主題：{topic}（{series or '自訂'}）==")
 
