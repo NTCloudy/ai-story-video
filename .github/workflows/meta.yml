@@ -1,0 +1,54 @@
+name: FB / IG
+
+# Weekly token health check (fails -> GitHub emails a reminder to re-authorise the Meta app),
+# plus a manual button to cross-post Shorts that are not on Facebook / Instagram yet.
+on:
+  schedule:
+    - cron: "17 1 * * 1"    # Monday 09:17 Taiwan
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "check = 檢查授權；catchup = 補發還沒同步到 FB / IG 的 Shorts"
+        type: choice
+        options: [check, catchup]
+        default: check
+
+concurrency:
+  group: daily-short
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  meta:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+      META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests PyYAML
+
+      - name: 檢查 FB / IG 授權
+        if: inputs.action != 'catchup'
+        run: python -m storyvideo.meta check
+
+      - name: 補發到 FB / IG
+        if: inputs.action == 'catchup'
+        run: python -m storyvideo.meta catchup --repo "${{ github.repository }}" --limit 10
+
+      - name: 更新頻道紀錄
+        if: always() && inputs.action == 'catchup'
+        run: |
+          git config user.name "shorts-bot"
+          git config user.email "shorts-bot@users.noreply.github.com"
+          git add channel/history.json
+          git commit -m "📣 FB / IG cross-post update" || exit 0
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done

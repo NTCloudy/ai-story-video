@@ -41,3 +41,17 @@ python -m storyvideo --story-file story.txt --title "我的故事" --length medi
 
 ## 上傳 YouTube 注意
 插畫是 AI 生成的、旁白是 AI 語音。上傳時請在 YouTube Studio 的「變造或合成內容」選擇「是」。
+
+## 同步到 Facebook 粉專 / Instagram（Reels）
+每天的 Short 上傳 YouTube 後，`daily-short.yml` 會用 `storyvideo/meta.py` 把同一支影片發成 **FB 粉專 Reels** 和 **IG Reels**
+（文字 = 標題 + 說明 + 來源 + AI 生成聲明 + hashtag），結果記在 `channel/history.json` 的 `fb_url` / `ig_url`。
+發布失敗的影片，之後每次排程都會自動補發；也可以手動執行 **Actions → FB / IG → catchup**。
+
+| Secret | 內容 |
+|---|---|
+| `META_PAGE_ID` | 粉專 ID |
+| `META_PAGE_TOKEN` | 粉專權杖（由 60 天使用者權杖換出，不會過期） |
+| `IG_USER_ID` | 連結到粉專的 IG 專業帳號 ID |
+
+Meta 規定每 90 天要重新授權一次：**FB / IG** workflow 每週檢查，快到期時會失敗並寄信提醒，
+到時打開 <https://developers.facebook.com/tools/explorer/>，選 Cloud Auto Poster，按 Generate Access Token 即可。

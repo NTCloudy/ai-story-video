@@ -99,6 +99,33 @@ jobs:
           EOF
           gh release create "$TAG" --title "$TITLE" --notes-file notes.md \
             out/video.mp4 out/thumbnail.jpg out/subtitles.srt out/youtube.txt out/script.json out/meta.json
+          echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
+
+      - name: 同步到 Facebook / Instagram（Reels）
+        if: hashFiles('out/video.mp4') != ''
+        continue-on-error: true
+        env:
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: |
+          COVER=""; VIDEO_URL=""
+          if [ -n "$RELEASE_TAG" ]; then
+            BASE="https://github.com/${{ github.repository }}/releases/download/$RELEASE_TAG"
+            COVER="$BASE/thumbnail.jpg"; VIDEO_URL="$BASE/video.mp4"
+          fi
+          python -m storyvideo.meta post --video out/video.mp4 --meta out/meta.json --thumb out/thumbnail.jpg \
+            --cover-url "$COVER" --video-url "$VIDEO_URL"
+
+      - name: 補發先前沒同步到 FB / IG 的影片
+        if: always()
+        continue-on-error: true
+        env:
+          META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
+          META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          GH_TOKEN: ${{ github.token }}
+        run: python -m storyvideo.meta catchup --repo "${{ github.repository }}"
 
       - name: 更新頻道紀錄
         if: always()
