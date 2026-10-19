@@ -113,7 +113,7 @@ SHORT_SCHEMA = {
                       "properties": {"narration": {"type": "STRING"}, "image_prompt": {"type": "STRING"},
                                      "image_prompt_2": {"type": "STRING"}, "switch_word": {"type": "STRING"},
                                      "characters": {"type": "ARRAY", "items": {"type": "STRING"}}},
-                      "required": ["narration", "image_prompt", "characters"]},
+                      "required": ["narration", "image_prompt", "image_prompt_2", "switch_word", "characters"]},
         },
         "youtube_title": {"type": "STRING"},
         "youtube_description": {"type": "STRING"},
@@ -269,11 +269,11 @@ Requirements:
    viewer who keeps watching hears the hook again and it still makes sense. No call to action, no "follow for more".
 4. hook_text: 3-6 word on-screen title shown during the first seconds (e.g. "NO MOON FOR 1 DAY?").
 5. Pictures follow the narration, not a timer: a picture should stay on screen while the narration talks about
-   it, typically 3-6 seconds. image_prompt = what the viewer should see while the scene's narration starts. A scene
-   of 15+ words usually moves on to a new thing to see (a new object, place, scale or consequence): then add
-   image_prompt_2 for that part and set switch_word to the exact word of the narration where the new picture should
-   appear. Short scenes (under 12 words) keep one picture; leave image_prompt_2 and switch_word empty when
-   nothing new appears. Every picture must look clearly different from the one before it
+   it, typically 3-6 seconds. image_prompt = what the viewer should see while the scene's narration starts.
+   Every scene with 15 or more words MUST also have image_prompt_2 = the new thing the narration moves on to (a new
+   object, place, scale or consequence) and switch_word = the exact word of the narration where that new picture
+   should appear (at least 5 words into the scene). Only scenes under 15 words use empty strings for
+   image_prompt_2 and switch_word. Every picture must look clearly different from the one before it
    (different subject, place, scale or moment) - never two near-identical images. Each is a striking, cinematic
    VERTICAL 9:16 image matching its part of the narration - subject, setting, action, camera angle, lighting.
    Vary the camera (extreme wide, aerial, first-person POV, close-up, macro, cutaway diagram-like view) and never
