@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import subprocess
 from pathlib import Path
 
@@ -54,27 +55,33 @@ def _fit(src: str = "0:v") -> str:
     return f"[{src}]scale={W*2}:{H*2}:force_original_aspect_ratio=increase,crop={W*2}:{H*2}:(iw-ow)/2:(ih-oh)*0.35,setsar=1"
 
 
-MIN_SHOT = 1.2   # seconds; a scene too short for two shots of this length keeps one image
+MIN_SHOT = 1.5   # seconds; never flash a picture shorter than this
 
 
-def shot_cuts(n: int, dur: float, words: list | None = None) -> list[float]:
-    """Boundaries [0, ..., dur] for n shots in one scene clip. Cuts land on the start of a spoken word
-    (clip time = LEAD + word start) closest to the even split, so the picture changes with the speech."""
+def _norm(w: str) -> str:
+    return re.sub(r"[^a-z0-9']", "", w.lower())
+
+
+def shot_cuts(n: int, dur: float, words: list | None = None, switch_word: str = "") -> list[float]:
+    """Boundaries [0, ..., dur] for n shots in one scene clip. The picture changes exactly when the narration
+    reaches `switch_word` (clip time = LEAD + word start); without it, on the word closest to an even split."""
     n = max(1, min(n, int(dur // MIN_SHOT) or 1))
     cuts = [0.0]
-    starts = sorted(LEAD + w[0] for w in (words or []))
+    timed = sorted((LEAD + w[0], _norm(w[2])) for w in (words or []))
+    key = _norm(switch_word.split()[0]) if switch_word.strip() else ""
     for k in range(1, n):
+        ok = [(s, w) for s, w in timed if s - cuts[-1] >= MIN_SHOT and dur - s >= MIN_SHOT * (n - k)]
+        hit = [s for s, w in ok if key and w == key]
         target = dur * k / n
-        ok = [s for s in starts if s - cuts[-1] >= MIN_SHOT and dur - s >= MIN_SHOT * (n - k)]
-        cuts.append(min(ok, key=lambda s: abs(s - target)) if ok else target)
+        cuts.append(hit[0] if hit else (min((s for s, _ in ok), key=lambda s: abs(s - target)) if ok else target))
     return cuts + [dur]
 
 
-def scene_clip(img, audio: Path, idx: int, out: Path, words: list | None = None) -> float:
+def scene_clip(img, audio: Path, idx: int, out: Path, words: list | None = None, switch_word: str = "") -> float:
     """One narrated scene. `img` is a path or a list of shot paths shown one after another (hard cuts)."""
     shots = [p for p in (img if isinstance(img, (list, tuple)) else [img]) if p]
     dur = LEAD + duration(audio) + TAIL
-    cuts = shot_cuts(len(shots), dur, words)
+    cuts = shot_cuts(len(shots), dur, words, switch_word)
     shots = shots[:len(cuts) - 1]
     total = int(dur * FPS) + 1
     chains, used = [], 0
@@ -287,8 +294,10 @@ def thumbnail(img: Path, title: str, out: Path) -> int:
     return size
 
 
-def assemble(title: str, images: list[Path], narrations: list[dict], work: Path, out_dir: Path,
-             hook: str = "") -> Path:
+def assemble(title: str, images: list, narrations: list[dict], work: Path, out_dir: Path,
+             hook: str = "", switch_words: list[str] | None = None) -> Path:
+    """images[i] is one path or a list of shot paths for scene i; switch_words[i] = narration word where the
+    second shot starts."""
     work.mkdir(parents=True, exist_ok=True)
     out_dir.mkdir(parents=True, exist_ok=True)
     clips, groups, word_groups, t = [], [], [], 0.0
@@ -299,7 +308,8 @@ def assemble(title: str, images: list[Path], narrations: list[dict], work: Path,
         clips.append(c)
     for i, (img, nar) in enumerate(zip(images, narrations)):
         c = work / f"clip_{i:02d}.mp4"
-        d = scene_clip(img, nar["audio"], i, c, nar.get("words"))
+        sw = (switch_words or [])[i] if i < len(switch_words or []) else ""
+        d = scene_clip(img, nar["audio"], i, c, nar.get("words"), sw or "")
         groups.append((t, nar["cues"]))
         word_groups.append((t, nar.get("words") or []))
         t += d

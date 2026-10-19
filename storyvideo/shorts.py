@@ -111,9 +111,9 @@ SHORT_SCHEMA = {
             "type": "ARRAY",
             "items": {"type": "OBJECT",
                       "properties": {"narration": {"type": "STRING"}, "image_prompt": {"type": "STRING"},
-                                     "image_prompt_2": {"type": "STRING"},
+                                     "image_prompt_2": {"type": "STRING"}, "switch_word": {"type": "STRING"},
                                      "characters": {"type": "ARRAY", "items": {"type": "STRING"}}},
-                      "required": ["narration", "image_prompt", "image_prompt_2", "characters"]},
+                      "required": ["narration", "image_prompt", "characters"]},
         },
         "youtube_title": {"type": "STRING"},
         "youtube_description": {"type": "STRING"},
@@ -268,12 +268,14 @@ Requirements:
    satisfying twist. Make it LOOP: the final sentence should lead naturally back into the opening hook, so a
    viewer who keeps watching hears the hook again and it still makes sense. No call to action, no "follow for more".
 4. hook_text: 3-6 word on-screen title shown during the first seconds (e.g. "NO MOON FOR 1 DAY?").
-5. Two images per scene, so the picture changes every few seconds: image_prompt for the first half of the
-   narration and image_prompt_2 for the second half. Make the two shots clearly different (e.g. wide establishing
-   shot -> dramatic close-up, a different angle, a reaction, or the consequence) while keeping the same subject and
-   setting so they feel continuous. Each is a striking, cinematic VERTICAL 9:16 image matching its part of the
-   narration - subject, setting, action, camera angle, lighting. Vary the camera all the time (extreme wide,
-   aerial, first-person POV, close-up, macro, cutaway diagram-like view); never repeat a framing in a row and never
+5. Pictures follow the narration, not a timer. image_prompt = what the viewer should see while the scene's
+   narration starts. ONLY if the narration clearly moves on to a different thing to see in the middle of the scene
+   (a new object, place, scale or consequence), add image_prompt_2 for that part and set switch_word to the exact
+   word of the narration where the new picture should appear; otherwise leave image_prompt_2 and switch_word empty.
+   Usually only 1-3 scenes need a second picture. Every picture must look clearly different from the one before it
+   (different subject, place, scale or moment) - never two near-identical images. Each is a striking, cinematic
+   VERTICAL 9:16 image matching its part of the narration - subject, setting, action, camera angle, lighting.
+   Vary the camera (extreme wide, aerial, first-person POV, close-up, macro, cutaway diagram-like view) and never
    show a person just standing in the middle facing the camera. Scene 1's first image must be the most
    eye-catching picture of the whole video. Do NOT include any art style words and no text in the image.
 6. characters: always [] - this channel does not use recurring characters. When a person is needed, describe

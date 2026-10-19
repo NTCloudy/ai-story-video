@@ -158,11 +158,11 @@ def main(argv=None) -> int:
     (out / "script.json").write_text(json.dumps(sb, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"標題：{sb['youtube_title']}｜{len(sb['scenes'])} 個分鏡｜模型 {sb['model']}")
 
-    # 3. images (vertical): two shots per scene so the picture changes every few seconds
-    shots_per_scene = max(1, int(cfg.get("shots_per_scene", 2)))
+    # 3. images (vertical): one per scene, plus a second one only where the narration moves to something new
+    max_shots = max(1, int(cfg.get("shots_per_scene", 2)))
     shot_list, owner, optional = [], [], set()
     for si, sc in enumerate(sb["scenes"]):
-        prompts = [sc["image_prompt"]] + [p for p in [sc.get("image_prompt_2", "")] if p.strip()][:shots_per_scene - 1]
+        prompts = [sc["image_prompt"]] + [p for p in [sc.get("image_prompt_2") or ""] if p.strip()][:max_shots - 1]
         for k, prompt in enumerate(prompts):
             if k:
                 optional.add(len(shot_list))
@@ -184,7 +184,8 @@ def main(argv=None) -> int:
 
     # 5. render
     render.configure("short")
-    render.assemble(sb["title"], imgs, nars, out / "work", out, hook=sb.get("hook_text", ""))
+    render.assemble(sb["title"], imgs, nars, out / "work", out, hook=sb.get("hook_text", ""),
+                    switch_words=[sc.get("switch_word") or "" for sc in sb["scenes"]])
     dur = render.duration(out / "video.mp4")
 
     # 6. upload
