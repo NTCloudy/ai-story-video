@@ -1,0 +1,54 @@
+name: Re-render Short (test)
+
+# Re-renders a Short from the assets.zip of an existing release (no AI calls, no upload) and publishes the
+# result as a "🧪" test release - used to try new motion / caption styles without spending image quota.
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "有 assets.zip 的 Release 標籤（例如 short-20261019-052432）"
+        required: true
+        type: string
+
+concurrency:
+  group: daily-short
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  rerender:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 安裝工具（ffmpeg、字型）
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk >/dev/null
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: 快取景深模型（免費動態效果用）
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/storyvideo
+          key: depth-anything-v2-small-onnx-v1
+
+      - name: 重新合成
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SRC_TAG: ${{ inputs.tag }}
+        run: |
+          gh release download "$SRC_TAG" -p assets.zip -D in
+          time python -m storyvideo.rerender in/assets.zip --out out
+          TAG="rerender-$(date -u +%Y%m%d-%H%M%S)"
+          gh release create "$TAG" --title "🧪 動畫測試（未上傳）" --notes "Re-rendered from $SRC_TAG" \
+            out/video.mp4 out/thumbnail.jpg
