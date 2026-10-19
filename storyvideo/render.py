@@ -6,6 +6,8 @@ import re
 import subprocess
 from pathlib import Path
 
+from . import motion
+
 W, H, FPS = 1920, 1080, 30
 LEAD, TAIL = 0.35, 0.45   # silence before / after each scene's narration
 TITLE_DUR = 3.0
@@ -26,7 +28,7 @@ def configure(fmt: str = "landscape") -> None:
 
 
 def _run(args: list[str]) -> None:
-    r = subprocess.run(args, capture_output=True, text=True)
+    r = subprocess.run(args, capture_output=True, text=True, stdin=subprocess.DEVNULL)  # ffmpeg must not read a TTY
     if r.returncode != 0:
         raise RuntimeError(f"ffmpeg 失敗：{' '.join(args[:6])}...\n{r.stderr[-1500:]}")
 
@@ -78,25 +80,33 @@ def shot_cuts(n: int, dur: float, words: list | None = None, switch_word: str = 
 
 
 def scene_clip(img, audio: Path, idx: int, out: Path, words: list | None = None, switch_word: str = "") -> float:
-    """One narrated scene. `img` is a path or a list of shot paths shown one after another (hard cuts)."""
+    """One narrated scene. `img` is a path or a list of shot paths shown one after another (hard cuts).
+    Shorts use the free depth-parallax "living photo" motion when available, else ffmpeg zoompan."""
     shots = [p for p in (img if isinstance(img, (list, tuple)) else [img]) if p]
     dur = LEAD + duration(audio) + TAIL
     cuts = shot_cuts(len(shots), dur, words, switch_word)
     shots = shots[:len(cuts) - 1]
     total = int(dur * FPS) + 1
-    chains, used = [], 0
+    counts, used = [], 0
     for k, (a, b) in enumerate(zip(cuts, cuts[1:])):
-        frames = total - used if k == len(shots) - 1 else max(int(round((b - a) * FPS)), 1)
-        used += frames
-        z, x, y = _motion(idx * 2 + k, frames)
-        chains.append(f"{_fit(f'{k}:v')},zoompan=z='{z}':x='{x}':y='{y}':d={frames}:s={W}x{H}:fps={FPS},"
-                      f"trim=end_frame={frames},setpts=PTS-STARTPTS[s{k}]")
-    n = len(shots)
+        counts.append(total - used if k == len(shots) - 1 else max(int(round((b - a) * FPS)), 1))
+        used += counts[-1]
+    inputs, chains = list(shots), []
+    if SHORT and motion.available():
+        inputs = [motion.render_shot(p, frames, W, H, FPS, idx * 2 + k, out.with_name(f"{out.stem}_shot{k}.mp4"),
+                                     seed=idx) for k, (p, frames) in enumerate(zip(shots, counts))]
+        chains = [f"[{k}:v]setpts=PTS-STARTPTS[s{k}]" for k in range(len(inputs))]
+    else:
+        for k, frames in enumerate(counts):
+            z, x, y = _motion(idx * 2 + k, frames)
+            chains.append(f"{_fit(f'{k}:v')},zoompan=z='{z}':x='{x}':y='{y}':d={frames}:s={W}x{H}:fps={FPS},"
+                          f"trim=end_frame={frames},setpts=PTS-STARTPTS[s{k}]")
+    n = len(inputs)
     fades = f",fade=t=in:st=0:d={FADE},fade=t=out:st={dur - FADE:.3f}:d={FADE}" if FADE > 0 else ""
     vf = (";".join(chains) + ";" + "".join(f"[s{k}]" for k in range(n)) + f"concat=n={n}:v=1:a=0{fades},"
           f"format=yuv420p[v];[{n}:a]adelay={int(LEAD * 1000)}:all=1,apad,atrim=0:{dur:.3f},aresample=44100[a]")
     args = ["ffmpeg", "-y", "-v", "error"]
-    for p in shots:
+    for p in inputs:
         args += ["-i", str(p)]
     _run(args + ["-i", str(audio), "-filter_complex", vf,
                  "-map", "[v]", "-map", "[a]", "-t", f"{dur:.3f}", "-r", str(FPS),
@@ -266,7 +276,8 @@ def text_touches_edges(ass: Path, w: int, h: int, edge: int = 16) -> bool:
     """Render only the subtitle on a black canvas; lit pixels near the frame edges mean the title is cut off."""
     raw = subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", f"color=black:s={w}x{h}:d=1",
                           "-vf", f"subtitles='{_esc_filter_path(ass)}'", "-frames:v", "1",
-                          "-f", "rawvideo", "-pix_fmt", "gray", "-"], capture_output=True, check=True).stdout
+                          "-f", "rawvideo", "-pix_fmt", "gray", "-"], capture_output=True, check=True,
+                         stdin=subprocess.DEVNULL).stdout
     if len(raw) < w * h:
         return False
     if max(raw[:w * edge]) > 60:  # top rows

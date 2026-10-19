@@ -64,6 +64,12 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: 快取景深模型（免費動態效果用）
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/storyvideo
+          key: depth-anything-v2-small-onnx-v1
+
       - name: AI 製作 Short（選題 → 查證 → 腳本 → 插畫 → 配音 → 合成 → 上傳）
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
