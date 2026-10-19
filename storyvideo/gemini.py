@@ -13,9 +13,11 @@ from .storyboard import GEMINI_URL, discover_models
 
 
 def call(prompt: str, schema: dict | None = None, search: bool = False, temperature: float = 0.8,
-         api_key: str | None = None, max_models: int | None = None, images: list | None = None) -> tuple[str, str]:
+         api_key: str | None = None, max_models: int | None = None, images: list | None = None,
+         lite_first: bool = False) -> tuple[str, str]:
     """Returns (text, model). With `schema` the text is JSON. `search` enables Google Search grounding.
-    `images`: optional JPEG/PNG file paths sent along with the prompt (vision)."""
+    `images`: optional JPEG/PNG file paths sent along with the prompt (vision).
+    `lite_first`: try the cheaper "lite" models first (simple checks; keeps the main models' free quota)."""
     api_key = api_key or os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
         raise RuntimeError("沒有設定 GEMINI_API_KEY")
@@ -31,6 +33,8 @@ def call(prompt: str, schema: dict | None = None, search: bool = False, temperat
     if search:
         body["tools"] = [{"google_search": {}}]
     models = discover_models(api_key)
+    if lite_first:
+        models = list(dict.fromkeys([m for m in models if "lite" in m] + models))
     if max_models:
         models = models[:max_models]
     last = None

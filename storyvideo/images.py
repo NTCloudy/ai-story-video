@@ -140,7 +140,8 @@ def check_image(path: Path, prompt: str) -> tuple[bool, str]:
          "picture that does not show the requested subject at all. Artistic style, dramatic lighting and small "
          "imperfections are fine. Put a short reason in problem (empty when ok).")
     try:
-        text, _ = gemini.call(q, QA_SCHEMA, temperature=0.0, max_models=3, images=[path])
+        time.sleep(4)  # stay under the free tier's requests-per-minute limit
+        text, _ = gemini.call(q, QA_SCHEMA, temperature=0.0, max_models=3, images=[path], lite_first=True)
         d = json.loads(text)
         return bool(d.get("ok", True)), str(d.get("problem", ""))
     except Exception as e:
