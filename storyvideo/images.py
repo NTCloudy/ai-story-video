@@ -122,13 +122,23 @@ def scene_prompt(scene: dict, chars: list[dict], ref_names: list[str], style: st
     return " ".join(parts)
 
 
-def generate_images(scenes: list[dict], style: str, characters, out_dir: Path, vertical: bool = False) -> list[Path]:
+def generate_images(scenes: list[dict], style: str, characters, out_dir: Path, vertical: bool = False,
+                    optional: set[int] | None = None) -> list[Path | None]:
+    """One image per entry. Entries listed in `optional` (extra shots) are drawn after all required ones,
+    return None on failure (or once the daily quota runs out) instead of a placeholder background, and do not
+    count towards the failure limit."""
     w, h = (SCENE_H, SCENE_W) if vertical else (SCENE_W, SCENE_H)
     out_dir.mkdir(parents=True, exist_ok=True)
     chars = normalize_characters(characters)
     refs = make_character_refs(chars, style, out_dir) if chars else {}
-    paths, failed = [], 0
-    for i, sc in enumerate(scenes):
+    optional = optional or set()
+    order = [i for i in range(len(scenes)) if i not in optional] + [i for i in range(len(scenes)) if i in optional]
+    paths: list[Path | None] = [None] * len(scenes)
+    failed, quota_out = 0, False
+    for i in order:
+        sc = scenes[i]
+        if i in optional and quota_out:
+            continue
         path = out_dir / f"scene_{i:02d}.jpg"
         names = [n for n in (sc.get("characters") or []) if n in refs][:MAX_REFS]
         prompt = scene_prompt(sc, chars, names, style, vertical)
@@ -136,19 +146,30 @@ def generate_images(scenes: list[dict], style: str, characters, out_dir: Path, v
             path.write_bytes(flux2(prompt, [refs[n] for n in names], w, h))
             print(f"[插畫] 分鏡 {i + 1}/{len(scenes)} 完成（參考 {len(names)} 個角色）")
         except QuotaExceeded:
-            raise
+            if i not in optional:
+                raise
+            print("[插畫] 今日額度用完，其餘額外鏡頭略過")
+            quota_out = True
+            continue
         except Exception as e1:
             print(f"[插畫] 分鏡 {i + 1} FLUX.2 失敗，改用 FLUX.1：{e1}")
             try:
                 full = scene_prompt(sc, chars, [], style, vertical)
                 path.write_bytes(flux1(full))
             except QuotaExceeded:
-                raise
+                if i not in optional:
+                    raise
+                quota_out = True
+                continue
             except Exception as e2:
+                if i in optional:
+                    print(f"[插畫] 分鏡 {i + 1}（額外鏡頭）失敗，略過：{e2}")
+                    continue
                 print(f"[插畫] 分鏡 {i + 1} 失敗，用預設背景代替：{e2}")
                 placeholder(path, i)
                 failed += 1
-        paths.append(path)
-    if failed > max(1, len(scenes) // 4) and not os.environ.get("ALLOW_PLACEHOLDER"):
-        raise RuntimeError(f"有 {failed}/{len(scenes)} 張插畫失敗，為避免產生品質不佳的影片已停止")
+        paths[i] = path
+    required = len(scenes) - len(optional)
+    if failed > max(1, required // 4) and not os.environ.get("ALLOW_PLACEHOLDER"):
+        raise RuntimeError(f"有 {failed}/{required} 張插畫失敗，為避免產生品質不佳的影片已停止")
     return paths

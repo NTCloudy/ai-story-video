@@ -92,8 +92,11 @@ def main(argv=None) -> int:
     p.add_argument("--topic", default="")
     p.add_argument("--force", action="store_true", help="make another Short even if one was made today")
     p.add_argument("--no-upload", action="store_true")
+    p.add_argument("--dry-run", action="store_true", help="test render: no upload, channel files untouched")
     p.add_argument("--out", default="out")
     args = p.parse_args(argv)
+    if args.dry_run:
+        args.no_upload = True
 
     cfg = _load(CH / "channel.yaml", {})
     history = _load(CH / "history.json", [])
@@ -107,7 +110,7 @@ def main(argv=None) -> int:
         _save(CH / "history.json", history)
 
     # refresh view counts for our previous Shorts (cheap: 1 quota unit)
-    if youtube.configured() and history:
+    if youtube.configured() and history and not args.dry_run:
         try:
             stats = youtube.video_stats([h["video_id"] for h in history if h.get("video_id")])
             for h in history:
@@ -155,13 +158,24 @@ def main(argv=None) -> int:
     (out / "script.json").write_text(json.dumps(sb, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"標題：{sb['youtube_title']}｜{len(sb['scenes'])} 個分鏡｜模型 {sb['model']}")
 
-    # 3. images (vertical)
+    # 3. images (vertical): two shots per scene so the picture changes every few seconds
+    shots_per_scene = max(1, int(cfg.get("shots_per_scene", 2)))
+    shot_list, owner, optional = [], [], set()
+    for si, sc in enumerate(sb["scenes"]):
+        prompts = [sc["image_prompt"]] + [p for p in [sc.get("image_prompt_2", "")] if p.strip()][:shots_per_scene - 1]
+        for k, prompt in enumerate(prompts):
+            if k:
+                optional.add(len(shot_list))
+            shot_list.append({"image_prompt": prompt, "characters": sc.get("characters", [])})
+            owner.append(si)
     try:
-        imgs = images.generate_images(sb["scenes"], cfg.get("style", shorts.SHORT_STYLE), sb.get("characters", []),
-                                      out / "work" / "images", vertical=True)
+        flat = images.generate_images(shot_list, cfg.get("style", shorts.SHORT_STYLE), sb.get("characters", []),
+                                      out / "work" / "images", vertical=True, optional=optional)
     except Exception as e:
         print(f"::error title=插畫失敗::{e}")
         return 3
+    imgs = [[p for p, o in zip(flat, owner) if o == si and p] for si in range(len(sb["scenes"]))]
+    print(f"[插畫] {sum(len(x) for x in imgs)} 張（{len(sb['scenes'])} 個分鏡）")
 
     # 4. voice
     nars = tts.narrate(sb["scenes"], out / "work" / "audio", cfg.get("voice", "en_male"),
@@ -195,9 +209,10 @@ def main(argv=None) -> int:
     else:
         print("[YouTube] 未設定授權或已關閉上傳，只產生影片")
 
-    history.append(entry)
-    _save(CH / "history.json", history)
-    _save(CH / "queue.json", queue)
+    if not args.dry_run:
+        history.append(entry)
+        _save(CH / "history.json", history)
+        _save(CH / "queue.json", queue)
     (out / "youtube.txt").write_text(f"{sb['youtube_title']}\n\n{desc}\n\nTags: {', '.join(sb.get('tags', []))}\n",
                                      encoding="utf-8")
     (out / "meta.json").write_text(json.dumps({**entry, "youtube_description": desc, "tags": sb.get("tags", []),

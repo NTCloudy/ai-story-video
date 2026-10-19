@@ -111,8 +111,9 @@ SHORT_SCHEMA = {
             "type": "ARRAY",
             "items": {"type": "OBJECT",
                       "properties": {"narration": {"type": "STRING"}, "image_prompt": {"type": "STRING"},
+                                     "image_prompt_2": {"type": "STRING"},
                                      "characters": {"type": "ARRAY", "items": {"type": "STRING"}}},
-                      "required": ["narration", "image_prompt", "characters"]},
+                      "required": ["narration", "image_prompt", "image_prompt_2", "characters"]},
         },
         "youtube_title": {"type": "STRING"},
         "youtube_description": {"type": "STRING"},
@@ -264,10 +265,15 @@ Requirements:
 2. Scene 1 narration = the hook: a bold question or shocking statement in under 12 words. No greetings,
    no "in this video", no channel name.
 3. Build curiosity scene by scene; put the most surprising fact near the end; last scene ends with a
-   satisfying twist or takeaway plus a very short call to action like "Follow for more what-ifs."
+   satisfying twist. Make it LOOP: the final sentence should lead naturally back into the opening hook, so a
+   viewer who keeps watching hears the hook again and it still makes sense. No call to action, no "follow for more".
 4. hook_text: 3-6 word on-screen title shown during the first seconds (e.g. "NO MOON FOR 1 DAY?").
-5. image_prompt (English) for each scene: a striking, cinematic VERTICAL 9:16 image matching the narration -
-   subject, setting, action, camera angle, lighting. Do NOT include any art style words and no text in the image.
+5. Two images per scene, so the picture changes every few seconds: image_prompt for the first half of the
+   narration and image_prompt_2 for the second half. Make the two shots clearly different (e.g. wide establishing
+   shot -> dramatic close-up, a different angle, a reaction, or the consequence) while keeping the same subject and
+   setting so they feel continuous. Each is a striking, cinematic VERTICAL 9:16 image matching its part of the
+   narration - subject, setting, action, camera angle, lighting. Scene 1's first image must be the most
+   eye-catching picture of the whole video. Do NOT include any art style words and no text in the image.
    If a recurring character appears, refer to it by name only.
 6. characters: only if a recurring character/person is needed (max 2), with a detailed fixed appearance; else [].
 7. title: short internal title. youtube_title: under 70 characters, curiosity-driven, ends with " #shorts".

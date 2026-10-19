@@ -20,7 +20,8 @@ VOICES = {
     "en_female": "en-US-AvaNeural",
 }
 
-async def _tts(text: str, voice: str, rate: str, mp3: Path, lang: str = "zh") -> list[tuple[float, float, str]]:
+async def _tts(text: str, voice: str, rate: str, mp3: Path, lang: str = "zh"):
+    """Returns (cues, words); words = per-word timings for English (used for the highlighted captions)."""
     boundary = "WordBoundary" if lang == "en" else "SentenceBoundary"
     comm = edge_tts.Communicate(text, voice, rate=rate, boundary=boundary)
     cues, words = [], []
@@ -38,7 +39,7 @@ async def _tts(text: str, voice: str, rate: str, mp3: Path, lang: str = "zh") ->
     if lang == "en":
         words = _attach_punct(text, words)
         cues = build_cues_en(words)
-    return cues
+    return cues, words
 
 
 def _attach_punct(text: str, words: list[tuple[float, float, str]]) -> list[tuple[float, float, str]]:
@@ -58,15 +59,17 @@ def _duration(path: Path) -> float:
     return float(out or 0)
 
 
-def _gtts(text: str, mp3: Path, lang: str = "zh") -> list[tuple[float, float, str]]:
-    """Fallback: Google Translate TTS (no timings -> proportional cues). Sped up 1.2x for natural pace."""
+def _gtts(text: str, mp3: Path, lang: str = "zh"):
+    """Fallback: Google Translate TTS (no timings -> proportional cues). Sped up 1.2x for natural pace.
+    Returns (cues, words) like _tts."""
     from gtts import gTTS
     raw = mp3.with_suffix(".raw.mp3")
     gTTS(text, lang="en" if lang == "en" else "zh-TW", timeout=30).save(str(raw))
     subprocess.run(["ffmpeg", "-y", "-v", "error", "-i", str(raw), "-filter:a", "atempo=1.2", str(mp3)], check=True)
     raw.unlink(missing_ok=True)
     if lang == "en":
-        return build_cues_en(proportional_words(text, 0.0, _duration(mp3)))
+        words = proportional_words(text, 0.0, _duration(mp3))
+        return build_cues_en(words), words
     sents = sentences(text)
     total = sum(len(x) for x in sents) or 1
     dur, t, cues = _duration(mp3), 0.0, []
@@ -74,7 +77,7 @@ def _gtts(text: str, mp3: Path, lang: str = "zh") -> list[tuple[float, float, st
         d = dur * len(x) / total
         cues.extend(build_cues(x, t, t + d))
         t += d
-    return cues
+    return cues, []
 
 
 _EDGE_OK = True
@@ -88,11 +91,11 @@ def narrate(scenes: list[dict], out_dir: Path, voice: str = "female", rate: str 
     results = []
     for i, sc in enumerate(scenes):
         mp3 = out_dir / f"scene_{i:02d}.mp3"
-        cues = None
+        cues, words = None, []
         if _EDGE_OK:
             for attempt in range(3):
                 try:
-                    cues = asyncio.run(asyncio.wait_for(_tts(sc["narration"], v, rate, mp3, lang), 90))
+                    cues, words = asyncio.run(asyncio.wait_for(_tts(sc["narration"], v, rate, mp3, lang), 90))
                     break
                 except Exception as e:  # network hiccups / blocked
                     print(f"[配音] 微軟語音失敗（{attempt + 1}/3）：{type(e).__name__}: {str(e)[:120]}")
@@ -100,9 +103,9 @@ def narrate(scenes: list[dict], out_dir: Path, voice: str = "female", rate: str 
                 print("[配音] 改用 Google 語音備援")
                 _EDGE_OK = False
         if cues is None:
-            cues = _gtts(sc["narration"], mp3, lang)
+            cues, words = _gtts(sc["narration"], mp3, lang)
         if not cues:
             cues = [(0.0, _duration(mp3), sc["narration"])]
-        results.append({"audio": mp3, "cues": cues})
+        results.append({"audio": mp3, "cues": cues, "words": words})
         print(f"[配音] {i + 1}/{len(scenes)} 完成")
     return results
