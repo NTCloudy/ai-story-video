@@ -111,8 +111,9 @@ SHORT_SCHEMA = {
             "type": "ARRAY",
             "items": {"type": "OBJECT",
                       "properties": {"narration": {"type": "STRING"}, "image_prompt": {"type": "STRING"},
+                                     "image_prompt_2": {"type": "STRING"}, "switch_word": {"type": "STRING"},
                                      "characters": {"type": "ARRAY", "items": {"type": "STRING"}}},
-                      "required": ["narration", "image_prompt", "characters"]},
+                      "required": ["narration", "image_prompt", "image_prompt_2", "switch_word", "characters"]},
         },
         "youtube_title": {"type": "STRING"},
         "youtube_description": {"type": "STRING"},
@@ -266,10 +267,23 @@ Requirements:
 3. Build curiosity scene by scene; put the most surprising fact near the end; last scene ends with a
    satisfying twist or takeaway plus a very short call to action like "Follow for more what-ifs."
 4. hook_text: 3-6 word on-screen title shown during the first seconds (e.g. "NO MOON FOR 1 DAY?").
-5. image_prompt (English) for each scene: a striking, cinematic VERTICAL 9:16 image matching the narration -
-   subject, setting, action, camera angle, lighting. Do NOT include any art style words and no text in the image.
-   If a recurring character appears, refer to it by name only.
-6. characters: only if a recurring character/person is needed (max 2), with a detailed fixed appearance; else [].
+5. Pictures follow the narration, not a timer: a picture should stay on screen while the narration talks about
+   it, typically 3-6 seconds. image_prompt = what the viewer should see while the scene's narration starts.
+   Every scene with 15 or more words MUST also have image_prompt_2 = the new thing the narration moves on to (a new
+   object, place, scale or consequence) and switch_word = the exact word of the narration where that new picture
+   should appear (at least 5 words into the scene). Only scenes under 15 words use empty strings for
+   image_prompt_2 and switch_word. Every picture must look clearly different from the one before it
+   (different subject, place, scale or moment) - never two near-identical images. Each is a striking, cinematic
+   VERTICAL 9:16 image matching its part of the narration - subject, setting, action, camera angle, lighting.
+   Vary the camera (extreme wide, aerial, first-person POV, close-up, macro, cutaway diagram-like view) and never
+   show a person just standing in the middle facing the camera. Scene 1's first image must be the most
+   eye-catching picture of the whole video. Do NOT include any art style words and no text in the image.
+   Avoid things image AIs draw badly or confusingly: reflections of scenes inside helmet visors or eyes, empty
+   suits or helmets, books / letters / manuscripts / signs / screens with writing, close-up hands, and
+   metaphorical or surreal mash-ups. Keep each picture literal and instantly readable.
+6. characters: always [] - this channel does not use recurring characters. When a person is needed, describe
+   them generically inside that image_prompt (e.g. "a tiny astronaut silhouette falling", "a diver seen from below"),
+   and prefer showing the phenomenon itself.
 7. title: short internal title. youtube_title: under 70 characters, curiosity-driven, ends with " #shorts".
    youtube_description: 2 sentences + 4 relevant hashtags. tags: 10-15 search keywords.
 8. sources: up to 3 source websites used.

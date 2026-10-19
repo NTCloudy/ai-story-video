@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import re
 import subprocess
 from pathlib import Path
+
+from . import motion
 
 W, H, FPS = 1920, 1080, 30
 LEAD, TAIL = 0.35, 0.45   # silence before / after each scene's narration
@@ -15,16 +18,17 @@ ZOOM = 0.12
 
 
 def configure(fmt: str = "landscape") -> None:
-    """landscape = 1920x1080 story video; short = 1080x1920 YouTube Shorts (no title card, hook overlay)."""
+    """landscape = 1920x1080 story video; short = 1080x1920 YouTube Shorts (no title card, hook overlay,
+    hard cuts between shots instead of fades)."""
     global W, H, LEAD, TAIL, SHORT, FADE, ZOOM
     if fmt == "short":
-        W, H, LEAD, TAIL, SHORT, FADE, ZOOM = 1080, 1920, 0.1, 0.2, True, 0.18, 0.18
+        W, H, LEAD, TAIL, SHORT, FADE, ZOOM = 1080, 1920, 0.1, 0.2, True, 0.0, 0.14
     else:
         W, H, LEAD, TAIL, SHORT, FADE, ZOOM = 1920, 1080, 0.35, 0.45, False, 0.35, 0.12
 
 
 def _run(args: list[str]) -> None:
-    r = subprocess.run(args, capture_output=True, text=True)
+    r = subprocess.run(args, capture_output=True, text=True, stdin=subprocess.DEVNULL)  # ffmpeg must not read a TTY
     if r.returncode != 0:
         raise RuntimeError(f"ffmpeg 失敗：{' '.join(args[:6])}...\n{r.stderr[-1500:]}")
 
@@ -53,17 +57,61 @@ def _fit(src: str = "0:v") -> str:
     return f"[{src}]scale={W*2}:{H*2}:force_original_aspect_ratio=increase,crop={W*2}:{H*2}:(iw-ow)/2:(ih-oh)*0.35,setsar=1"
 
 
-def scene_clip(img: Path, audio: Path, idx: int, out: Path) -> float:
+MIN_SHOT = 2.0   # seconds; never flash a picture shorter than this
+
+
+def _norm(w: str) -> str:
+    return re.sub(r"[^a-z0-9']", "", w.lower())
+
+
+def shot_cuts(n: int, dur: float, words: list | None = None, switch_word: str = "") -> list[float]:
+    """Boundaries [0, ..., dur] for n shots in one scene clip. The picture changes exactly when the narration
+    reaches `switch_word` (clip time = LEAD + word start); without it, on the word closest to an even split."""
+    n = max(1, min(n, int(dur // MIN_SHOT) or 1))
+    cuts = [0.0]
+    timed = sorted((LEAD + w[0], _norm(w[2])) for w in (words or []))
+    key = _norm(switch_word.split()[0]) if switch_word.strip() else ""
+    for k in range(1, n):
+        ok = [(s, w) for s, w in timed if s - cuts[-1] >= MIN_SHOT and dur - s >= MIN_SHOT * (n - k)]
+        hit = [s for s, w in ok if key and w == key]
+        target = dur * k / n
+        cuts.append(hit[0] if hit else (min((s for s, _ in ok), key=lambda s: abs(s - target)) if ok else target))
+    return cuts + [dur]
+
+
+def scene_clip(img, audio: Path, idx: int, out: Path, words: list | None = None, switch_word: str = "") -> float:
+    """One narrated scene. `img` is a path or a list of shot paths shown one after another (hard cuts).
+    Shorts use the free depth-parallax "living photo" motion when available, else ffmpeg zoompan."""
+    shots = [p for p in (img if isinstance(img, (list, tuple)) else [img]) if p]
     dur = LEAD + duration(audio) + TAIL
-    frames = int(dur * FPS) + 1
-    z, x, y = _motion(idx, frames)
-    vf = (f"{_fit()},zoompan=z='{z}':x='{x}':y='{y}':d={frames}:s={W}x{H}:fps={FPS},"
-          f"fade=t=in:st=0:d={FADE},fade=t=out:st={dur - FADE:.3f}:d={FADE},format=yuv420p[v];"
-          f"[1:a]adelay={int(LEAD * 1000)}:all=1,apad,atrim=0:{dur:.3f},aresample=44100[a]")
-    _run(["ffmpeg", "-y", "-v", "error", "-i", str(img), "-i", str(audio), "-filter_complex", vf,
-          "-map", "[v]", "-map", "[a]", "-t", f"{dur:.3f}", "-r", str(FPS),
-          "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-c:a", "aac", "-b:a", "192k", "-ac", "2",
-          str(out)])
+    cuts = shot_cuts(len(shots), dur, words, switch_word)
+    shots = shots[:len(cuts) - 1]
+    total = int(dur * FPS) + 1
+    counts, used = [], 0
+    for k, (a, b) in enumerate(zip(cuts, cuts[1:])):
+        counts.append(total - used if k == len(shots) - 1 else max(int(round((b - a) * FPS)), 1))
+        used += counts[-1]
+    inputs, chains = list(shots), []
+    if SHORT and motion.available():
+        inputs = [motion.render_shot(p, frames, W, H, FPS, idx * 2 + k, out.with_name(f"{out.stem}_shot{k}.mp4"),
+                                     seed=idx) for k, (p, frames) in enumerate(zip(shots, counts))]
+        chains = [f"[{k}:v]setpts=PTS-STARTPTS[s{k}]" for k in range(len(inputs))]
+    else:
+        for k, frames in enumerate(counts):
+            z, x, y = _motion(idx * 2 + k, frames)
+            chains.append(f"{_fit(f'{k}:v')},zoompan=z='{z}':x='{x}':y='{y}':d={frames}:s={W}x{H}:fps={FPS},"
+                          f"trim=end_frame={frames},setpts=PTS-STARTPTS[s{k}]")
+    n = len(inputs)
+    fades = f",fade=t=in:st=0:d={FADE},fade=t=out:st={dur - FADE:.3f}:d={FADE}" if FADE > 0 else ""
+    vf = (";".join(chains) + ";" + "".join(f"[s{k}]" for k in range(n)) + f"concat=n={n}:v=1:a=0{fades},"
+          f"format=yuv420p[v];[{n}:a]adelay={int(LEAD * 1000)}:all=1,apad,atrim=0:{dur:.3f},aresample=44100[a]")
+    args = ["ffmpeg", "-y", "-v", "error"]
+    for p in inputs:
+        args += ["-i", str(p)]
+    _run(args + ["-i", str(audio), "-filter_complex", vf,
+                 "-map", "[v]", "-map", "[a]", "-t", f"{dur:.3f}", "-r", str(FPS),
+                 "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-c:a", "aac", "-b:a", "192k", "-ac", "2",
+                 str(out)])
     return dur
 
 
@@ -135,10 +183,49 @@ def layout_cues(cue_groups: list[tuple[float, list]]) -> list[tuple[float, float
     return [tuple(c) for c in cues]
 
 
+HIGHLIGHT, NORMAL = "{\\c&H00E5FF&}", "{\\c&HFFFFFF&}"   # spoken word in yellow, the rest white
+
+
+def word_slots(word_groups: list[tuple[float, list]] | None) -> list[tuple[float, float, str]]:
+    """Absolute (start, end, CAPTION WORD) for every displayed English word, in caption order."""
+    from .subtitles import _en_clean
+    out = []
+    for start, words in word_groups or []:
+        for s, e, w in words or []:
+            c = _en_clean(w).upper()
+            if c:
+                out.append((start + LEAD + s, start + LEAD + e, c))
+    return out
+
+
+def highlight_events(a: float, b: float, text: str, slots: list, j: int) -> tuple[list[tuple[float, float, str]], int]:
+    """Split caption [a, b) into one event per spoken word with that word highlighted.
+    Returns (events, next slot index); no events if the words cannot be matched to the caption."""
+    toks = text.split()
+    k = len(toks)
+    for start in range(j, min(j + 4, len(slots) - k + 1)):  # small window to resync after dropped words
+        if [s[2] for s in slots[start:start + k]] == toks:
+            cand = slots[start:start + k]
+            bounds = [a] + [min(max(cand[m][0], a), b) for m in range(1, k)] + [b]
+            bounds = [round(x, 2) for x in bounds]
+            for m in range(1, len(bounds)):
+                bounds[m] = max(bounds[m], bounds[m - 1])
+            events = []
+            for m in range(k):
+                if bounds[m + 1] - bounds[m] >= 0.01:
+                    words = " ".join(f"{HIGHLIGHT}{_ass_text(t)}{NORMAL}" if q == m else _ass_text(t)
+                                     for q, t in enumerate(toks))
+                    events.append((bounds[m], bounds[m + 1], words))
+            return events, start + k
+    return [], j
+
+
 def write_subtitles(title: str, cue_groups: list[tuple[float, list]], ass_path: Path, srt_path: Path,
-                    hook: str = "") -> None:
+                    hook: str = "", word_groups: list[tuple[float, list]] | None = None) -> None:
+    slots = word_slots(word_groups) if SHORT else []
     if SHORT:
-        style, pos = "Cap", f"{{\\an5\\pos({W // 2},{int(H * 0.70)})\\fscx92\\fscy92\\t(0,90,\\fscx100\\fscy100)}}"
+        anchor = f"{{\\an5\\pos({W // 2},{int(H * 0.70)})"
+        style, pos = "Cap", f"{anchor}\\fscx92\\fscy92\\t(0,90,\\fscx100\\fscy100)}}"
         lines = [ass_header()]
         if hook:
             lines.append(f"Dialogue: 1,{_ass_time(0)},{_ass_time(2.6)},Hook,,0,0,0,,"
@@ -147,9 +234,15 @@ def write_subtitles(title: str, cue_groups: list[tuple[float, list]], ass_path: 
         style, pos = "Sub", f"{{\\an2\\pos({W // 2},{H - int(H * 0.06)})}}"  # fixed baseline: never moves
         lines = [ass_header(), f"Dialogue: 1,{_ass_time(0.3)},{_ass_time(TITLE_DUR - 0.3)},Title,,0,0,0,,"
                                f"{{\\fad(400,400)}}{_ass_text(title)}\n"]
-    srt = []
+    srt, j = [], 0
     for n, (a, b, text) in enumerate(layout_cues(cue_groups), 1):
-        lines.append(f"Dialogue: 0,{_ass_time(a)},{_ass_time(b)},{style},,0,0,0,,{pos}{_ass_text(text)}\n")
+        events, j = highlight_events(a, b, text, slots, j) if slots else ([], j)
+        if events:
+            for m, (ea, eb, words) in enumerate(events):
+                lead = pos if m == 0 else anchor + "}"   # pop-in only when the caption first appears
+                lines.append(f"Dialogue: 0,{_ass_time(ea)},{_ass_time(eb)},{style},,0,0,0,,{lead}{words}\n")
+        else:
+            lines.append(f"Dialogue: 0,{_ass_time(a)},{_ass_time(b)},{style},,0,0,0,,{pos}{_ass_text(text)}\n")
         srt.append(f"{n}\n{_srt_time(a)} --> {_srt_time(b)}\n{text}\n")
     ass_path.write_text("".join(lines), encoding="utf-8")
     srt_path.write_text("\n".join(srt), encoding="utf-8")
@@ -183,7 +276,8 @@ def text_touches_edges(ass: Path, w: int, h: int, edge: int = 16) -> bool:
     """Render only the subtitle on a black canvas; lit pixels near the frame edges mean the title is cut off."""
     raw = subprocess.run(["ffmpeg", "-v", "error", "-f", "lavfi", "-i", f"color=black:s={w}x{h}:d=1",
                           "-vf", f"subtitles='{_esc_filter_path(ass)}'", "-frames:v", "1",
-                          "-f", "rawvideo", "-pix_fmt", "gray", "-"], capture_output=True, check=True).stdout
+                          "-f", "rawvideo", "-pix_fmt", "gray", "-"], capture_output=True, check=True,
+                         stdin=subprocess.DEVNULL).stdout
     if len(raw) < w * h:
         return False
     if max(raw[:w * edge]) > 60:  # top rows
@@ -211,19 +305,24 @@ def thumbnail(img: Path, title: str, out: Path) -> int:
     return size
 
 
-def assemble(title: str, images: list[Path], narrations: list[dict], work: Path, out_dir: Path,
-             hook: str = "") -> Path:
+def assemble(title: str, images: list, narrations: list[dict], work: Path, out_dir: Path,
+             hook: str = "", switch_words: list[str] | None = None) -> Path:
+    """images[i] is one path or a list of shot paths for scene i; switch_words[i] = narration word where the
+    second shot starts."""
     work.mkdir(parents=True, exist_ok=True)
     out_dir.mkdir(parents=True, exist_ok=True)
-    clips, groups, t = [], [], 0.0
+    clips, groups, word_groups, t = [], [], [], 0.0
+    first = images[0][0] if isinstance(images[0], (list, tuple)) else images[0]
     if not SHORT:
         c = work / "clip_title.mp4"
-        t += title_clip(images[0], c)
+        t += title_clip(first, c)
         clips.append(c)
     for i, (img, nar) in enumerate(zip(images, narrations)):
         c = work / f"clip_{i:02d}.mp4"
-        d = scene_clip(img, nar["audio"], i, c)
+        sw = (switch_words or [])[i] if i < len(switch_words or []) else ""
+        d = scene_clip(img, nar["audio"], i, c, nar.get("words"), sw or "")
         groups.append((t, nar["cues"]))
+        word_groups.append((t, nar.get("words") or []))
         t += d
         clips.append(c)
         print(f"[合成] 分鏡 {i + 1}/{len(images)}")
@@ -233,11 +332,11 @@ def assemble(title: str, images: list[Path], narrations: list[dict], work: Path,
     _run(["ffmpeg", "-y", "-v", "error", "-f", "concat", "-safe", "0", "-i", str(lst), "-c", "copy", str(body)])
 
     ass, srt = work / "subs.ass", out_dir / "subtitles.srt"
-    write_subtitles(title, groups, ass, srt, hook)
+    write_subtitles(title, groups, ass, srt, hook, word_groups)
     final = out_dir / "video.mp4"
     _run(["ffmpeg", "-y", "-v", "error", "-i", str(body), "-vf", f"subtitles='{_esc_filter_path(ass)}'",
           "-c:v", "libx264", "-preset", "veryfast", "-crf", "20", "-pix_fmt", "yuv420p",
           "-c:a", "copy", "-movflags", "+faststart", str(final)])
-    thumbnail(images[0], hook or title, out_dir / "thumbnail.jpg")
+    thumbnail(first, hook or title, out_dir / "thumbnail.jpg")
     print(f"[合成] 完成，影片長度 {duration(final):.1f} 秒")
     return final

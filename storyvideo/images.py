@@ -122,33 +122,107 @@ def scene_prompt(scene: dict, chars: list[dict], ref_names: list[str], style: st
     return " ".join(parts)
 
 
-def generate_images(scenes: list[dict], style: str, characters, out_dir: Path, vertical: bool = False) -> list[Path]:
+QA_SCHEMA = {"type": "OBJECT", "properties": {"ok": {"type": "BOOLEAN"}, "problem": {"type": "STRING"}},
+             "required": ["ok", "problem"]}
+SAFER = (" Clear, literal, easy-to-read composition with natural anatomy; no faces replaced by objects or planets,"
+         " no reflections of other scenes inside helmets or eyes, no text.")
+
+
+def check_image(path: Path, prompt: str) -> tuple[bool, str]:
+    """Ask Gemini (vision) whether an illustration has an obvious AI mistake. Best effort: True on errors."""
+    import json
+    from . import gemini
+    q = ("You check AI-generated illustrations for a family-friendly science YouTube Short before publishing.\n"
+         f"The picture should show: {prompt[:600]}\n"
+         "Answer ok=false ONLY for clear problems most viewers would find weird or wrong: a face replaced by an "
+         "object or a planet, an empty or headless suit or helmet that looks like a creepy floating head, melted or "
+         "distorted faces or bodies, extra or missing limbs, duplicated people, visible text or letters, or a "
+         "picture that does not show the requested subject at all. Artistic style, dramatic lighting and small "
+         "imperfections are fine. Put a short reason in problem (empty when ok).")
+    try:
+        time.sleep(4)  # stay under the free tier's requests-per-minute limit
+        text, _ = gemini.call(q, QA_SCHEMA, temperature=0.0, max_models=3, images=[path], lite_first=True)
+        d = json.loads(text)
+        return bool(d.get("ok", True)), str(d.get("problem", ""))
+    except Exception as e:
+        print(f"[插畫檢查] 略過：{str(e)[:120]}")
+        return True, ""
+
+
+def generate_images(scenes: list[dict], style: str, characters, out_dir: Path, vertical: bool = False,
+                    optional: set[int] | None = None, check: bool = False) -> list[Path | None]:
+    """One image per entry. Entries listed in `optional` (extra shots) are drawn after all required ones,
+    return None on failure (or once the daily quota runs out) instead of a placeholder background, and do not
+    count towards the failure limit."""
     w, h = (SCENE_H, SCENE_W) if vertical else (SCENE_W, SCENE_H)
     out_dir.mkdir(parents=True, exist_ok=True)
     chars = normalize_characters(characters)
     refs = make_character_refs(chars, style, out_dir) if chars else {}
-    paths, failed = [], 0
-    for i, sc in enumerate(scenes):
+    optional = optional or set()
+    order = [i for i in range(len(scenes)) if i not in optional] + [i for i in range(len(scenes)) if i in optional]
+    paths: list[Path | None] = [None] * len(scenes)
+    failed, quota_out = 0, False
+    for i in order:
+        sc = scenes[i]
+        if i in optional and quota_out:
+            continue
         path = out_dir / f"scene_{i:02d}.jpg"
         names = [n for n in (sc.get("characters") or []) if n in refs][:MAX_REFS]
         prompt = scene_prompt(sc, chars, names, style, vertical)
+        drawn = True
         try:
             path.write_bytes(flux2(prompt, [refs[n] for n in names], w, h))
             print(f"[插畫] 分鏡 {i + 1}/{len(scenes)} 完成（參考 {len(names)} 個角色）")
         except QuotaExceeded:
-            raise
+            if i not in optional:
+                raise
+            print("[插畫] 今日額度用完，其餘額外鏡頭略過")
+            quota_out = True
+            continue
         except Exception as e1:
             print(f"[插畫] 分鏡 {i + 1} FLUX.2 失敗，改用 FLUX.1：{e1}")
             try:
                 full = scene_prompt(sc, chars, [], style, vertical)
                 path.write_bytes(flux1(full))
             except QuotaExceeded:
-                raise
+                if i not in optional:
+                    raise
+                quota_out = True
+                continue
             except Exception as e2:
+                if i in optional:
+                    print(f"[插畫] 分鏡 {i + 1}（額外鏡頭）失敗，略過：{e2}")
+                    continue
                 print(f"[插畫] 分鏡 {i + 1} 失敗，用預設背景代替：{e2}")
                 placeholder(path, i)
                 failed += 1
-        paths.append(path)
-    if failed > max(1, len(scenes) // 4) and not os.environ.get("ALLOW_PLACEHOLDER"):
-        raise RuntimeError(f"有 {failed}/{len(scenes)} 張插畫失敗，為避免產生品質不佳的影片已停止")
+                drawn = False
+        if check and drawn and not _review(path, i, sc["image_prompt"], prompt, [refs[n] for n in names], w, h,
+                                           i in optional):
+            continue
+        paths[i] = path
+    required = len(scenes) - len(optional)
+    if failed > max(1, required // 4) and not os.environ.get("ALLOW_PLACEHOLDER"):
+        raise RuntimeError(f"有 {failed}/{required} 張插畫失敗，為避免產生品質不佳的影片已停止")
     return paths
+
+
+def _review(path: Path, i: int, wanted: str, prompt: str, refs: list[Path], w: int, h: int, optional: bool) -> bool:
+    """Gemini checks the picture; a weird one is redrawn once with safer wording.
+    Returns False when an extra shot should be dropped (still wrong, or no quota left to redraw)."""
+    ok, problem = check_image(path, wanted)
+    if ok:
+        return True
+    print(f"[插畫檢查] 分鏡 {i + 1} 有問題：{problem}，重畫一次")
+    try:
+        data = flux2(prompt + SAFER, refs, w, h)
+    except Exception as e:  # quota or API error: keep the first picture for required scenes
+        print(f"[插畫檢查] 分鏡 {i + 1} 重畫失敗：{str(e)[:120]}")
+        return not optional
+    path.write_bytes(data)
+    ok, problem = check_image(path, wanted)
+    if not ok:
+        print(f"[插畫檢查] 分鏡 {i + 1} 重畫後仍有問題：{problem}" + ("，拿掉這張額外鏡頭" if optional else ""))
+        return not optional
+    print(f"[插畫檢查] 分鏡 {i + 1} 重畫後通過")
+    return True

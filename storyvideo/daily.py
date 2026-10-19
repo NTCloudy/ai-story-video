@@ -87,13 +87,41 @@ def publish_pending(history: list[dict]) -> bool:
     return changed
 
 
+def save_assets(out: Path, imgs: list, nars: list[dict], sb: dict) -> None:
+    """Raw materials (pictures, narration audio + word timings) so a Short can be re-rendered later
+    without spending the daily illustration quota again."""
+    import zipfile
+    try:
+        with zipfile.ZipFile(out / "assets.zip", "w", zipfile.ZIP_DEFLATED) as z:
+            scenes = []
+            for i, (shots, n) in enumerate(zip(imgs, nars)):
+                names = []
+                for p in shots if isinstance(shots, (list, tuple)) else [shots]:
+                    z.write(p, f"images/{Path(p).name}")
+                    names.append(Path(p).name)
+                z.write(n["audio"], f"audio/{Path(n['audio']).name}")
+                sc = sb["scenes"][i]
+                prompts = [sc.get("image_prompt", "")] + ([sc["image_prompt_2"]] if sc.get("image_prompt_2") else [])
+                scenes.append({"images": names, "prompts": prompts[:len(names)], "audio": Path(n["audio"]).name,
+                               "cues": n["cues"],
+                               "words": n.get("words") or [],
+                               "switch_word": sb["scenes"][i].get("switch_word") or ""})
+            z.writestr("render.json", json.dumps({"title": sb["title"], "hook": sb.get("hook_text", ""),
+                                                  "scenes": scenes}, ensure_ascii=False, indent=1))
+    except Exception as e:
+        print(f"[素材] assets.zip skipped: {e}")
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="storyvideo.daily")
     p.add_argument("--topic", default="")
     p.add_argument("--force", action="store_true", help="make another Short even if one was made today")
     p.add_argument("--no-upload", action="store_true")
+    p.add_argument("--dry-run", action="store_true", help="test render: no upload, channel files untouched")
     p.add_argument("--out", default="out")
     args = p.parse_args(argv)
+    if args.dry_run:
+        args.no_upload = True
 
     cfg = _load(CH / "channel.yaml", {})
     history = _load(CH / "history.json", [])
@@ -107,7 +135,7 @@ def main(argv=None) -> int:
         _save(CH / "history.json", history)
 
     # refresh view counts for our previous Shorts (cheap: 1 quota unit)
-    if youtube.configured() and history:
+    if youtube.configured() and history and not args.dry_run:
         try:
             stats = youtube.video_stats([h["video_id"] for h in history if h.get("video_id")])
             for h in history:
@@ -155,13 +183,26 @@ def main(argv=None) -> int:
     (out / "script.json").write_text(json.dumps(sb, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"標題：{sb['youtube_title']}｜{len(sb['scenes'])} 個分鏡｜模型 {sb['model']}")
 
-    # 3. images (vertical)
+    # 3. images (vertical): one per scene, plus a second one only where the narration moves to something new
+    max_shots = max(1, int(cfg.get("shots_per_scene", 2)))
+    shot_list, owner, optional = [], [], set()
+    for si, sc in enumerate(sb["scenes"]):
+        prompts = [sc["image_prompt"]] + [p for p in [sc.get("image_prompt_2") or ""] if p.strip()][:max_shots - 1]
+        for k, prompt in enumerate(prompts):
+            if k:
+                optional.add(len(shot_list))
+            shot_list.append({"image_prompt": prompt, "characters": []})
+            owner.append(si)
     try:
-        imgs = images.generate_images(sb["scenes"], cfg.get("style", shorts.SHORT_STYLE), sb.get("characters", []),
-                                      out / "work" / "images", vertical=True)
+        # no character reference sheets for Shorts: they made every shot the same front-facing pose
+        flat = images.generate_images(shot_list, cfg.get("style", shorts.SHORT_STYLE), [],
+                                      out / "work" / "images", vertical=True, optional=optional,
+                                      check=bool(cfg.get("image_check", True)))
     except Exception as e:
         print(f"::error title=插畫失敗::{e}")
         return 3
+    imgs = [[p for p, o in zip(flat, owner) if o == si and p] for si in range(len(sb["scenes"]))]
+    print(f"[插畫] {sum(len(x) for x in imgs)} 張（{len(sb['scenes'])} 個分鏡）")
 
     # 4. voice
     nars = tts.narrate(sb["scenes"], out / "work" / "audio", cfg.get("voice", "en_male"),
@@ -169,8 +210,10 @@ def main(argv=None) -> int:
 
     # 5. render
     render.configure("short")
-    render.assemble(sb["title"], imgs, nars, out / "work", out, hook=sb.get("hook_text", ""))
+    render.assemble(sb["title"], imgs, nars, out / "work", out, hook=sb.get("hook_text", ""),
+                    switch_words=[sc.get("switch_word") or "" for sc in sb["scenes"]])
     dur = render.duration(out / "video.mp4")
+    save_assets(out, imgs, nars, sb)
 
     # 6. upload
     desc = sb.get("youtube_description", "").strip()
@@ -195,9 +238,10 @@ def main(argv=None) -> int:
     else:
         print("[YouTube] 未設定授權或已關閉上傳，只產生影片")
 
-    history.append(entry)
-    _save(CH / "history.json", history)
-    _save(CH / "queue.json", queue)
+    if not args.dry_run:
+        history.append(entry)
+        _save(CH / "history.json", history)
+        _save(CH / "queue.json", queue)
     (out / "youtube.txt").write_text(f"{sb['youtube_title']}\n\n{desc}\n\nTags: {', '.join(sb.get('tags', []))}\n",
                                      encoding="utf-8")
     (out / "meta.json").write_text(json.dumps({**entry, "youtube_description": desc, "tags": sb.get("tags", []),

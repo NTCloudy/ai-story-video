@@ -32,6 +32,10 @@ on:
         description: "（測試用）插畫額度用完時用預設背景"
         type: boolean
         default: false
+      dry_run:
+        description: "（測試用）只產生影片給我看：不上傳、不發 FB/IG、不寫頻道紀錄"
+        type: boolean
+        default: false
 
 concurrency:
   group: daily-short
@@ -60,6 +64,12 @@ jobs:
 
       - run: pip install -r requirements.txt
 
+      - name: 快取景深模型（免費動態效果用）
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/storyvideo
+          key: depth-anything-v2-small-onnx-v1
+
       - name: AI 製作 Short（選題 → 查證 → 腳本 → 插畫 → 配音 → 合成 → 上傳）
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -72,8 +82,10 @@ jobs:
           FORCE: ${{ inputs.force }}
           UPLOAD: ${{ inputs.upload }}
           ALLOW_PLACEHOLDER: ${{ inputs.test_placeholder && '1' || '' }}
+          DRY_RUN: ${{ inputs.dry_run }}
         run: |
           args=()
+          [ "$DRY_RUN" = "true" ] && args+=(--dry-run)
           [ -n "$TOPIC" ] && args+=(--topic "$TOPIC")
           [ "$FORCE" = "true" ] && args+=(--force)
           [ "$UPLOAD" = "false" ] && args+=(--no-upload)
@@ -85,6 +97,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           TITLE=$(python -c "import json;print(json.load(open('out/meta.json'))['title'])")
+          [ "${{ inputs.dry_run }}" = "true" ] && TITLE="🧪 測試（未上傳）$TITLE"
           TAG="short-$(date -u +%Y%m%d-%H%M%S)"
           python - <<'EOF' > notes.md
           import json
@@ -98,11 +111,13 @@ jobs:
           print(f"### 標籤\n{', '.join(m['tags'])}")
           EOF
           gh release create "$TAG" --title "$TITLE" --notes-file notes.md \
-            out/video.mp4 out/thumbnail.jpg out/subtitles.srt out/youtube.txt out/script.json out/meta.json
+            out/video.mp4 out/thumbnail.jpg out/subtitles.srt out/youtube.txt out/script.json out/meta.json \
+            $( [ -f out/assets.zip ] && echo out/assets.zip )
           echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
 
       - name: 同步到 Facebook / Instagram（Reels）
-        if: hashFiles('out/video.mp4') != ''
+        # scheduled runs always post; manual runs only when uploading for real (GitHub coerces null == false)
+        if: hashFiles('out/video.mp4') != '' && (github.event_name == 'schedule' || (inputs.upload && !inputs.dry_run))
         continue-on-error: true
         env:
           META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
