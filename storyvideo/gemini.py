@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import base64
 import json
 import os
 import time
@@ -12,15 +13,21 @@ from .storyboard import GEMINI_URL, discover_models
 
 
 def call(prompt: str, schema: dict | None = None, search: bool = False, temperature: float = 0.8,
-         api_key: str | None = None, max_models: int | None = None) -> tuple[str, str]:
-    """Returns (text, model). With `schema` the text is JSON. `search` enables Google Search grounding."""
+         api_key: str | None = None, max_models: int | None = None, images: list | None = None) -> tuple[str, str]:
+    """Returns (text, model). With `schema` the text is JSON. `search` enables Google Search grounding.
+    `images`: optional JPEG/PNG file paths sent along with the prompt (vision)."""
     api_key = api_key or os.environ.get("GEMINI_API_KEY", "")
     if not api_key:
         raise RuntimeError("沒有設定 GEMINI_API_KEY")
     cfg: dict = {"temperature": temperature}
     if schema:
         cfg.update(responseMimeType="application/json", responseSchema=schema)
-    body: dict = {"contents": [{"role": "user", "parts": [{"text": prompt}]}], "generationConfig": cfg}
+    parts: list[dict] = [{"text": prompt}]
+    for img in images or []:
+        data = open(img, "rb").read()
+        mime = "image/png" if data[:4] == b"\x89PNG" else "image/jpeg"
+        parts.append({"inline_data": {"mime_type": mime, "data": base64.b64encode(data).decode()}})
+    body: dict = {"contents": [{"role": "user", "parts": parts}], "generationConfig": cfg}
     if search:
         body["tools"] = [{"google_search": {}}]
     models = discover_models(api_key)

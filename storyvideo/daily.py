@@ -100,7 +100,10 @@ def save_assets(out: Path, imgs: list, nars: list[dict], sb: dict) -> None:
                     z.write(p, f"images/{Path(p).name}")
                     names.append(Path(p).name)
                 z.write(n["audio"], f"audio/{Path(n['audio']).name}")
-                scenes.append({"images": names, "audio": Path(n["audio"]).name, "cues": n["cues"],
+                sc = sb["scenes"][i]
+                prompts = [sc.get("image_prompt", "")] + ([sc["image_prompt_2"]] if sc.get("image_prompt_2") else [])
+                scenes.append({"images": names, "prompts": prompts[:len(names)], "audio": Path(n["audio"]).name,
+                               "cues": n["cues"],
                                "words": n.get("words") or [],
                                "switch_word": sb["scenes"][i].get("switch_word") or ""})
             z.writestr("render.json", json.dumps({"title": sb["title"], "hook": sb.get("hook_text", ""),
@@ -193,7 +196,8 @@ def main(argv=None) -> int:
     try:
         # no character reference sheets for Shorts: they made every shot the same front-facing pose
         flat = images.generate_images(shot_list, cfg.get("style", shorts.SHORT_STYLE), [],
-                                      out / "work" / "images", vertical=True, optional=optional)
+                                      out / "work" / "images", vertical=True, optional=optional,
+                                      check=bool(cfg.get("image_check", True)))
     except Exception as e:
         print(f"::error title=插畫失敗::{e}")
         return 3

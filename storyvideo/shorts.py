@@ -278,6 +278,9 @@ Requirements:
    Vary the camera (extreme wide, aerial, first-person POV, close-up, macro, cutaway diagram-like view) and never
    show a person just standing in the middle facing the camera. Scene 1's first image must be the most
    eye-catching picture of the whole video. Do NOT include any art style words and no text in the image.
+   Avoid things image AIs draw badly or confusingly: reflections of scenes inside helmet visors or eyes, empty
+   suits or helmets, books / letters / manuscripts / signs / screens with writing, close-up hands, and
+   metaphorical or surreal mash-ups. Keep each picture literal and instantly readable.
 6. characters: always [] - this channel does not use recurring characters. When a person is needed, describe
    them generically inside that image_prompt (e.g. "a tiny astronaut silhouette falling", "a diver seen from below"),
    and prefer showing the phenomenon itself.

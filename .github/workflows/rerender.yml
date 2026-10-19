@@ -1,7 +1,8 @@
 name: Re-render Short (test)
 
-# Re-renders a Short from the assets.zip of an existing release (no AI calls, no upload) and publishes the
+# Re-renders a Short from the assets.zip of an existing release (no AI drawing, no upload) and publishes the
 # result as a "🧪" test release - used to try new motion / caption styles without spending image quota.
+# check_only = just run the Gemini picture check on that release's pictures.
 on:
   workflow_dispatch:
     inputs:
@@ -9,6 +10,10 @@ on:
         description: "有 assets.zip 的 Release 標籤（例如 short-20261019-052432）"
         required: true
         type: string
+      check_only:
+        description: "只用 Gemini 檢查圖片有沒有怪怪的（不重新合成）"
+        type: boolean
+        default: false
 
 concurrency:
   group: daily-short
@@ -25,6 +30,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: 安裝工具（ffmpeg、字型）
+        if: ${{ !inputs.check_only }}
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq ffmpeg fonts-noto-cjk >/dev/null
@@ -37,12 +43,24 @@ jobs:
       - run: pip install -r requirements.txt
 
       - name: 快取景深模型（免費動態效果用）
+        if: ${{ !inputs.check_only }}
         uses: actions/cache@v4
         with:
           path: ~/.cache/storyvideo
           key: depth-anything-v2-small-onnx-v1
 
+      - name: 檢查圖片
+        if: ${{ inputs.check_only }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          SRC_TAG: ${{ inputs.tag }}
+        run: |
+          gh release download "$SRC_TAG" -p assets.zip -p script.json -D in
+          python -m storyvideo.rerender in/assets.zip --check-only --script in/script.json
+
       - name: 重新合成
+        if: ${{ !inputs.check_only }}
         env:
           GH_TOKEN: ${{ github.token }}
           SRC_TAG: ${{ inputs.tag }}
