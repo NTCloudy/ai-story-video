@@ -272,10 +272,13 @@ Requirements:
    narration and image_prompt_2 for the second half. Make the two shots clearly different (e.g. wide establishing
    shot -> dramatic close-up, a different angle, a reaction, or the consequence) while keeping the same subject and
    setting so they feel continuous. Each is a striking, cinematic VERTICAL 9:16 image matching its part of the
-   narration - subject, setting, action, camera angle, lighting. Scene 1's first image must be the most
+   narration - subject, setting, action, camera angle, lighting. Vary the camera all the time (extreme wide,
+   aerial, first-person POV, close-up, macro, cutaway diagram-like view); never repeat a framing in a row and never
+   show a person just standing in the middle facing the camera. Scene 1's first image must be the most
    eye-catching picture of the whole video. Do NOT include any art style words and no text in the image.
-   If a recurring character appears, refer to it by name only.
-6. characters: only if a recurring character/person is needed (max 2), with a detailed fixed appearance; else [].
+6. characters: always [] - this channel does not use recurring characters. When a person is needed, describe
+   them generically inside that image_prompt (e.g. "a tiny astronaut silhouette falling", "a diver seen from below"),
+   and prefer showing the phenomenon itself.
 7. title: short internal title. youtube_title: under 70 characters, curiosity-driven, ends with " #shorts".
    youtube_description: 2 sentences + 4 relevant hashtags. tags: 10-15 search keywords.
 8. sources: up to 3 source websites used.

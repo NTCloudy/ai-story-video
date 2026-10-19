@@ -166,10 +166,11 @@ def main(argv=None) -> int:
         for k, prompt in enumerate(prompts):
             if k:
                 optional.add(len(shot_list))
-            shot_list.append({"image_prompt": prompt, "characters": sc.get("characters", [])})
+            shot_list.append({"image_prompt": prompt, "characters": []})
             owner.append(si)
     try:
-        flat = images.generate_images(shot_list, cfg.get("style", shorts.SHORT_STYLE), sb.get("characters", []),
+        # no character reference sheets for Shorts: they made every shot the same front-facing pose
+        flat = images.generate_images(shot_list, cfg.get("style", shorts.SHORT_STYLE), [],
                                       out / "work" / "images", vertical=True, optional=optional)
     except Exception as e:
         print(f"::error title=插畫失敗::{e}")
