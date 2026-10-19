@@ -42,6 +42,13 @@ python -m storyvideo --story-file story.txt --title "我的故事" --length medi
 ## 上傳 YouTube 注意
 插畫是 AI 生成的、旁白是 AI 語音。上傳時請在 YouTube Studio 的「變造或合成內容」選擇「是」。
 
+## 每日 Shorts 的畫面（v2）
+- **跟著旁白換圖**：每段一張圖，旁白講到新東西時才換第二張（腳本的 `switch_word`），每張至少 2 秒。
+- **字幕**：正在念的字變黃色。結尾保留「Follow for more…」。
+- **免費動態**：`storyvideo/motion.py` 用 Depth Anything V2（CPU）算出前景、背景遠近，鏡頭移動時產生立體視差，再加飄動光點；套件或模型不在時自動改回一般縮放。
+- **圖片自動檢查**：每張圖畫完後讓 Gemini（lite 模型）看一遍，臉變成東西、空頭盔、變形、圖裡有字、主題不對就重畫一次（`channel.yaml` 的 `image_check: false` 可關閉）。
+- **測試工具**：Daily Short 的 `dry_run`（只產生影片、不上傳不發文不寫紀錄）；每個 Release 附 `assets.zip`，可用 **Re-render Short (test)** workflow 或 `python -m storyvideo.rerender assets.zip` 不花畫圖額度重新合成。
+
 ## 同步到 Facebook 粉專 / Instagram（Reels）
 每天的 Short 上傳 YouTube 後，`daily-short.yml` 會用 `storyvideo/meta.py` 把同一支影片發成 **FB 粉專 Reels** 和 **IG Reels**
 （文字 = 標題 + 說明 + 來源 + AI 生成聲明 + hashtag），結果記在 `channel/history.json` 的 `fb_url` / `ig_url`。
