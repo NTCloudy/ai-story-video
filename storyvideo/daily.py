@@ -87,6 +87,28 @@ def publish_pending(history: list[dict]) -> bool:
     return changed
 
 
+def save_assets(out: Path, imgs: list, nars: list[dict], sb: dict) -> None:
+    """Raw materials (pictures, narration audio + word timings) so a Short can be re-rendered later
+    without spending the daily illustration quota again."""
+    import zipfile
+    try:
+        with zipfile.ZipFile(out / "assets.zip", "w", zipfile.ZIP_DEFLATED) as z:
+            scenes = []
+            for i, (shots, n) in enumerate(zip(imgs, nars)):
+                names = []
+                for p in shots if isinstance(shots, (list, tuple)) else [shots]:
+                    z.write(p, f"images/{Path(p).name}")
+                    names.append(Path(p).name)
+                z.write(n["audio"], f"audio/{Path(n['audio']).name}")
+                scenes.append({"images": names, "audio": Path(n["audio"]).name, "cues": n["cues"],
+                               "words": n.get("words") or [],
+                               "switch_word": sb["scenes"][i].get("switch_word") or ""})
+            z.writestr("render.json", json.dumps({"title": sb["title"], "hook": sb.get("hook_text", ""),
+                                                  "scenes": scenes}, ensure_ascii=False, indent=1))
+    except Exception as e:
+        print(f"[素材] assets.zip skipped: {e}")
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="storyvideo.daily")
     p.add_argument("--topic", default="")
@@ -187,6 +209,7 @@ def main(argv=None) -> int:
     render.assemble(sb["title"], imgs, nars, out / "work", out, hook=sb.get("hook_text", ""),
                     switch_words=[sc.get("switch_word") or "" for sc in sb["scenes"]])
     dur = render.duration(out / "video.mp4")
+    save_assets(out, imgs, nars, sb)
 
     # 6. upload
     desc = sb.get("youtube_description", "").strip()

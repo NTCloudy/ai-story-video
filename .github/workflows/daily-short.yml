@@ -105,7 +105,8 @@ jobs:
           print(f"### 標籤\n{', '.join(m['tags'])}")
           EOF
           gh release create "$TAG" --title "$TITLE" --notes-file notes.md \
-            out/video.mp4 out/thumbnail.jpg out/subtitles.srt out/youtube.txt out/script.json out/meta.json
+            out/video.mp4 out/thumbnail.jpg out/subtitles.srt out/youtube.txt out/script.json out/meta.json \
+            $( [ -f out/assets.zip ] && echo out/assets.zip )
           echo "RELEASE_TAG=$TAG" >> "$GITHUB_ENV"
 
       - name: 同步到 Facebook / Instagram（Reels）
