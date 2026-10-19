@@ -265,8 +265,7 @@ Requirements:
 2. Scene 1 narration = the hook: a bold question or shocking statement in under 12 words. No greetings,
    no "in this video", no channel name.
 3. Build curiosity scene by scene; put the most surprising fact near the end; last scene ends with a
-   satisfying twist. Make it LOOP: the final sentence should lead naturally back into the opening hook, so a
-   viewer who keeps watching hears the hook again and it still makes sense. No call to action, no "follow for more".
+   satisfying twist or takeaway plus a very short call to action like "Follow for more what-ifs."
 4. hook_text: 3-6 word on-screen title shown during the first seconds (e.g. "NO MOON FOR 1 DAY?").
 5. Pictures follow the narration, not a timer: a picture should stay on screen while the narration talks about
    it, typically 3-6 seconds. image_prompt = what the viewer should see while the scene's narration starts.
