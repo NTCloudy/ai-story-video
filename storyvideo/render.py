@@ -55,7 +55,7 @@ def _fit(src: str = "0:v") -> str:
     return f"[{src}]scale={W*2}:{H*2}:force_original_aspect_ratio=increase,crop={W*2}:{H*2}:(iw-ow)/2:(ih-oh)*0.35,setsar=1"
 
 
-MIN_SHOT = 1.5   # seconds; never flash a picture shorter than this
+MIN_SHOT = 2.0   # seconds; never flash a picture shorter than this
 
 
 def _norm(w: str) -> str:

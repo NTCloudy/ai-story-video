@@ -18,9 +18,9 @@ class ShotCutTest(unittest.TestCase):
         self.assertAlmostEqual(cuts[1], render.LEAD + 3.3)   # the word start closest to 3.5 s
 
     def test_cut_follows_the_scripted_switch_word(self):
-        words = [(0.0, 0.3, "Then"), (0.4, 0.8, "the"), (1.6, 2.0, "lightning,"), (3.3, 3.6, "hits"), (4.6, 5.0, "you")]
+        words = [(0.0, 0.3, "Then"), (0.4, 0.8, "the"), (2.2, 2.6, "lightning,"), (3.3, 3.6, "hits"), (4.6, 5.0, "you")]
         cuts = render.shot_cuts(2, 7.0, words, "Lightning")
-        self.assertAlmostEqual(cuts[1], render.LEAD + 1.6)
+        self.assertAlmostEqual(cuts[1], render.LEAD + 2.2)
 
     def test_switch_word_too_early_falls_back_to_middle(self):
         words = [(0.0, 0.3, "Boom"), (3.3, 3.6, "then"), (4.6, 5.0, "silence")]

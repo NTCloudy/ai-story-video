@@ -268,11 +268,12 @@ Requirements:
    satisfying twist. Make it LOOP: the final sentence should lead naturally back into the opening hook, so a
    viewer who keeps watching hears the hook again and it still makes sense. No call to action, no "follow for more".
 4. hook_text: 3-6 word on-screen title shown during the first seconds (e.g. "NO MOON FOR 1 DAY?").
-5. Pictures follow the narration, not a timer. image_prompt = what the viewer should see while the scene's
-   narration starts. ONLY if the narration clearly moves on to a different thing to see in the middle of the scene
-   (a new object, place, scale or consequence), add image_prompt_2 for that part and set switch_word to the exact
-   word of the narration where the new picture should appear; otherwise leave image_prompt_2 and switch_word empty.
-   Usually only 1-3 scenes need a second picture. Every picture must look clearly different from the one before it
+5. Pictures follow the narration, not a timer: a picture should stay on screen while the narration talks about
+   it, typically 3-6 seconds. image_prompt = what the viewer should see while the scene's narration starts. A scene
+   of 15+ words usually moves on to a new thing to see (a new object, place, scale or consequence): then add
+   image_prompt_2 for that part and set switch_word to the exact word of the narration where the new picture should
+   appear. Short scenes (under 12 words) keep one picture; leave image_prompt_2 and switch_word empty when
+   nothing new appears. Every picture must look clearly different from the one before it
    (different subject, place, scale or moment) - never two near-identical images. Each is a striking, cinematic
    VERTICAL 9:16 image matching its part of the narration - subject, setting, action, camera angle, lighting.
    Vary the camera (extreme wide, aerial, first-person POV, close-up, macro, cutaway diagram-like view) and never
