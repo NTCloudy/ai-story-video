@@ -1,621 +1,1295 @@
 {
- "fetched": "2026-10-19T00:35:17.673464+08:00",
+ "fetched": "2026-10-20T15:05:27.715597+08:00",
+ "queries": [
+  "facts",
+  "did you know",
+  "fun facts",
+  "interesting facts",
+  "mind blowing facts",
+  "weird facts",
+  "animal facts",
+  "science facts",
+  "history facts",
+  "psychology facts",
+  "food facts",
+  "geography facts",
+  "nature facts",
+  "space facts",
+  "human body facts",
+  "how it works"
+ ],
  "items": [
+  {
+   "id": "N3nYajfV_Os",
+   "title": "How DEEP is the OCEAN😮 - Explained in Hindi (SHOCKING)",
+   "channel": "Tushar Gaur",
+   "query": "facts",
+   "views": 34139302
+  },
   {
    "id": "cUSgXSr2nGA",
    "title": "5 Places Science Still Can&#39;t Explain",
    "channel": "TheCurioQueue",
    "query": "science facts",
-   "views": 33090338
+   "views": 33591614
   },
   {
-   "id": "N3nYajfV_Os",
-   "title": "How DEEP is the OCEAN😮 - Explained in Hindi (SHOCKING)",
-   "channel": "Tushar Gaur",
-   "query": "ocean facts",
-   "views": 33015737
+   "id": "3xeQgS44jE4",
+   "title": "THINGS To DO When YOU’RE Bored 3 PINTEREST Ideas TO DIY Squishy",
+   "channel": "juliyav",
+   "query": "did you know",
+   "views": 33428687
   },
   {
-   "id": "6jxDGwZyUEA",
-   "title": "RANKING THE CRAZIEST SEA CREATURE MOMENTS",
-   "channel": "Milo",
-   "query": "ocean facts",
-   "views": 20598573
+   "id": "JmNKiK4Qny8",
+   "title": "दुनिया के 8 सबसे खूबसूरत पक्षी #shorts",
+   "channel": "SF Factorg",
+   "query": "nature facts",
+   "views": 26253554
   },
   {
-   "id": "X0mARfFW_bg",
-   "title": "Animal Fact Time! 🐸 #learn #kids #shorts",
-   "channel": "DarDar - SuperHero",
-   "query": "animal facts",
-   "views": 14403898
+   "id": "Dckwdt0q6Go",
+   "title": "How To Survive a Plane Crash 😱",
+   "channel": "FactoHolic",
+   "query": "facts",
+   "views": 22651072
+  },
+  {
+   "id": "xi6TO_nsdqs",
+   "title": "Travel Facts Social Media Hid ✈️",
+   "channel": "NeoShortx",
+   "query": "facts",
+   "views": 21824939
+  },
+  {
+   "id": "HScE7phbhNU",
+   "title": "दुनिया के 8 सबसे खूबसूरत पक्षी",
+   "channel": "Factonic Doze ",
+   "query": "nature facts",
+   "views": 20996111
+  },
+  {
+   "id": "7SfsNF5HVaI",
+   "title": "Do you know what kind of tree that is #shorts",
+   "channel": "Luziwei",
+   "query": "did you know",
+   "views": 18469095
+  },
+  {
+   "id": "HvW_N5p1q44",
+   "title": "You Can See Everything | Official Trailer HD | A24",
+   "channel": "A24",
+   "query": "did you know",
+   "views": 18007064
+  },
+  {
+   "id": "1l7wbZmdtys",
+   "title": "Bruno Mars - Dance With Me [Official Music Video]",
+   "channel": "Bruno Mars",
+   "query": "did you know",
+   "views": 17711357
+  },
+  {
+   "id": "8qEZzVOT26g",
+   "title": "How Companies Fool Us 😱",
+   "channel": "FactoHolic",
+   "query": "facts",
+   "views": 16418319
   },
   {
    "id": "NgHWSz1U6_4",
    "title": "Animal Fact Time! 🥚 #learn #kids #shorts",
    "channel": "DarDar - SuperHero",
    "query": "animal facts",
-   "views": 12909670
+   "views": 14343334
   },
   {
-   "id": "SxrNObd63bU",
-   "title": "How Orcas Train To Hunt Blue Whales 😮",
+   "id": "-7MDLZCb1Mw",
+   "title": "How Sloth Fur Hides A Tiny Ecosystem 😮",
    "channel": "Zack D. Films",
-   "query": "ocean facts",
-   "views": 10843446
+   "query": "nature facts",
+   "views": 14306729
+  },
+  {
+   "id": "T3yuix4KqAk",
+   "title": "The Smart AI Shopping 😱",
+   "channel": "FactoHolic",
+   "query": "facts",
+   "views": 13107477
+  },
+  {
+   "id": "nHlV3n-Vskw",
+   "title": "village people of Rajasthan 🥰🥰#facts #shorts #knowledge #hindi",
+   "channel": "DessiDostt",
+   "query": "facts",
+   "views": 12697462
+  },
+  {
+   "id": "Y5vdfyM3X8k",
+   "title": "How Rare You Are 😱",
+   "channel": "FactoHolic",
+   "query": "fun facts",
+   "views": 12687517
+  },
+  {
+   "id": "R-mhYBK1DwY",
+   "title": "🩸10 Iron Rich Foods for Healthy Hemoglobin | #foodfacts #healthfacts #healthyfood #healthtips #viral",
+   "channel": "IQ Dose07",
+   "query": "food facts",
+   "views": 12399600
+  },
+  {
+   "id": "OKwllZmwIcI",
+   "title": "The Motherland Calls",
+   "channel": "Thomas Mulligan",
+   "query": "history facts",
+   "views": 11391632
+  },
+  {
+   "id": "k4xQfC8EN60",
+   "title": "10 Healthy Natural Fruits Facts You Should Know | For Daily Diet | 🥝🫐 Healthy Foods#ytshorts",
+   "channel": "HealthWallah",
+   "query": "food facts",
+   "views": 11369426
+  },
+  {
+   "id": "nAcTvufkvXQ",
+   "title": "Этот крошечный архитектор строит шедевр без инструментов и чертежей! #facts",
+   "channel": "TRXTO",
+   "query": "facts",
+   "views": 11354174
+  },
+  {
+   "id": "z2oxI81GkhA",
+   "title": "Did you know this trick?",
+   "channel": "Grass Car Guy",
+   "query": "did you know",
+   "views": 11046345
   },
   {
    "id": "XvnKngos0SE",
    "title": "अगर 6.6 करोड़ साल पहले एक लाल खजूर उग जाता तो क्या होता? 😱 | Dinosaur World #ytshorts #shorts",
-   "channel": "Grd King",
-   "query": "science facts",
-   "views": 10557368
-  },
-  {
-   "id": "o5sRJ7LYCfM",
-   "title": "एक चम्मच से अपना सरदर्द कम करे 😱 #facts #knowledge #education #information #science #health",
-   "channel": "Vedant Sir",
-   "query": "science facts",
-   "views": 10455582
+   "channel": "Wild Scope X",
+   "query": "nature facts",
+   "views": 10844627
   },
   {
    "id": "sq0za32T9Sk",
    "title": "Lost Treasures That Are Still Missing 😱",
    "channel": "FactoHolic",
-   "query": "history mysteries",
-   "views": 10217215
+   "query": "history facts",
+   "views": 10719799
+  },
+  {
+   "id": "o5sRJ7LYCfM",
+   "title": "एक चम्मच से अपना सरदर्द कम करे 😱 #facts #knowledge #education #information #science #health",
+   "channel": "Vedant Sir",
+   "query": "facts",
+   "views": 10704694
+  },
+  {
+   "id": "gMMIJXAMVhI",
+   "title": "When Salmon Turn Into a Zombies...",
+   "channel": "Hoodie Guy",
+   "query": "did you know",
+   "views": 10189708
   },
   {
    "id": "kkou2QV7t5U",
    "title": "5 Skinniest &amp; Weirdest Dog Breeds In The World 🐶#animalfacts #wildlife #factshindi",
    "channel": "Infinite Fact",
    "query": "animal facts",
-   "views": 10097507
+   "views": 10176060
   },
   {
-   "id": "_ZXkmO8aw0s",
-   "title": "Rarest Phenomena In The World",
-   "channel": "Facts' Mine",
-   "query": "science facts",
-   "views": 8185211
+   "id": "zRRDfDxuL9o",
+   "title": "क्या आप जानते हैं कि एशिया के 9 सबसे ज्यादा",
+   "channel": "Info Truth Hub",
+   "query": "did you know",
+   "views": 9836425
   },
   {
-   "id": "opkjb2IE2Hc",
-   "title": "नारियल तेल लगाने वालों देख लो 😱 #facts #education #information #science #health #hair",
-   "channel": "Vedant Sir",
-   "query": "science facts",
-   "views": 7751081
+   "id": "p7qbvVpmugw",
+   "title": "What&#39;s Really Inside Your Coconut Water?",
+   "channel": "Satvic Movement",
+   "query": "did you know",
+   "views": 9510003
   },
   {
    "id": "ZzGBzBwAYpU",
    "title": "जानवरों को ऐसे आपने कभी नहीं देखा होगा | How Animals Look From Different Angles? | #facts #shorts",
    "channel": "FACT EDUCATION",
    "query": "animal facts",
-   "views": 7518963
+   "views": 9429704
   },
   {
-   "id": "zuZcxmBD610",
-   "title": "¿Qué pasaría si caes al fondo del océano? 💀",
-   "channel": "Mateo Ferruz",
-   "query": "ocean facts",
-   "views": 7494139
+   "id": "Yg0E5kGxOTY",
+   "title": "Places You Must See Before Leaving Earth",
+   "channel": "Facts' Mine",
+   "query": "nature facts",
+   "views": 9195479
+  },
+  {
+   "id": "_ZXkmO8aw0s",
+   "title": "Rarest Phenomena In The World",
+   "channel": "Facts' Mine",
+   "query": "science facts",
+   "views": 8410598
+  },
+  {
+   "id": "KQM9hYlMXsI",
+   "title": "ALLDAY PROJECT - ‘DO IT LIKE THIS’ M/V",
+   "channel": "THEBLACKLABEL",
+   "query": "did you know",
+   "views": 7919147
+  },
+  {
+   "id": "FPGpYBFNrXc",
+   "title": "रोटी खाने वालों देख लो 😱 #facts #education #information #knowledge #health #food",
+   "channel": "Vedant Sir",
+   "query": "food facts",
+   "views": 7684981
+  },
+  {
+   "id": "GQwZAY-U82A",
+   "title": "Dating Life of a White-spotted Pufferfish...",
+   "channel": "Hoodie Guy",
+   "query": "did you know",
+   "views": 7647906
   },
   {
    "id": "r_0YDjjWYGc",
    "title": "Bachpan Me Kiya Apne ? I Science Experiment",
    "channel": "Science and fun",
    "query": "science facts",
-   "views": 7370891
+   "views": 7573157
   },
   {
-   "id": "aQvq4ajH_oM",
-   "title": "Why Your Fingers Can Never Actually Touch 🫥#science #facts",
-   "channel": "MORGAR | Human History",
-   "query": "science facts",
-   "views": 7115919
+   "id": "r0SQmnsfm5w",
+   "title": "5 Animals With Mind Blowing Natural Mustaches😱",
+   "channel": "Beast tier",
+   "query": "nature facts",
+   "views": 7525663
   },
   {
-   "id": "asSVHGxv__s",
-   "title": "Queen Elizabeth The First Was GROSS...",
-   "channel": "History Dude",
-   "query": "scary facts",
-   "views": 7043167
+   "id": "2uljY1J-Ppk",
+   "title": "Pls do comment if you know🥺🙏🏻 #share #help #dog #vet #fyp #doctor #husky #pets #eyes #yt #shorts",
+   "channel": "Nishika Bhardwaj",
+   "query": "did you know",
+   "views": 7514456
   },
   {
    "id": "ni4zPT4_b3M",
    "title": "ट्रेन के डिब्बों का यह हिलता हुआ हुक आपकी जान कैसे बचाता है? 😱 #train #sciencefacts #science",
    "channel": "Fxx Soon",
    "query": "science facts",
-   "views": 6857474
+   "views": 7402821
+  },
+  {
+   "id": "asSVHGxv__s",
+   "title": "Queen Elizabeth The First Was GROSS...",
+   "channel": "History Dude",
+   "query": "weird facts",
+   "views": 7326858
+  },
+  {
+   "id": "aQvq4ajH_oM",
+   "title": "Why Your Fingers Can Never Actually Touch 🫥#science #facts",
+   "channel": "MORGAR | Human History",
+   "query": "history facts",
+   "views": 7240028
+  },
+  {
+   "id": "TRyOgu9VjAs",
+   "title": "JAPAN IS AMAZING",
+   "channel": "Facts' Mine",
+   "query": "interesting facts",
+   "views": 7150544
+  },
+  {
+   "id": "bSKpJBhCR54",
+   "title": "Amazon जंगल के‌ तीन सबसे ख़तरनाक जानवर ‌! #shorts #viral #trending #facts",
+   "channel": "The Real Facts",
+   "query": "nature facts",
+   "views": 6938217
+  },
+  {
+   "id": "PKgwRwBf3Pg",
+   "title": "Real Voices Behind Things You hear  Every Day 🤯🎙️#shorts #voiceactor #didyouknow #viral #tech",
+   "channel": "DudexArc",
+   "query": "did you know",
+   "views": 6884859
+  },
+  {
+   "id": "weEEH8rdGzY",
+   "title": "Fakta Pohon yang bisa menghasilkan boom 🌲💣 #shorts",
+   "channel": "Rudyologi ",
+   "query": "nature facts",
+   "views": 6852388
+  },
+  {
+   "id": "66zZ-GkeUh0",
+   "title": "10 Unbelievable Animal Moments Caught on Camera video  #shortvideo  #animals",
+   "channel": "Animal Universe",
+   "query": "nature facts",
+   "views": 6466448
+  },
+  {
+   "id": "4GY8Y0iOSQM",
+   "title": "O Gato Imortal! #historias #segundaguerramundial #curiosidades",
+   "channel": "Sabia Que",
+   "query": "fun facts",
+   "views": 6327551
+  },
+  {
+   "id": "wqrk5Hbx1i0",
+   "title": "Travel Places That Don’t Look Real#Facts",
+   "channel": "RudraUnseen",
+   "query": "nature facts",
+   "views": 6169696
   },
   {
    "id": "tFOVYjq3y98",
    "title": "Klein Bottle: The Bottle Even an Ocean Can’t Fill",
    "channel": "Akaich ",
    "query": "science facts",
-   "views": 5751182
-  },
-  {
-   "id": "AijjQTC9YQA",
-   "title": "5 Most POWERFUL Ocean Predators on Earth! 🌎 #OceanPredators #MarineLife#AnimalFacts #shorts",
-   "channel": "JayDoc",
-   "query": "ocean facts",
-   "views": 5712462
+   "views": 5966010
   },
   {
    "id": "KvOOhdCWRyc",
    "title": "This Animal Might Be Living On The Moon",
    "channel": "Facts' Mine",
-   "query": "science facts",
-   "views": 5583217
+   "query": "space facts",
+   "views": 5730047
+  },
+  {
+   "id": "AijjQTC9YQA",
+   "title": "5 Most POWERFUL Ocean Predators on Earth! 🌎 #OceanPredators #MarineLife#AnimalFacts #shorts",
+   "channel": "JayDoc",
+   "query": "animal facts",
+   "views": 5728133
   },
   {
    "id": "eno8lkM91Os",
    "title": "This Toucan Got a Brand-New Beak! 🐦❤️#shorts #facts",
    "channel": "Xara Shorts",
    "query": "animal facts",
-   "views": 5491639
+   "views": 5512001
+  },
+  {
+   "id": "529sFajw4IQ",
+   "title": "10 Powerful Foods Packed With Protein, Fiber &amp; Nutrients! 💪🌿 #shorts",
+   "channel": "Health Key",
+   "query": "food facts",
+   "views": 5497937
   },
   {
    "id": "9dRAqtExj-0",
    "title": "Which Of These Animals Kill The Most Humans?! #shorts #animals #facts #dog #pets",
    "channel": "Makeshift Project",
    "query": "animal facts",
-   "views": 5318985
+   "views": 5384808
   },
   {
-   "id": "latj6afDd0A",
-   "title": "1 october से पहले ये काम कर लेना 😱 #facts #knowledge #education #information #science #technology",
+   "id": "OvLKeKrrx8M",
+   "title": "एक फल से दो शाही मसाले कैसे बनते हैं? जायफल और जावित्री का अनोखा मोज़िज़ा! 🌰✨ | Nature Special",
+   "channel": "Nature Special ",
+   "query": "nature facts",
+   "views": 5291998
+  },
+  {
+   "id": "HCoxarqBp1A",
+   "title": "Why only Gandhi ji on every Indian Note ? 🤔💵 | Kuldeep Singhaniaa #shorts #gandhi",
+   "channel": "Kuldeep Singhania Shorts",
+   "query": "history facts",
+   "views": 4894287
+  },
+  {
+   "id": "Np_Bh7nszLQ",
+   "title": "खुल गया उस दिन का राज़😱 #facts #knowledge #education #information #science #technology",
    "channel": "Vedant Sir",
    "query": "science facts",
-   "views": 4696864
+   "views": 4674451
   },
   {
-   "id": "wbqXxrF0wz8",
-   "title": "Bermuda Triangle Mystery 😮 ( Another Plane Missing ) | Kuldeep Singhaniaa #shorts",
-   "channel": "Kuldeep Singhania Shorts",
-   "query": "history mysteries",
-   "views": 4012435
+   "id": "KwXTQWonI1k",
+   "title": "Top 10 Famous Foods of Bihar You Must Try! 🇮🇳🍛",
+   "channel": "Crazy Facts Hindi",
+   "query": "food facts",
+   "views": 4506151
+  },
+  {
+   "id": "6iaKz3mNNEA",
+   "title": "Movie tips and tricks 🤯 #shorts #facts",
+   "channel": "VSfact",
+   "query": "fun facts",
+   "views": 4420725
+  },
+  {
+   "id": "x8ofx1Kma7Q",
+   "title": "Countries That Have Their Flags On Moon 🌕🤯| #shorts #edit #country #trending #geography #map",
+   "channel": "1ZX Fact",
+   "query": "geography facts",
+   "views": 4184975
+  },
+  {
+   "id": "hA3EXf7UxaI",
+   "title": "What If Mahatma Gandhi Returned for 12 Hours? 😱",
+   "channel": "Gyano Trick",
+   "query": "geography facts",
+   "views": 4092299
+  },
+  {
+   "id": "TOHWO-gs6GI",
+   "title": "#geography #map #facts",
+   "channel": "Geo Facts HL",
+   "query": "geography facts",
+   "views": 4061141
   },
   {
    "id": "oX_pSlprESg",
    "title": "అంజీర్‌లో దాగి ఉన్న షాకింగ్ నిజం 😱 | fig wasp mystery.",
    "channel": "Limbadritalks",
-   "query": "science facts",
-   "views": 4007541
+   "query": "nature facts",
+   "views": 4055289
+  },
+  {
+   "id": "-4NCPK1y60k",
+   "title": "8 Amazing Food Facts You Should Know 🍳☕🍉 | Interesting Food Facts #shorts",
+   "channel": "HelthxImran",
+   "query": "food facts",
+   "views": 3984798
   },
   {
    "id": "EuabSskQMDk",
    "title": "5 TWO HEADED Animals That Look UNREAL! #TwoHeadedAnimals #AnimalFacts #WeirdAnimals #shorts",
    "channel": "JayDoc",
    "query": "animal facts",
-   "views": 3955924
+   "views": 3968106
   },
   {
-   "id": "Pjyg7GNlOLI",
-   "title": "Nature&#39;s Most Protected Animals Babies",
-   "channel": "Rubesh's Aquarium",
-   "query": "animal facts",
-   "views": 3927006
+   "id": "VhHDkji0z-U",
+   "title": "10 Weird Things You Didn&#39;t Know About Kai Cenat",
+   "channel": "FGtheexplainer",
+   "query": "weird facts",
+   "views": 3942572
   },
   {
-   "id": "HJ2waTrPwDU",
-   "title": "😱 why?|5 Terrifying Self-Defense Tricks of Nature #shorts #tamil #news #facts #animals #fish #nature",
-   "channel": "Xfacto",
-   "query": "animal facts",
-   "views": 3708610
+   "id": "InpXld2aTwo",
+   "title": "Do Hippos Sweat Blood? #goodtoknow #vet #medicine #educational #funfacts #survival #lifehacks #hacks",
+   "channel": "Vetventures",
+   "query": "fun facts",
+   "views": 3892284
+  },
+  {
+   "id": "qXHskJ0dCAM",
+   "title": "திமிங்கலத்தின் மேல் இருக்கும் சிப்பிகளை ஏன் எடுக்கக்கூடாது? #shorts #fastfactstamil",
+   "channel": "Fast Facts தமிழ் ",
+   "query": "interesting facts",
+   "views": 3617701
+  },
+  {
+   "id": "Ewm6-7tw2uc",
+   "title": "Top Surprising Facts About Food 🥑🥝 #shorts #shortsfeed #amazingfacts #explore",
+   "channel": "Dilshan Raza",
+   "query": "food facts",
+   "views": 3556399
   },
   {
    "id": "Zzs458AUj1M",
    "title": "What would happen if Earth fell into a black hole? #space #outerspace #blackhole #spacefacts",
    "channel": "prodbeatsbymat",
    "query": "space facts",
-   "views": 3425431
+   "views": 3515062
   },
   {
-   "id": "dA2dAjEpKPM",
-   "title": "How deep does the ocean REALLY go? 🌊😨 #shorts",
-   "channel": "NB Show Telugu",
-   "query": "ocean facts",
-   "views": 2911675
+   "id": "M_5BtQaQLMQ",
+   "title": "What If A Bird Loved A Fish? 😔",
+   "channel": "Zack D. Films",
+   "query": "animal facts",
+   "views": 3462856
   },
   {
-   "id": "AfknJaZbDXk",
-   "title": "Why We Can Travel to the Future But Not the Past #timetravel #astrophysics #briancox",
-   "channel": "THE IDEA BEHIND",
-   "query": "what if science",
-   "views": 2855665
+   "id": "bMMaRO1WqlY",
+   "title": "10 Weird Things You Didn&#39;t Know About Elon Musk",
+   "channel": "FGtheexplainer",
+   "query": "weird facts",
+   "views": 3429336
   },
   {
-   "id": "9LKZ5f6vf3U",
-   "title": "4th October - The Calender Mystery 😮 | Kuldeep Singhaniaa #shorts",
-   "channel": "Kuldeep Singhania Shorts",
-   "query": "history mysteries",
-   "views": 2790207
+   "id": "J_sNJjrN4J4",
+   "title": "What Is El Niño &amp; Why Is It So Powerful 🌡️🤯 Super El Niño 🌊",
+   "channel": "GeoGlobeTales",
+   "query": "geography facts",
+   "views": 3337054
   },
   {
-   "id": "oeAFtdxaHYE",
-   "title": "What if the Himalayas were in central India? Part 2",
-   "channel": "Paper Files",
-   "query": "what if science",
-   "views": 2679283
+   "id": "oBUjs68hTps",
+   "title": "Scientists Turned a Mosquito Into a 3D Printer 🦟🤯",
+   "channel": "Atharv Explains Why",
+   "query": "science facts",
+   "views": 3308955
   },
   {
-   "id": "QppYnze4GJ4",
-   "title": "Seberapa Dalam Sebenarnya Lautan Itu?",
-   "channel": "Doctor Lium",
-   "query": "ocean facts",
-   "views": 2621797
+   "id": "WfsvStIpNHU",
+   "title": "Why Sumo Wrestlers Have This Unique Hairstyle #Sumo #Japan #Facts",
+   "channel": "FactVerZe",
+   "query": "interesting facts",
+   "views": 3303487
   },
   {
-   "id": "qOUEv_3IxiM",
-   "title": "#miniature",
-   "channel": "Amol Funbox",
-   "query": "ocean facts",
-   "views": 2571504
+   "id": "_I3L1tYM280",
+   "title": "Healthy vs Unhealthy Foods; Foods That Support Healthy Knees &amp; Bones 🦴#shorts #kneepain #bones",
+   "channel": "NutriOrgans",
+   "query": "human body facts",
+   "views": 3284354
   },
   {
-   "id": "Po94ezRYNnY",
-   "title": "People That Science Still Cannot Explain 😱 #history #mystery #curious #science #disturbing",
-   "channel": "HistoryFactsUsa",
-   "query": "history mysteries",
-   "views": 2466207
+   "id": "EZq9nZDl4YI",
+   "title": "Jacqueline Steiger Loved Her Dangerous Matilda Stunt #history #facts",
+   "channel": "VEIL OF TIME || HUMAN HISTORY",
+   "query": "history facts",
+   "views": 3212127
   },
   {
-   "id": "K2HtwyMUsVM",
-   "title": "Creepy Google Earth Discovery",
-   "channel": "Thomas Mulligan",
-   "query": "scary facts",
-   "views": 2400239
+   "id": "3Fsur3LEihU",
+   "title": "50 Shades Of Guinea🔥🤯😱 #countries #geography #shorts",
+   "channel": "World Ji Ke",
+   "query": "geography facts",
+   "views": 3119889
   },
   {
-   "id": "9KLW4rp-ou8",
-   "title": "What if a black hole passed by Earth? You&#39;d never see it coming. #whatif #space #simulation",
-   "channel": "Lunarzone Animates",
-   "query": "what if science",
-   "views": 2312541
+   "id": "9051ya8ntqo",
+   "title": "😱 क्या सच में इतना खतरनाक है Giant Bamboo? | Amazing Facts #shorts #amazing",
+   "channel": "FactGyanix",
+   "query": "mind blowing facts",
+   "views": 3114921
   },
   {
-   "id": "Jetshixjf7w",
-   "title": "5 Ocean Animals That Just KEEP GROWING! 🌊 #OceanAnimals #MarineLife #OceanGiants #shorts",
-   "channel": "JayDoc",
-   "query": "ocean facts",
-   "views": 2242903
+   "id": "aO_ovGRzVCw",
+   "title": "This vegetable toy is oddly satisfying 🥕🍆 Watch how it works! 🤯 #shorts #toys #funny #viral",
+   "channel": "Ayu K SUPPORT ",
+   "query": "how it works",
+   "views": 3112654
+  },
+  {
+   "id": "mYvSkaSz5W4",
+   "title": "उड़ नहीं सकता ये तोता! 😱 Kakapo की रहस्यमयी कहानी | Rare Bird #shorts #kakapo",
+   "channel": "Knowledge Point IQ",
+   "query": "interesting facts",
+   "views": 3056613
+  },
+  {
+   "id": "PffJhp-yA78",
+   "title": "هل هالشي فعلا يخالف قوانين الفيزياء؟💡  #science  #education",
+   "channel": "HawdAlafkar",
+   "query": "science facts",
+   "views": 2960369
+  },
+  {
+   "id": "jjGP0bsuPGk",
+   "title": "सीकेट साइंस ऑफ़ हंस ! #swan    #animalfacts  #amazingfacts   #sciencefacts  #hindifacts",
+   "channel": "Ankit Speaks",
+   "query": "science facts",
+   "views": 2950734
+  },
+  {
+   "id": "zc0GA7u4_sQ",
+   "title": "He was buried in a Pringles can💀😭 #pringles #viral #interestingfacts",
+   "channel": "Yatzify",
+   "query": "interesting facts",
+   "views": 2923110
+  },
+  {
+   "id": "c9TaBL0A6MM",
+   "title": "भाई जानवरों के Funny कारनामे। #funny #facts",
+   "channel": "Fpxens",
+   "query": "weird facts",
+   "views": 2890839
+  },
+  {
+   "id": "aK4Qb7hU7YE",
+   "title": "Propellers Hit A Wall  One College Thesis Broke It Forever 🔥  Frank Whittle Jet Engine",
+   "channel": "History with Ekam",
+   "query": "history facts",
+   "views": 2887488
+  },
+  {
+   "id": "B_6PVQR-OKk",
+   "title": "Famous Singers From Every Indian State! 🇮🇳🎵 Part-1 #shorts",
+   "channel": "Bharat Animatrix ",
+   "query": "geography facts",
+   "views": 2724542
+  },
+  {
+   "id": "s8MzUmVv-8w",
+   "title": "The Crazy Evolution of cycles 😱",
+   "channel": "Untold Theory ",
+   "query": "science facts",
+   "views": 2582560
+  },
+  {
+   "id": "z_ffSeiv2l0",
+   "title": "5 حيوانات شكلها كيوت… بس ممكن تقتلك! 😳",
+   "channel": "Momen Maged _ مؤمن ماجد",
+   "query": "animal facts",
+   "views": 2459684
+  },
+  {
+   "id": "mIDnO8wov6k",
+   "title": "10 Indian Foods: Benefits, Nutrients &amp; Facts! 🍽️💪 #shorts",
+   "channel": "Health Key",
+   "query": "food facts",
+   "views": 2420440
+  },
+  {
+   "id": "WQDiOrJ_On4",
+   "title": "🐌 చీమ కంటే స్లోగా నడిచే ఈ నత్త.. ఒక రాష్ట్రాన్నే వణికించిందా? 😱 | Giant African Snail Telugu Facts",
+   "channel": "Limbadritalks",
+   "query": "animal facts",
+   "views": 2416410
+  },
+  {
+   "id": "MhRC403SVWo",
+   "title": "Why Does This Korean Factory Use 4,000 Chickens Every Day? #facts #korea #chicken #soup",
+   "channel": "Ngoc Tuyen",
+   "query": "food facts",
+   "views": 2367864
   },
   {
    "id": "cYVd1Nq2W2E",
    "title": "Blackhole doesn&#39;t follow the laws of physics 💀 #space #blackhole #spacefacts",
    "channel": "Dark Void",
    "query": "space facts",
-   "views": 2220562
+   "views": 2280560
   },
   {
-   "id": "rZquZa16bRo",
-   "title": "What if you cut your paper 103 times?",
-   "channel": "ClearTier",
-   "query": "what if science",
-   "views": 2135887
+   "id": "2xEt2E8Tl6E",
+   "title": "Sự thật thú vị về lữ hành",
+   "channel": "Xem Để Biết",
+   "query": "fun facts",
+   "views": 2227705
   },
   {
-   "id": "mtpIj48ToBg",
-   "title": "Real Story Of Space Pen!",
-   "channel": "Akaich ",
-   "query": "space facts",
-   "views": 2110183
+   "id": "avouxV4y5Xo",
+   "title": "🤔 Did You Know These Fun Facts? 👀✨# #funny  #shorts #tips",
+   "channel": "CleoCuddles",
+   "query": "weird facts",
+   "views": 2218004
   },
   {
-   "id": "xSptWEAEiD8",
-   "title": "Body Parts That May Disappear In The Future 😲",
-   "channel": "All Fact SR",
-   "query": "human body facts",
-   "views": 2044350
-  },
-  {
-   "id": "TFsx6IBIaBA",
-   "title": "Can Bamboo Grow Through a Human Body? 😨",
-   "channel": "The Fact",
-   "query": "human body facts",
-   "views": 2008264
+   "id": "BneG3bVSJ54",
+   "title": "The Weirdest Bird Nests You’ve Ever Seen!🙄#facts #shorts #birds #new #tending #shortvideo",
+   "channel": "Unique Fact Official",
+   "query": "weird facts",
+   "views": 2212320
   },
   {
    "id": "aKBHw3JxYlA",
    "title": "The Pickup Truck That Moved a Space Shuttle",
    "channel": "Never The Facts",
    "query": "space facts",
-   "views": 2007054
+   "views": 2093823
   },
   {
-   "id": "Xyj7gIH7WNg",
-   "title": "Why Do Fishermen THROW VENOMOUS SEA SNAKES Back Into the Water? #facts #trending #ytshorts",
-   "channel": "Facts Nesar 2.0",
-   "query": "ocean facts",
-   "views": 1780722
+   "id": "CbOsnWF5JDw",
+   "title": "The Only TRIPLE Landlocked State in the World! #geography #maps #usa",
+   "channel": "Globe Addict David",
+   "query": "geography facts",
+   "views": 2087715
   },
   {
-   "id": "35KZm1yiyIE",
-   "title": "What if all your DNA suddenly vanished?",
-   "channel": "xkcd's What If?",
-   "query": "what if science",
-   "views": 1726604
+   "id": "xSptWEAEiD8",
+   "title": "Body Parts That May Disappear In The Future 😲",
+   "channel": "All Fact SR",
+   "query": "human body facts",
+   "views": 2070251
+  },
+  {
+   "id": "ea2fjGQPCH0",
+   "title": "Kis ne ke hogi chore #bestfriend #funny #ishasisodiya #facts",
+   "channel": "Brain Starting ",
+   "query": "fun facts",
+   "views": 1996302
+  },
+  {
+   "id": "vIIlkRbDzv4",
+   "title": "India vs Pakistan Explained | 3D Map Animation #shorts #geography #indiavspakistan #youtubeshorts",
+   "channel": "Shivang Verse",
+   "query": "geography facts",
+   "views": 1993991
+  },
+  {
+   "id": "v4HcEUZQ1Es",
+   "title": "The Journey of &quot;Sugar&quot; #shorts #facts #history",
+   "channel": "Remember This",
+   "query": "food facts",
+   "views": 1956519
+  },
+  {
+   "id": "kTJ55wdbjas",
+   "title": "luckystory #funny #comedy #facts #ekmotahathighumechala #story #cartoon",
+   "channel": "LUCKY STORY",
+   "query": "fun facts",
+   "views": 1948407
+  },
+  {
+   "id": "I8mjO_KGB58",
+   "title": "Who are the Persians? #history #travel #podcast #facts #politics",
+   "channel": "Shabnam Nasimi",
+   "query": "history facts",
+   "views": 1933920
+  },
+  {
+   "id": "syLx7uBm16A",
+   "title": "В 3000 раз страшнее атомной бомбы #история #точносказано #красивосказано #наука #хочуфакты",
+   "channel": "Илья Пригожин",
+   "query": "history facts",
+   "views": 1883908
+  },
+  {
+   "id": "ze-Z-cGiGe4",
+   "title": "One Fact about EVERY Archives Entity! #roblox #doors #shorts",
+   "channel": "NO_DATA",
+   "query": "interesting facts",
+   "views": 1878143
+  },
+  {
+   "id": "VB9RJADsUg4",
+   "title": "Indian ₹500 vs Pakistan vs USA vs Japan vs Nepal | 3D Map Animation #shorts #geography",
+   "channel": "Shivang Verse",
+   "query": "geography facts",
+   "views": 1819426
+  },
+  {
+   "id": "NqqXB2tmIyI",
+   "title": "INI RASANYA JADI HEWAN PALING INTROVERT DI LAUTAN! | #funfacts #animals #hewanbesar #facts #hewan",
+   "channel": "FAUNATIVE.",
+   "query": "fun facts",
+   "views": 1786136
+  },
+  {
+   "id": "Ko_AmkGMUNY",
+   "title": "Mindblowing save 🤯🪂 #shorts #malayalam",
+   "channel": "Untold fact digest",
+   "query": "mind blowing facts",
+   "views": 1781461
+  },
+  {
+   "id": "PygYQQSzMjM",
+   "title": "😲 10 Amazing Food &amp; Health Facts! 🍌🥝 #HealthTips #DailyHealthTips",
+   "channel": "amazingfactx",
+   "query": "food facts",
+   "views": 1774945
+  },
+  {
+   "id": "Br1Z-fZQCxQ",
+   "title": "don’t think that’s how it works 🤣",
+   "channel": "NFL",
+   "query": "how it works",
+   "views": 1733869
+  },
+  {
+   "id": "ENDY4jzmgBM",
+   "title": "8 Normal People Entered Asylums… Then THIS Happened 😳 #exposed",
+   "channel": "Mubasshir Official ",
+   "query": "psychology facts",
+   "views": 1732320
+  },
+  {
+   "id": "6mVi7kepZBo",
+   "title": "3 Most Unfortunate Letters name 🫀🫂||#shorts #shortvideo #shortsfeed#shorts",
+   "channel": "Z I H A M",
+   "query": "psychology facts",
+   "views": 1713798
   },
   {
    "id": "3UPvNbcr-co",
    "title": "How Fast Can We Reach Oberon? 🪐🚀 | Light, Space Shuttle, UFO &amp; More!",
    "channel": "Let's Learn Universe",
    "query": "space facts",
-   "views": 1673192
+   "views": 1704441
+  },
+  {
+   "id": "I6_IneEvDR8",
+   "title": "What would happen if the US invaded Canada? #history #historyfacts #trump #usa #canada",
+   "channel": "Trevor's History Reels",
+   "query": "history facts",
+   "views": 1695534
   },
   {
    "id": "ExyL9yLsWD8",
    "title": "Scary space facts 2",
    "channel": "aylow",
-   "query": "scary facts",
-   "views": 1640647
+   "query": "space facts",
+   "views": 1684678
   },
   {
-   "id": "bETrUdI3e2o",
-   "title": "Dalgıçların korkusu 5 canlı",
-   "channel": "Garip Hayvanlar",
-   "query": "ocean facts",
-   "views": 1554838
+   "id": "QiTdwT9mjpg",
+   "title": "How Drilling Finds Water Underground",
+   "channel": "How Things Work",
+   "query": "how it works",
+   "views": 1681849
+  },
+  {
+   "id": "Mcwva9nyv0Y",
+   "title": "Weird Building in Tamil Nadu Google Maps? 😱 #shorts #facts #education",
+   "channel": "Simply Kavi",
+   "query": "weird facts",
+   "views": 1672813
+  },
+  {
+   "id": "ggl5ahOR0gw",
+   "title": "Duck Meat: Healthy or Too Fatty?",
+   "channel": "Dr Santhosh Jacob",
+   "query": "food facts",
+   "views": 1625091
+  },
+  {
+   "id": "_WYk1vUGIow",
+   "title": "ONE MISTAKE... AND SHE DIES.",
+   "channel": "Second Chances",
+   "query": "history facts",
+   "views": 1590862
+  },
+  {
+   "id": "5l_7OGAsVU0",
+   "title": "What Are The #1 Countries In These Categories? #shorts #country #geography #facts",
+   "channel": "Makeshift Project",
+   "query": "geography facts",
+   "views": 1583515
+  },
+  {
+   "id": "aPR55er6peY",
+   "title": "रूस और कनाडा दुनिया के सबसे बड़े देश हैं? 😱 असली सच जानिए!#shorts",
+   "channel": "XploreMap Nitish",
+   "query": "geography facts",
+   "views": 1543429
   },
   {
    "id": "5eKdKXyhsd0",
    "title": "4D Will Bend Your Mind #4DSpacetime #Dimensions #BlockUniverse #Physics #GeneralRelativity",
    "channel": "Siddharth Choudhary",
    "query": "space facts",
-   "views": 1496852
+   "views": 1522357
+  },
+  {
+   "id": "4LIkYcbiMxw",
+   "title": "What other practical dorm essentials do you know? #funny #cute #facts",
+   "channel": "Joey in clover",
+   "query": "fun facts",
+   "views": 1503890
   },
   {
    "id": "pyk1v-_CmiM",
    "title": "The Dark Truth Behind This 500-Year-Old Mummy!!",
    "channel": "Prabhjot Speaks",
    "query": "human body facts",
-   "views": 1440440
-  },
-  {
-   "id": "Xt_Eltk8Q3k",
-   "title": "மகாபாரத போரின் இரவில் கிருஷ்ணர் எங்கே சென்றார் தெரியுமா #மகாபாரதம் #கிருஷ்ணர் #story #tamil #history",
-   "channel": "Endless Mysteries",
-   "query": "history mysteries",
-   "views": 1390804
-  },
-  {
-   "id": "BlqgEZSIP-4",
-   "title": "The Animals that Accidentally met a Terrifying Fate😱 #facts #animals #wildlife",
-   "channel": "FurrFact",
-   "query": "scary facts",
-   "views": 1390685
+   "views": 1488410
   },
   {
    "id": "NhJUjaWgcBc",
    "title": "অক্টোবর ২০২৬-এ আকাশে কী কী দেখা যাবে? 🌌😱 এই videoটা Save না করলে মিস করবে!#shorts #viral",
    "channel": "CosmoPhantasy",
    "query": "space facts",
-   "views": 1348413
+   "views": 1364639
   },
   {
-   "id": "pO_5m73e6Gg",
-   "title": "What if your speed doubled every 2 seconds? Light speed in 53 seconds. #whatif #space #simulation",
-   "channel": "Lunarzone Animates",
-   "query": "what if science",
-   "views": 1341199
+   "id": "v1vz3yesxDE",
+   "title": "10 Weirdest Things About Jude Bellingham !",
+   "channel": "Zoomby Show",
+   "query": "weird facts",
+   "views": 1359589
   },
   {
-   "id": "vsWeCCUfa2E",
-   "title": "Buat adonan kue bentuk bayi #facts #alurceritafilm #scary #funny #sad #sedih #ibu",
-   "channel": "Mind17",
-   "query": "scary facts",
-   "views": 1323839
-  },
-  {
-   "id": "DfXPjVBuYng",
-   "title": "पहाड़ को काटकर बना यह खतरनाक किला! हरिहर किला The Mystery of Its Vertical Rock-Cut Staircase.",
-   "channel": "Study with Facts ",
-   "query": "history mysteries",
-   "views": 1255599
+   "id": "U_HFkarkw78",
+   "title": "5 Craziest Things Countries Actually Did 🤯",
+   "channel": "Faizal Khan",
+   "query": "geography facts",
+   "views": 1295181
   },
   {
    "id": "L2lCD17o8tU",
    "title": "The Universe Is Bigger Than You Think!🌍🤯#Space #Universe #SpaceFacts #Astronomy#Earth",
    "channel": "FACT VERSE",
    "query": "space facts",
-   "views": 1230524
+   "views": 1256484
   },
   {
-   "id": "ll7QsEo4vyI",
-   "title": "What If Humans Could Breathe Underwater?",
-   "channel": "thus spoke cef",
-   "query": "what if science",
-   "views": 1224129
+   "id": "e0kN_ZRM8Dc",
+   "title": "Crazy Facts About Ronaldo 😳🇵🇹 #ronaldo #football #soccer",
+   "channel": "Edvingk1",
+   "query": "weird facts",
+   "views": 1240078
   },
   {
-   "id": "aEWrqC20rSQ",
-   "title": "Being A Blue Whale Is Terrifying!",
-   "channel": "CurioCatStories",
-   "query": "scary facts",
-   "views": 1182742
+   "id": "kncCKpmxA6Q",
+   "title": "Psychology Facts About Love ❤️🧠🤯|#shorts#psychology#motivation#quotes#deepquotes#ytshorts",
+   "channel": "@motivation_points",
+   "query": "psychology facts",
+   "views": 1179963
   },
   {
-   "id": "us-mBPj2OEE",
-   "title": "Real Scale of Our Solar System! ☠️ #space",
-   "channel": "Hist Myst",
-   "query": "space facts",
-   "views": 1180474
+   "id": "O-CgpghVJ9o",
+   "title": "6 Mind-Blowing Science Experiments You Can Do at Home! 🧪✨ #ScienceExperiments #STEM #ScienceTricks",
+   "channel": "Vaish The Academy ",
+   "query": "mind blowing facts",
+   "views": 1177662
   },
   {
-   "id": "J3FGqISDiRM",
-   "title": "What if your SPEED doubled every 2 seconds? #physics #science #scifi #simulation #whatif #animation",
-   "channel": "Alternate Outcomes Animations",
-   "query": "what if science",
-   "views": 1175369
+   "id": "8NTkdctqkYw",
+   "title": "Psychology Facts 🧠🤯|#shorts#psychology#motivation#quotes#deepquotes#ytshorts",
+   "channel": "@motivation_points",
+   "query": "psychology facts",
+   "views": 1171056
+  },
+  {
+   "id": "iMXm-JlR2y4",
+   "title": "That&#39;s not how it works #viral #jjk #jujutsukaisen #fyp #shorts",
+   "channel": "Toji II とじ",
+   "query": "how it works",
+   "views": 1117572
   },
   {
    "id": "tbQYZQv_Llk",
    "title": "The Human Body Is Insane 😨",
    "channel": "Facts Dastan",
    "query": "human body facts",
-   "views": 1078640
-  },
-  {
-   "id": "NI1SWtuKq8c",
-   "title": "What If The Sun Disappeared For 5 Seconds",
-   "channel": "Molli Kroni",
-   "query": "what if science",
-   "views": 1027807
-  },
-  {
-   "id": "f3RVfQza5ZY",
-   "title": "What If Your Brain Was Perfectly Smooth 🧠",
-   "channel": "The Outliners ",
-   "query": "what if science",
-   "views": 1017024
-  },
-  {
-   "id": "7F8mldMiyg8",
-   "title": "scary facts about you #shorts",
-   "channel": "ImBlack  Power",
-   "query": "scary facts",
-   "views": 1005697
-  },
-  {
-   "id": "gEuFI3EdAoo",
-   "title": "You’re Wearing Plastic Right Now !",
-   "channel": "Imtinan Ahmad",
-   "query": "human body facts",
-   "views": 970089
+   "views": 1081436
   },
   {
    "id": "AwT3KgczeDA",
    "title": "शरीर के अंदर क्या चल रहा है? 😱🧠 | Brain Babu की मजेदार कहानी | SaurEdu #facts #shortvideo",
    "channel": "Saur Edu",
    "query": "human body facts",
-   "views": 914140
+   "views": 1050449
   },
   {
-   "id": "T2B16SSxOwI",
-   "title": "Amazon’s Mysterious Uncontacted Tribe| Hidden World of the Amazon Jungle | Amazon’s Mysterious Tribe",
-   "channel": "Sanskriti Rojgar",
-   "query": "history mysteries",
-   "views": 878551
+   "id": "pTIGlhrEtog",
+   "title": "willdo agentic workflows - How willdo works?",
+   "channel": "willdo",
+   "query": "how it works",
+   "views": 994715
   },
   {
-   "id": "ux3_YgqHQes",
-   "title": "Creepy Facts About Dreams 😳🤦🏻‍♀️",
-   "channel": "Olga Cozma",
-   "query": "scary facts",
-   "views": 837551
+   "id": "yZhR43THjj0",
+   "title": "How a Rag Rug Spring Tool Works | Manual Tufting Technique for Making Textured Rugs",
+   "channel": "Buildtech",
+   "query": "how it works",
+   "views": 984917
   },
   {
-   "id": "uG3sN3X7LVg",
-   "title": "she literally used science to find out if he liked her🧬💘 #foryou #fyp #edit #movie",
-   "channel": "Te01_movie",
-   "query": "what if science",
-   "views": 825332
-  },
-  {
-   "id": "zqOKcaHwkq8",
-   "title": "The REAL Reason Why England Has Bricked Up Windows #fyp  #shorts  #facts",
-   "channel": "Emwelds",
-   "query": "scary facts",
-   "views": 760056
-  },
-  {
-   "id": "gikGpJZmslc",
-   "title": "Eng noyob material 🌌 #facts #space #shorts",
-   "channel": "BegiBro",
-   "query": "space facts",
-   "views": 704437
-  },
-  {
-   "id": "vBSloeYIoaw",
-   "title": "Why Babies Have A Soft Spot On Their Head!",
-   "channel": "TechWizards",
+   "id": "gEuFI3EdAoo",
+   "title": "You’re Wearing Plastic Right Now !",
+   "channel": "Imtinan Ahmad",
    "query": "human body facts",
-   "views": 682591
+   "views": 981361
   },
   {
-   "id": "TaWwe0U53VU",
-   "title": "वैज्ञानिक भी हैरान हैं! 🤯 Brihadisvara Temple का वो सच जो छुपाया गया | Thanjavur Temple Mystery",
-   "channel": "The History TRAILS ",
-   "query": "history mysteries",
-   "views": 651030
+   "id": "VMeMSrpD864",
+   "title": "Fungsi? Manfaat? Alamat? #pen #pencil #sationery #experiment",
+   "channel": "Hana Anayre",
+   "query": "how it works",
+   "views": 951560
+  },
+  {
+   "id": "V-0qyv1O0Pc",
+   "title": "Psychology Facts 🧠|#shorts#psychology#motivation#quotes#deepquotes#ytshorts",
+   "channel": "@motivation_points",
+   "query": "psychology facts",
+   "views": 906309
+  },
+  {
+   "id": "Cypp34t3mCY",
+   "title": "This Cat Book Shocked Everyone! 😳#facts",
+   "channel": "RudraUnseen",
+   "query": "mind blowing facts",
+   "views": 896698
+  },
+  {
+   "id": "IEPC1r7e2QQ",
+   "title": "Can a Box Actually Change a Baby’s Head Shape? 😳📦",
+   "channel": "LUCYBYTE",
+   "query": "human body facts",
+   "views": 864264
+  },
+  {
+   "id": "QtW6J2ueEGw",
+   "title": "Poor vs Good Bathroom Ventilation 🚨 | How It Works",
+   "channel": "SOME TIP",
+   "query": "how it works",
+   "views": 860888
   },
   {
    "id": "rpl30G4U6C0",
    "title": "Body parts లా ఉండే fruits 🔥 #facts#viral#trending#factshorts# #youtubeshorts#bodyparts",
    "channel": "Mystery Facts Telugu ",
    "query": "human body facts",
-   "views": 639040
+   "views": 817447
   },
   {
-   "id": "R3Cb4jjrIHI",
-   "title": "🌶️ बहुत तीखा खाना खाने से शरीर के अंदर क्या होता है? 😱 | 3D Medical Animation #shorts",
-   "channel": "Nitesh Body Lab ⭐",
+   "id": "2p3LCm4gpkY",
+   "title": "Part-1 Is letter wale log sabse alag hote hai 🤫 Name physchology #students #shorts",
+   "channel": "Venox",
+   "query": "psychology facts",
+   "views": 810816
+  },
+  {
+   "id": "BVgsUHoT1AE",
+   "title": "Psychology Facts🧠👀🤯|#shorts#psychology#motivation#quotes#deepquotes#ytshorts",
+   "channel": "@motivation_points",
+   "query": "psychology facts",
+   "views": 788474
+  },
+  {
+   "id": "a2j1FNZolcM",
+   "title": "5 Nutrients Your Spine Needs to Stay Strong #shorts #spinehealth #nutrition",
+   "channel": "NutriOrgans",
    "query": "human body facts",
-   "views": 629752
+   "views": 784055
   },
   {
-   "id": "KFrYngHDgwM",
-   "title": "Pluto  #animation #facts #xyzbca #cartoon",
-   "channel": "Fact Attack Adventures",
-   "query": "scary facts",
-   "views": 603175
+   "id": "nHqf7d50UDg",
+   "title": "How Satellite Goes in Space? #satellite #space #rocket #technology #chandrayaan3 #science #facts",
+   "channel": "Machanatomy",
+   "query": "space facts",
+   "views": 769226
   },
   {
-   "id": "fLCnklwB27Y",
-   "title": "Why Early Humans Was So Terrifying",
-   "channel": "Factopus",
-   "query": "scary facts",
-   "views": 593113
-  },
-  {
-   "id": "QEhMEFGo4gg",
-   "title": "🤯 3 Human Body Parts You’ve NEVER Seen Like This! 🔬 #Shorts",
-   "channel": "Official Facts",
+   "id": "vBSloeYIoaw",
+   "title": "Why Babies Have A Soft Spot On Their Head!",
+   "channel": "TechWizards",
    "query": "human body facts",
-   "views": 545963
+   "views": 769018
   },
   {
-   "id": "igM1Gp2Lo6w",
-   "title": "What Happens When You Swallow? #shorts #Swallowing #HumanBody #science #trending #fyp",
-   "channel": "Brain And Mind",
-   "query": "human body facts",
-   "views": 476237
+   "id": "lHtDA964qSo",
+   "title": "Kitchen Hacks 🍵 😱 | Mind Blowing Hacks in Bangla | Random Facts #facts #shorts",
+   "channel": "FoodfactBD",
+   "query": "mind blowing facts",
+   "views": 757187
+  }
+ ],
+ "themes": [
+  {
+   "theme": "Mysteries & Unexplained",
+   "count": 2,
+   "median_views": 21001106,
+   "examples": [
+    "5 Places Science Still Can&#39;t Explain (33,591,614 views)",
+    "Rarest Phenomena In The World (8,410,598 views)"
+   ]
   },
   {
-   "id": "eCu9N9InFro",
-   "title": "The Real Science of a Cobra Bite: From Venom to Paralysis 🤯 #snake #blackcobra #shorts #viral #reels",
-   "channel": "Med Jigyasa",
-   "query": "human body facts",
-   "views": 442034
+   "theme": "Ocean Life",
+   "count": 5,
+   "median_views": 7647906,
+   "examples": [
+    "How DEEP is the OCEAN😮 - Explained in Hindi (SHOCKING) (34,139,302 views)",
+    "When Salmon Turn Into a Zombies... (10,189,708 views)",
+    "Dating Life of a White-spotted Pufferfish... (7,647,906 views)",
+    "5 Most POWERFUL Ocean Predators on Earth! 🌎 #OceanPredators #MarineLife#AnimalFacts #short (5,728,133 views)",
+    "INI RASANYA JADI HEWAN PALING INTROVERT DI LAUTAN! | #funfacts #animals #hewanbesar #facts (1,786,136 views)"
+   ]
   },
   {
-   "id": "tbL2L26XE6I",
-   "title": "आगरा किला का पूरा सच 😱 | Agra Fort Ka Woh Raaz Jo Sabse Chhupa Hai #agrafort #agraforthistory #agra",
-   "channel": "Vlogger on duty",
-   "query": "history mysteries",
-   "views": 393385
+   "theme": "Pets",
+   "count": 3,
+   "median_views": 7514456,
+   "examples": [
+    "5 Skinniest &amp; Weirdest Dog Breeds In The World 🐶#animalfacts #wildlife #factshindi (10,176,060 views)",
+    "Pls do comment if you know🥺🙏🏻 #share #help #dog #vet #fyp #doctor #husky #pets #eyes #yt # (7,514,456 views)",
+    "This Cat Book Shocked Everyone! 😳#facts (896,698 views)"
+   ]
   },
   {
-   "id": "ota7A2oVPJg",
-   "title": "ఓడ మొత్తం ఉంది... కానీ 10 మంది మనుషులు ఎక్కడ? 😱 | Mary Celeste Mystery",
-   "channel": "Vinura Vaani",
-   "query": "history mysteries",
-   "views": 352052
+   "theme": "Plants & Nature",
+   "count": 3,
+   "median_views": 6852388,
+   "examples": [
+    "Do you know what kind of tree that is #shorts (18,469,095 views)",
+    "Fakta Pohon yang bisa menghasilkan boom 🌲💣 #shorts (6,852,388 views)",
+    "Body parts లా ఉండే fruits 🔥 #facts#viral#trending#factshorts# #youtubeshorts#bodyparts (817,447 views)"
+   ]
   },
   {
-   "id": "b2grDkKw_cA",
-   "title": "😱 Swarajya Ki Sabse Dangerous Lady Spy! 🕵️‍♀️ | Shivaji Maharaj History 🚩",
-   "channel": "The Thinking Past",
-   "query": "history mysteries",
-   "views": 340384
+   "theme": "Earth & Geology",
+   "count": 3,
+   "median_views": 6169696,
+   "examples": [
+    "Places You Must See Before Leaving Earth (9,195,479 views)",
+    "Travel Places That Don’t Look Real#Facts (6,169,696 views)",
+    "How Drilling Finds Water Underground (1,681,849 views)"
+   ]
   },
   {
-   "id": "lh1XurcNZnU",
-   "title": "Megalodon Was NOT What You Think… 🤯",
-   "channel": "Atharv Explains Why",
-   "query": "history mysteries",
-   "views": 250406
+   "theme": "Physics & What-Ifs",
+   "count": 5,
+   "median_views": 5966010,
+   "examples": [
+    "Bachpan Me Kiya Apne ? I Science Experiment (7,573,157 views)",
+    "Why Your Fingers Can Never Actually Touch 🫥#science #facts (7,240,028 views)",
+    "Klein Bottle: The Bottle Even an Ocean Can’t Fill (5,966,010 views)",
+    "4D Will Bend Your Mind #4DSpacetime #Dimensions #BlockUniverse #Physics #GeneralRelativity (1,522,357 views)",
+    "6 Mind-Blowing Science Experiments You Can Do at Home! 🧪✨ #ScienceExperiments #STEM #Scien (1,177,662 views)"
+   ]
+  },
+  {
+   "theme": "Animals",
+   "count": 10,
+   "median_views": 5448404,
+   "examples": [
+    "How Sloth Fur Hides A Tiny Ecosystem 😮 (14,306,729 views)",
+    "5 Animals With Mind Blowing Natural Mustaches😱 (7,525,663 views)",
+    "10 Unbelievable Animal Moments Caught on Camera video  #shortvideo  #animals (6,466,448 views)",
+    "This Animal Might Be Living On The Moon (5,730,047 views)",
+    "This Toucan Got a Brand-New Beak! 🐦❤️#shorts #facts (5,512,001 views)",
+    "Which Of These Animals Kill The Most Humans?! #shorts #animals #facts #dog #pets (5,384,808 views)"
+   ]
+  },
+  {
+   "theme": "Money & Economics",
+   "count": 3,
+   "median_views": 4894287,
+   "examples": [
+    "How Companies Fool Us 😱 (16,418,319 views)",
+    "Why only Gandhi ji on every Indian Note ? 🤔💵 | Kuldeep Singhaniaa #shorts #gandhi (4,894,287 views)",
+    "Indian ₹500 vs Pakistan vs USA vs Japan vs Nepal | 3D Map Animation #shorts #geography (1,819,426 views)"
+   ]
+  },
+  {
+   "theme": "Food Facts",
+   "count": 5,
+   "median_views": 3984798,
+   "examples": [
+    "What&#39;s Really Inside Your Coconut Water? (9,510,003 views)",
+    "Top 10 Famous Foods of Bihar You Must Try! 🇮🇳🍛 (4,506,151 views)",
+    "8 Amazing Food Facts You Should Know 🍳☕🍉 | Interesting Food Facts #shorts (3,984,798 views)",
+    "Top Surprising Facts About Food 🥑🥝 #shorts #shortsfeed #amazingfacts #explore (3,556,399 views)",
+    "Why Does This Korean Factory Use 4,000 Chickens Every Day? #facts #korea #chicken #soup (2,367,864 views)"
+   ]
+  },
+  {
+   "theme": "History",
+   "count": 8,
+   "median_views": 3507704,
+   "examples": [
+    "Lost Treasures That Are Still Missing 😱 (10,719,799 views)",
+    "Queen Elizabeth The First Was GROSS... (7,326,858 views)",
+    "O Gato Imortal! #historias #segundaguerramundial #curiosidades (6,327,551 views)",
+    "What If Mahatma Gandhi Returned for 12 Hours? 😱 (4,092,299 views)",
+    "He was buried in a Pringles can💀😭 #pringles #viral #interestingfacts (2,923,110 views)",
+    "The Journey of &quot;Sugar&quot; #shorts #facts #history (1,956,519 views)"
+   ]
+  },
+  {
+   "theme": "Geography & Countries",
+   "count": 10,
+   "median_views": 2922215,
+   "examples": [
+    "Travel Facts Social Media Hid ✈️ (21,824,939 views)",
+    "village people of Rajasthan 🥰🥰#facts #shorts #knowledge #hindi (12,697,462 views)",
+    "JAPAN IS AMAZING (7,150,544 views)",
+    "#geography #map #facts (4,061,141 views)",
+    "50 Shades Of Guinea🔥🤯😱 #countries #geography #shorts (3,119,889 views)",
+    "Famous Singers From Every Indian State! 🇮🇳🎵 Part-1 #shorts (2,724,542 views)"
+   ]
+  },
+  {
+   "theme": "Health & Food Science",
+   "count": 8,
+   "median_views": 2852397,
+   "examples": [
+    "🩸10 Iron Rich Foods for Healthy Hemoglobin | #foodfacts #healthfacts #healthyfood #healtht (12,399,600 views)",
+    "10 Healthy Natural Fruits Facts You Should Know | For Daily Diet | 🥝🫐 Healthy Foods#ytshor (11,369,426 views)",
+    "10 Powerful Foods Packed With Protein, Fiber &amp; Nutrients! 💪🌿 #shorts (5,497,937 views)",
+    "Healthy vs Unhealthy Foods; Foods That Support Healthy Knees &amp; Bones 🦴#shorts #kneepai (3,284,354 views)",
+    "10 Indian Foods: Benefits, Nutrients &amp; Facts! 🍽️💪 #shorts (2,420,440 views)",
+    "😲 10 Amazing Food &amp; Health Facts! 🍌🥝 #HealthTips #DailyHealthTips (1,774,945 views)"
+   ]
+  },
+  {
+   "theme": "Technology & Inventions",
+   "count": 7,
+   "median_views": 2582560,
+   "examples": [
+    "The Smart AI Shopping 😱 (13,107,477 views)",
+    "10 Weird Things You Didn&#39;t Know About Elon Musk (3,429,336 views)",
+    "Scientists Turned a Mosquito Into a 3D Printer 🦟🤯 (3,308,955 views)",
+    "The Crazy Evolution of cycles 😱 (2,582,560 views)",
+    "willdo agentic workflows - How willdo works? (994,715 views)",
+    "How a Rag Rug Spring Tool Works | Manual Tufting Technique for Making Textured Rugs (984,917 views)"
+   ]
+  },
+  {
+   "theme": "Engineering & Megastructures",
+   "count": 5,
+   "median_views": 2093823,
+   "examples": [
+    "The Motherland Calls (11,391,632 views)",
+    "Propellers Hit A Wall  One College Thesis Broke It Forever 🔥  Frank Whittle Jet Engine (2,887,488 views)",
+    "The Pickup Truck That Moved a Space Shuttle (2,093,823 views)",
+    "Weird Building in Tamil Nadu Google Maps? 😱 #shorts #facts #education (1,672,813 views)",
+    "Poor vs Good Bathroom Ventilation 🚨 | How It Works (860,888 views)"
+   ]
+  },
+  {
+   "theme": "Space",
+   "count": 6,
+   "median_views": 1992500,
+   "examples": [
+    "Countries That Have Their Flags On Moon 🌕🤯| #shorts #edit #country #trending #geography #m (4,184,975 views)",
+    "What would happen if Earth fell into a black hole? #space #outerspace #blackhole #spacefac (3,515,062 views)",
+    "Blackhole doesn&#39;t follow the laws of physics 💀 #space #blackhole #spacefacts (2,280,560 views)",
+    "How Fast Can We Reach Oberon? 🪐🚀 | Light, Space Shuttle, UFO &amp; More! (1,704,441 views)",
+    "Scary space facts 2 (1,684,678 views)",
+    "The Universe Is Bigger Than You Think!🌍🤯#Space #Universe #SpaceFacts #Astronomy#Earth (1,256,484 views)"
+   ]
+  },
+  {
+   "theme": "Survival & Danger",
+   "count": 3,
+   "median_views": 1781461,
+   "examples": [
+    "How To Survive a Plane Crash 😱 (22,651,072 views)",
+    "Mindblowing save 🤯🪂 #shorts #malayalam (1,781,461 views)",
+    "ONE MISTAKE... AND SHE DIES. (1,590,862 views)"
+   ]
+  },
+  {
+   "theme": "Sports & Records",
+   "count": 3,
+   "median_views": 1359589,
+   "examples": [
+    "Why Sumo Wrestlers Have This Unique Hairstyle #Sumo #Japan #Facts (3,303,487 views)",
+    "10 Weirdest Things About Jude Bellingham ! (1,359,589 views)",
+    "Crazy Facts About Ronaldo 😳🇵🇹 #ronaldo #football #soccer (1,240,078 views)"
+   ]
+  },
+  {
+   "theme": "Human Body",
+   "count": 5,
+   "median_views": 1081436,
+   "examples": [
+    "How Rare You Are 😱 (12,687,517 views)",
+    "Body Parts That May Disappear In The Future 😲 (2,070,251 views)",
+    "The Human Body Is Insane 😨 (1,081,436 views)",
+    "Can a Box Actually Change a Baby’s Head Shape? 😳📦 (864,264 views)",
+    "Why Babies Have A Soft Spot On Their Head! (769,018 views)"
+   ]
+  },
+  {
+   "theme": "Psychology & Brain",
+   "count": 6,
+   "median_views": 1038682,
+   "examples": [
+    "8 Normal People Entered Asylums… Then THIS Happened 😳 #exposed (1,732,320 views)",
+    "Psychology Facts About Love ❤️🧠🤯|#shorts#psychology#motivation#quotes#deepquotes#ytshorts (1,179,963 views)",
+    "Psychology Facts 🧠🤯|#shorts#psychology#motivation#quotes#deepquotes#ytshorts (1,171,056 views)",
+    "Psychology Facts 🧠|#shorts#psychology#motivation#quotes#deepquotes#ytshorts (906,309 views)",
+    "Part-1 Is letter wale log sabse alag hote hai 🤫 Name physchology #students #shorts (810,816 views)",
+    "Psychology Facts🧠👀🤯|#shorts#psychology#motivation#quotes#deepquotes#ytshorts (788,474 views)"
+   ]
   }
  ]
 }
