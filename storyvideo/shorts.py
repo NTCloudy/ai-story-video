@@ -159,21 +159,109 @@ def trends_summary(trends: list[dict], n: int = 30) -> str:
 
 
 def pick_topic(history: list[dict], series: list[str] | None = None, attempts: int = 6,
-               trends: list[dict] | None = None) -> dict:
+               trends: list[dict] | None = None, themes: list[dict] | None = None, cooldown: int = 7) -> dict:
     """Pick a topic guaranteed (lexical + semantic checks) not to overlap any previous Short.
-    70% of days exploit proven high-view patterns (own stats + YouTube-wide trends), 30% explore."""
+    With `themes` (trend mode): today's theme is the most popular trending theme not used in the last
+    `cooldown` days, and the topic is proposed inside it. Otherwise: 70% exploit our best series, 30% explore."""
     import random
-    mode = "exploit" if random.random() < 0.7 else "explore"
-    print(f"[Topic] mode: {mode}")
+    theme = pick_theme(themes, history, cooldown) if themes else None
+    mode = "trend" if theme else ("exploit" if random.random() < 0.7 else "explore")
+    print(f"[Topic] mode: {mode}" + (f" | theme: {theme['theme']} (median {theme['median_views']:,} views)"
+                                     if theme else ""))
     rejected: list[str] = []
     for _ in range(attempts):
-        t = _propose_topic(history, series, rejected, trends or [], mode)
+        t = (_propose_in_theme(history, theme, rejected) if theme
+             else _propose_topic(history, series, rejected, trends or [], mode))
         dup = find_duplicate(t["topic"], t.get("concept", ""), history)
         if not dup:
             return t
         print(f"[Topic] 重複，換一個：{t['topic']} ≈ {dup}")
         rejected.append(t["topic"])
     raise RuntimeError("連續多次都選到重複主題，請在網頁排入新主題")
+
+
+# ---------------- trending themes (what is hot on YouTube Shorts right now) ----------------
+THEMES = ["Animals", "Ocean Life", "Insects & Bugs", "Pets", "Dinosaurs & Prehistoric Life", "Plants & Nature",
+          "Space", "Earth & Geology", "Weather & Natural Disasters", "Human Body", "Psychology & Brain",
+          "Health & Food Science", "Food Facts", "History", "Ancient Civilizations", "Mysteries & Unexplained",
+          "Technology & Inventions", "Engineering & Megastructures", "Physics & What-Ifs", "Chemistry & Materials",
+          "Geography & Countries", "Money & Economics", "Sports & Records", "Language & Words",
+          "Optical Illusions & Perception", "Survival & Danger"]
+LABEL_SCHEMA = {"type": "ARRAY", "items": {"type": "OBJECT",
+                                           "properties": {"i": {"type": "INTEGER"}, "theme": {"type": "STRING"}},
+                                           "required": ["i", "theme"]}}
+_KIDS = ("#kids", "for kids", "kids learn", "nursery", "toddler", "preschool", "cocomelon")
+
+
+def _english(t: str) -> bool:
+    return sum(c.isascii() for c in t) / max(len(t), 1) > 0.9
+
+
+def label_themes(trends: list[dict], min_count: int = 2) -> list[dict]:
+    """Group trending Shorts into stable themes (Gemini labels every title with one of THEMES).
+    Returns themes sorted by popularity: [{theme, count, median_views, examples}]. Kids content is ignored."""
+    import statistics
+    items = [t for t in trends if _english(t["title"]) and not any(k in t["title"].lower() for k in _KIDS)][:160]
+    if not items:
+        return []
+    listing = "\n".join(f"{i}. {t['title'][:110]}" for i, t in enumerate(items))
+    prompt = (f"Classify each YouTube Short title into exactly one theme from this list:\n{', '.join(THEMES)}\n"
+              "Use \"Other\" only if nothing fits. Return [{i, theme}] for every title.\n\n" + listing)
+    text, _ = gemini.call(prompt, LABEL_SCHEMA, temperature=0.0, max_models=4)
+    groups: dict[str, list[dict]] = {}
+    for row in json.loads(text):
+        i, theme = row.get("i"), row.get("theme", "")
+        if isinstance(i, int) and 0 <= i < len(items) and theme in THEMES:
+            groups.setdefault(theme, []).append(items[i])
+    out = []
+    for theme, vids in groups.items():
+        if len(vids) < min_count:
+            continue
+        vids.sort(key=lambda v: -v["views"])
+        out.append({"theme": theme, "count": len(vids), "median_views": int(statistics.median(v["views"] for v in vids)),
+                    "examples": [f"{v['title'][:90]} ({v['views']:,} views)" for v in vids[:6]]})
+    return sorted(out, key=lambda t: -t["median_views"])
+
+
+def pick_theme(themes: list[dict] | None, history: list[dict], cooldown: int = 7, top: int = 6) -> dict | None:
+    """Today's theme: weighted pick among the most popular trending themes not used in the last `cooldown`
+    Shorts (so the theme changes every day and many themes get tested)."""
+    import math
+    import random
+    recent = {h.get("series", "") for h in history[-cooldown:]} if cooldown > 0 else set()
+    pool = [t for t in (themes or []) if t["theme"] not in recent][:top]
+    if not pool:
+        return None
+    weights = [math.sqrt(max(t["median_views"], 1)) * (1 + math.log10(t["count"])) for t in pool]
+    return random.choices(pool, weights=weights, k=1)[0]
+
+
+def _propose_in_theme(history: list[dict], theme: dict, rejected: list[str]) -> dict:
+    recent = "\n".join(f"- {h.get('topic', '')} [{h.get('concept', '')}]" for h in history[-300:]) or "(none yet)"
+    if rejected:
+        recent += "\nAlso rejected just now (too similar to past videos):\n" + "\n".join(f"- {r}" for r in rejected)
+    prompt = f"""You run a fast-growing English YouTube Shorts channel of surprising facts for a global audience
+(teens and adults, NOT kids content). Today's theme is "{theme['theme']}" - one of the hottest themes on YouTube
+Shorts right now. The most-viewed recent Shorts in this theme:
+{chr(10).join('- ' + e for e in theme['examples'])}
+
+Pick ONE new video topic inside this theme, inspired by what makes those videos popular but with a fresh,
+original angle (never copy a title).
+
+Rules:
+- Must be factual / scientifically or historically accurate (hypotheticals must follow real science).
+- Must have a strong curiosity hook that makes people stop scrolling in 1 second; a little-known fact beats a famous one.
+- Must NOT repeat or closely resemble any of these previous topics:
+{recent}
+
+{VIRAL_PATTERNS}
+
+Return series = "{theme['theme']}" exactly, the topic phrased as the video question, the core concept
+(1-4 lowercase words naming the exact subject, e.g. "octopus hearts", "hypnic jerk"), and why it will go viral."""
+    text, _ = gemini.call(prompt, TOPIC_SCHEMA, temperature=1.0)
+    t = json.loads(text)
+    t["series"] = theme["theme"]
+    return t
 
 
 def _propose_topic(history: list[dict], series: list[str] | None, rejected: list[str],
@@ -194,7 +282,7 @@ Rules:
 - Must have a strong curiosity hook that makes people stop scrolling in 1 second.
 - Must NOT repeat or closely resemble any of these previous topics:
 {recent}
-- Recent series, newest last: {last_series}. Do not use the same series 3 days in a row.
+- Recent series, newest last: {last_series}. Do not use the same series as the most recent Short.
 
 Our channel's performance so far:
 {performance_summary(history)}

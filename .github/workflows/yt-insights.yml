@@ -1,33 +1,56 @@
 name: YouTube Insights
 
+# Manual: our own Shorts' stats + refresh the "what is hot on YouTube Shorts" themes used by the topic picker.
 on:
   workflow_dispatch:
+
+concurrency:
+  group: daily-short
+  cancel-in-progress: false
+
+permissions:
+  contents: write
 
 jobs:
   insights:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install requests PyYAML
-      - name: 頻道數據與熱門 Shorts
+          cache: pip
+      - run: pip install -r requirements.txt
+
+      - name: 頻道數據與熱門題材
         env:
           YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
         run: |
           python - <<'PY'
           import json
-          from storyvideo import youtube
+          from storyvideo import daily, shorts, youtube
           h = json.load(open("channel/history.json"))
           st = youtube.video_stats([x["video_id"] for x in h if x.get("video_id")])
           for x in h:
               s = st.get(x.get("video_id"), {})
               print("OWN", x["date"], s.get("views"), s.get("likes"), x["series"], "|", x["title"])
-          t = youtube.trending_shorts(["what if science", "human body facts", "psychology facts", "space facts", "history facts", "animal facts"])
-          for v in t[:40]:
-              print("TREND", v["views"], "|", v["query"], "|", v["title"][:90], "|", v["channel"])
+          cfg = daily._load(daily.CH / "channel.yaml", {})
+          items, themes = daily.load_trends(cfg)
+          print(f"{len(items)} trending Shorts")
+          for t in themes:
+              print(f"THEME {t['median_views']:>12,} x{t['count']:<3} {t['theme']:<32} | {t['examples'][0]}")
+          pick = shorts.pick_theme(themes, h, int(cfg.get("theme_cooldown_days", 7)))
+          print("NEXT THEME (example pick):", pick and pick["theme"])
           PY
+
+      - name: 存下熱門題材
+        run: |
+          git config user.name "shorts-bot"
+          git config user.email "shorts-bot@users.noreply.github.com"
+          git add channel/trends.json
+          git commit -m "📈 Trending Shorts themes" || exit 0
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done

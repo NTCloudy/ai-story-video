@@ -8,6 +8,8 @@ privacy: private           # 上傳時的狀態（未通過 Google 審核前 API
 auto_publish: true         # 上傳後自動改成公開；失敗的話下次排程會再補公開
 made_for_kids: false
 category: "27"             # 27 = Education
+topic_mode: trends         # trends = 每天從 YouTube Shorts 目前最熱門的題材類別中挑一個（同類別 7 天內不重複）；series = 只用下面的系列
+theme_cooldown_days: 7     # 同一個題材類別隔幾支才能再用
 voice: en_male             # en_male（Andrew）/ en_male2（Christopher）/ en_female（Ava）
 voice_rate: "+8%"
 series:

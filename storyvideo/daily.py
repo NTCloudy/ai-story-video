@@ -36,25 +36,37 @@ def _save(path: Path, data) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
-TREND_QUERIES = ["what if science", "human body facts", "space facts", "history mysteries", "animal facts",
-                 "scary facts", "ocean facts", "science facts"]
+# Broad, theme-agnostic searches: we want whatever kind of fact Short is hot right now, not just our old niches.
+TREND_QUERIES = ["facts", "did you know", "fun facts", "interesting facts", "mind blowing facts", "weird facts",
+                 "animal facts", "science facts", "history facts", "psychology facts", "food facts",
+                 "geography facts", "nature facts", "space facts", "human body facts", "how it works"]
 
 
-def load_trends(cfg: dict) -> list[dict]:
-    """Most-viewed niche Shorts on YouTube, cached for 3 days (search costs 100 quota units per query)."""
+def load_trends(cfg: dict) -> tuple[list[dict], list[dict]]:
+    """(most-viewed recent fact Shorts on YouTube, their themes ranked by popularity), cached for 3 days
+    (search costs 100 quota units per query; theme labelling is one Gemini call)."""
     path = CH / "trends.json"
     cache = _load(path, {})
-    fresh = cache.get("fetched") and (datetime.now(TZ) - datetime.fromisoformat(cache["fetched"])).days < 3
-    if fresh or not youtube.configured():
-        return cache.get("items", [])
-    try:
-        items = youtube.trending_shorts(cfg.get("trend_queries", TREND_QUERIES))
-        _save(path, {"fetched": datetime.now(TZ).isoformat(), "items": items[:150]})
-        print(f"[Trends] {len(items)} trending Shorts collected")
-        return items
-    except Exception as e:
-        print(f"[Trends] skipped: {e}")
-        return cache.get("items", [])
+    queries = cfg.get("trend_queries", TREND_QUERIES)
+    fresh = (cache.get("fetched") and cache.get("queries") == queries
+             and (datetime.now(TZ) - datetime.fromisoformat(cache["fetched"])).days < 3)
+    items = cache.get("items", [])
+    if not fresh and youtube.configured():
+        try:
+            items = youtube.trending_shorts(queries)[:150]
+            cache = {"fetched": datetime.now(TZ).isoformat(), "queries": queries, "items": items}
+            print(f"[Trends] {len(items)} trending Shorts collected")
+        except Exception as e:
+            print(f"[Trends] skipped: {e}")
+    if items and not cache.get("themes"):
+        try:
+            cache["themes"] = shorts.label_themes(items)
+            cache.setdefault("items", items)
+            _save(path, cache)
+            print("[Trends] hot themes: " + ", ".join(f"{t['theme']} ({t['median_views']:,})" for t in cache["themes"][:10]))
+        except Exception as e:
+            print(f"[Trends] theme labelling skipped: {e}")
+    return items, cache.get("themes", [])
 
 
 def publish_video(video_id: str, attempts: int = 6, wait: int = 20) -> str:
@@ -173,7 +185,10 @@ def main(argv=None) -> int:
             continue
         topic, series = cand, ser
     if not topic:
-        t = shorts.pick_topic(history, cfg.get("series"), trends=load_trends(cfg))
+        trends, themes = load_trends(cfg)
+        use_themes = cfg.get("topic_mode", "trends") == "trends"
+        t = shorts.pick_topic(history, cfg.get("series"), trends=trends, themes=themes if use_themes else None,
+                              cooldown=int(cfg.get("theme_cooldown_days", 7)))
         topic, series, concept = t["topic"], t["series"], t.get("concept", "")
     print(f"== 主題：{topic}（{series or '自訂'}）==")
 
