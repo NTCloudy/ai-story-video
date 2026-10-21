@@ -38,6 +38,13 @@ jobs:
           for x in h:
               s = st.get(x.get("video_id"), {})
               print("OWN", x["date"], s.get("views"), s.get("likes"), x["series"], "|", x["title"])
+          try:
+              an = youtube.video_analytics([x["video_id"] for x in h if x.get("video_id")])
+              for x in h:
+                  a = an.get(x.get("video_id"), {})
+                  print("ANALYTICS", x["date"], json.dumps(a), "|", x["title"])
+          except Exception as e:
+              print("ANALYTICS_ERROR", e)
           cfg = daily._load(daily.CH / "channel.yaml", {})
           items, themes = daily.load_trends(cfg)
           print(f"{len(items)} trending Shorts")

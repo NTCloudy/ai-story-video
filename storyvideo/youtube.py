@@ -131,6 +131,39 @@ def video_stats(ids: list[str]) -> dict[str, dict]:
     return out
 
 
+ANALYTICS = "https://youtubeanalytics.googleapis.com/v2/reports"
+ANALYTICS_METRICS = ["views", "engagedViews", "averageViewPercentage", "averageViewDuration", "likes", "shares",
+                     "subscribersGained"]
+
+
+def video_analytics(ids: list[str], start: str = "2026-01-01", end: str = "") -> dict[str, dict]:
+    """{video_id: {views, engagedViews, averageViewPercentage, averageViewDuration, likes, shares, subscribersGained}}
+    from the YouTube Analytics API (data lags ~1-2 days). engagedViews / views ~ share of viewers who did not
+    swipe away right away. Falls back to fewer metrics when a metric is not available."""
+    from datetime import date
+    end = end or date.today().isoformat()
+    auth = {"Authorization": f"Bearer {access_token()}"}
+    out: dict[str, dict] = {}
+    metrics = list(ANALYTICS_METRICS)
+    for i in range(0, len(ids), 200):
+        while True:
+            r = requests.get(ANALYTICS, headers=auth, timeout=60, params={
+                "ids": "channel==MINE", "startDate": start, "endDate": end, "dimensions": "video",
+                "metrics": ",".join(metrics), "filters": "video==" + ",".join(ids[i:i + 200]), "maxResults": 200})
+            if r.status_code == 400 and "engagedViews" in metrics:
+                metrics.remove("engagedViews")
+                continue
+            if r.status_code != 200:
+                raise RuntimeError(f"YouTube Analytics {r.status_code}: {r.text[:400]}")
+            break
+        d = r.json()
+        names = [h["name"] for h in d.get("columnHeaders", [])]
+        for row in d.get("rows", []):
+            rec = dict(zip(names, row))
+            out[rec.pop("video")] = rec
+    return out
+
+
 def trending_shorts(queries: list[str], days: int = 30, per_query: int = 12) -> list[dict]:
     """Most-viewed recent English Shorts for niche keywords (search.list = 100 quota units per query)."""
     from datetime import datetime, timedelta, timezone
