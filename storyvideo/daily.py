@@ -157,6 +157,18 @@ def main(argv=None) -> int:
             _save(CH / "history.json", history)
         except Exception as e:
             print(f"[Stats] skipped: {e}")
+        # retention metrics for the monthly theme comparison (YouTube Analytics lags 1-2 days)
+        try:
+            an = youtube.video_analytics([h["video_id"] for h in history if h.get("video_id")])
+            for h in history:
+                a = an.get(h.get("video_id"))
+                if a:
+                    h.update(engaged_views=a.get("engagedViews"), avg_view_pct=round(a.get("averageViewPercentage", 0), 1),
+                             avg_view_sec=a.get("averageViewDuration"), subs_gained=a.get("subscribersGained"),
+                             shares=a.get("shares"))
+            _save(CH / "history.json", history)
+        except Exception as e:
+            print(f"[Analytics] skipped: {e}")
 
     per_day = int(cfg.get("shorts_per_day", 1))
     if not args.force and not args.topic and sum(1 for h in history if h.get("date") == today) >= per_day:
