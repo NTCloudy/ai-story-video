@@ -337,6 +337,17 @@ def check(warn_days: int = 14) -> int:
     left = (exp - time.time()) / 86400 if exp else None
     print(f"[Meta] Page token valid; expires: {'never' if not d.get('expires_at') else time.ctime(d['expires_at'])}; "
           f"data access: {'n/a' if left is None else f'{left:.0f} days left'}; scopes: {', '.join(d.get('scopes', []))}")
+    try:
+        reels = api("GET", f"{os.environ['META_PAGE_ID']}/video_reels",
+                    fields="id,created_time,description,status,published,permalink_url", limit=8).get("data", [])
+        print(f"[FB] latest {len(reels)} Reels on the Page:")
+        for r in reels:
+            st = r.get("status") or {}
+            print(f"  {r.get('created_time', '')[:16]}  published={r.get('published')}  "
+                  f"video={st.get('video_status')}  publish={(st.get('publishing_phase') or {}).get('status')}  "
+                  f"{(r.get('description') or '').splitlines()[0][:50] if r.get('description') else ''}")
+    except Exception as e:
+        print(f"[FB] could not list Reels: {str(e)[:200]}")
     if left is not None and left < warn_days:
         print(f"::error title=FB/IG 需要重新授權（剩 {max(left, 0):.0f} 天）::打開 https://developers.facebook.com/tools/explorer/ ，"
               "右邊「Meta 應用程式」選 Cloud Auto Poster，按 Generate Access Token，一路按繼續、儲存即可")
