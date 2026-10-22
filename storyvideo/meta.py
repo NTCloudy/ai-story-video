@@ -355,6 +355,36 @@ def check(warn_days: int = 14) -> int:
     return 0
 
 
+def takedown(video_id: str) -> int:
+    """Remove a bad Short everywhere (YouTube, FB Reel, IG Reel) and drop it from channel/history.json,
+    so the next run can make that day's Short again."""
+    from . import youtube
+    history = _load_history()
+    entry = next((h for h in history if h.get("video_id") == video_id), None)
+    if entry is None:
+        print(f"::error::{video_id} is not in channel/history.json")
+        return 1
+    problems = 0
+    steps = [("YouTube", lambda: youtube.delete_video(video_id))]
+    if entry.get("fb_id"):
+        steps.append(("Facebook", lambda: _check(requests.delete(f"{GRAPH}/{entry['fb_id']}",
+                                                                   params={"access_token": _token()}, timeout=60))))
+    if entry.get("ig_id"):
+        steps.append(("Instagram", lambda: _check(requests.delete(f"{GRAPH}/{entry['ig_id']}",
+                                                                    params={"access_token": _token()}, timeout=60))))
+    for name, fn in steps:
+        try:
+            fn()
+            print(f"[{name}] deleted")
+        except Exception as e:
+            problems += 1
+            print(f"::warning title={name} 刪除失敗，請手動刪除::{entry.get('title')}: {str(e)[:300]}")
+    history.remove(entry)
+    HISTORY.write_text(json.dumps(history, ensure_ascii=False, indent=1), encoding="utf-8")
+    print(f"[History] removed {entry.get('date')} {entry.get('title')}")
+    return 0
+
+
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="storyvideo.meta")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -369,8 +399,12 @@ def main(argv=None) -> int:
     c.add_argument("--repo", default=os.environ.get("GITHUB_REPOSITORY", "NTCloudy/ai-story-video"))
     c.add_argument("--limit", type=int, default=3)
     sub.add_parser("check", help="token health")
+    t = sub.add_parser("takedown", help="delete a bad Short from YouTube / FB / IG and from history")
+    t.add_argument("--youtube-id", required=True)
     args = p.parse_args(argv)
 
+    if args.cmd == "takedown":
+        return takedown(args.youtube_id)
     if not configured():
         print("[Meta] META_PAGE_ID / META_PAGE_TOKEN / IG_USER_ID not set; skipping FB/IG")
         return 0

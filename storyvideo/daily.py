@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -127,6 +128,7 @@ def save_assets(out: Path, imgs: list, nars: list[dict], sb: dict) -> None:
 def main(argv=None) -> int:
     p = argparse.ArgumentParser(prog="storyvideo.daily")
     p.add_argument("--topic", default="")
+    p.add_argument("--concept", default="", help="1-4 words naming the exact phenomenon of --topic")
     p.add_argument("--force", action="store_true", help="make another Short even if one was made today")
     p.add_argument("--no-upload", action="store_true")
     p.add_argument("--dry-run", action="store_true", help="test render: no upload, channel files untouched")
@@ -142,9 +144,27 @@ def main(argv=None) -> int:
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
+    # GitHub runs scheduled jobs hours late, so the workflow fires hourly and the job decides: automatic runs
+    # only make the day's Short from `publish_after` (Taiwan time) on, never in the middle of the night.
+    after = str(cfg.get("publish_after", "07:30"))
+    if (os.environ.get("GITHUB_EVENT_NAME") == "schedule" and not (args.force or args.topic)
+            and datetime.now(TZ).strftime("%H:%M") < after
+            and not any(h.get("date") == today for h in history)):
+        print(f"還沒到 {after}（台灣時間），等下一次排程。")
+        (out / "SKIPPED").write_text("too early")
+        return 0
+
     auto_publish = bool(cfg.get("auto_publish", False)) and youtube.configured() and not args.no_upload
     if auto_publish and publish_pending(history):
         _save(CH / "history.json", history)
+
+    per_day = int(cfg.get("shorts_per_day", 1))
+    done_today = not args.force and not args.topic and sum(1 for h in history if h.get("date") == today) >= per_day
+    if done_today and datetime.now(TZ).hour % 4:
+        # hourly schedule: refresh stats only every ~4 hours once today's Short exists (fewer bot commits)
+        print(f"今天（{today}）已經做過 {per_day} 支 Shorts，略過。")
+        (out / "SKIPPED").write_text("already done today")
+        return 0
 
     # refresh view counts for our previous Shorts (cheap: 1 quota unit)
     if youtube.configured() and history and not args.dry_run:
@@ -170,8 +190,7 @@ def main(argv=None) -> int:
         except Exception as e:
             print(f"[Analytics] skipped: {e}")
 
-    per_day = int(cfg.get("shorts_per_day", 1))
-    if not args.force and not args.topic and sum(1 for h in history if h.get("date") == today) >= per_day:
+    if done_today:
         print(f"今天（{today}）已經做過 {per_day} 支 Shorts，略過。")
         (out / "SKIPPED").write_text("already done today")
         return 0
@@ -188,6 +207,7 @@ def main(argv=None) -> int:
             print(f"::error title=主題重複::「{args.topic.strip()}」和先前的影片「{dup}」重複，請換一個主題")
             return 4
         topic = args.topic.strip()
+        concept = args.concept.strip()
     while not topic and queue:
         item = queue.pop(0)
         cand, ser = (item.get("topic", ""), item.get("series", "")) if isinstance(item, dict) else (str(item), "")
@@ -204,9 +224,18 @@ def main(argv=None) -> int:
         topic, series, concept = t["topic"], t["series"], t.get("concept", "")
     print(f"== 主題：{topic}（{series or '自訂'}）==")
 
-    # 2. research + script
-    facts = shorts.research(topic)
-    sb = shorts.write_short(topic, facts, series)
+    # 2. research + script, then make sure the script is about the topic and the title matches the script
+    facts = shorts.research(topic, concept)
+    feedback = ""
+    for attempt in range(3):
+        sb = shorts.write_short(topic, facts, series, concept, feedback)
+        ok, feedback = shorts.check_consistency(sb, topic, concept)
+        if ok:
+            break
+        print(f"::warning title=標題或內容不符，重寫（第 {attempt + 1} 次）::{sb.get('youtube_title', '')}: {feedback}")
+    else:
+        print(f"::error title=標題與內容不符，已停止上傳::{topic}: {feedback}")
+        return 5
     (out / "script.json").write_text(json.dumps(sb, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"標題：{sb['youtube_title']}｜{len(sb['scenes'])} 個分鏡｜模型 {sb['model']}")
 

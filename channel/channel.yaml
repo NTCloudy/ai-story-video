@@ -3,6 +3,7 @@
 # ============================================================
 shorts_per_day: 1          # 每天自動產生幾支
 paused: false              # true = 暫停每日自動產生
+publish_after: "07:30"     # 每天自動發片的最早時間（台灣時間）；GitHub 排程會延遲，所以每小時檢查一次
 upload: true               # 有 YouTube 授權時自動上傳
 privacy: private           # 上傳時的狀態（未通過 Google 審核前 API 只能用 private 上傳）
 auto_publish: true         # 上傳後自動改成公開；失敗的話下次排程會再補公開

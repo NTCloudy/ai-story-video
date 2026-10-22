@@ -97,6 +97,13 @@ def upload(video: Path, title: str, description: str, tags: list[str], category:
     raise RuntimeError("YouTube 上傳多次失敗")
 
 
+def delete_video(video_id: str) -> None:
+    r = requests.delete(f"{API}/videos", params={"id": video_id},
+                        headers={"Authorization": f"Bearer {access_token()}"}, timeout=60)
+    if r.status_code not in (204, 404):
+        raise RuntimeError(f"{r.status_code} {r.text[:400]}")
+
+
 def set_privacy(video_id: str, privacy: str = "public") -> dict:
     token = access_token()
     auth = {"Authorization": f"Bearer {token}"}

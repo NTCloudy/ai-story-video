@@ -303,35 +303,57 @@ WIKI_API = "https://en.wikipedia.org/w/api.php"
 WIKI_HEADERS = {"User-Agent": "CloudFindsTheWorld-ShortsBot/1.0 (https://github.com/NTCloudy/ai-story-video)"}
 
 
-def wikipedia_notes(topic: str, pages: int = 3, chars: int = 2500) -> str:
-    """Free, reliable research source: intro sections of the most relevant Wikipedia articles."""
+def concept_keywords(concept: str) -> set[str]:
+    """Content words of the core concept, e.g. "hairy frog claws" -> {"hairy", "frog", "claw"}."""
+    return _words(concept)
+
+
+def _mentions(text: str, keywords: set[str]) -> bool:
+    return bool(keywords & _words(text))
+
+
+def _wiki_search(q: str, pages: int, chars: int) -> list[str]:
     import requests
-    try:
-        q, _ = gemini.call(f"Give 2-4 English Wikipedia search keywords (just the words, no quotes) for: {topic}",
-                           temperature=0.0, max_models=3)
-        q = q.strip().splitlines()[0][:100]
-    except Exception:
-        q = topic
     r = requests.get(WIKI_API, headers=WIKI_HEADERS, timeout=30, params={
         "action": "query", "format": "json", "generator": "search", "gsrsearch": q, "gsrlimit": pages,
         "prop": "extracts|info", "exintro": 1, "explaintext": 1, "inprop": "url"})
     r.raise_for_status()
     found = sorted((r.json().get("query") or {}).get("pages", {}).values(), key=lambda p: p.get("index", 99))
-    notes = [f"[{p['title']}] ({p.get('fullurl', '')})\n{p.get('extract', '')[:chars]}" for p in found if p.get("extract")]
+    return [f"[{p['title']}] ({p.get('fullurl', '')})\n{p.get('extract', '')[:chars]}" for p in found if p.get("extract")]
+
+
+def wikipedia_notes(topic: str, pages: int = 3, chars: int = 2500, concept: str = "") -> str:
+    """Free, reliable research source: intro sections of the most relevant Wikipedia articles.
+    Articles that never mention the core concept are dropped, so a vague question ("this animal") cannot
+    pull in an unrelated subject."""
+    try:
+        q, _ = gemini.call(f"Give 2-4 English Wikipedia search keywords (just the words, no quotes) for: {topic}"
+                           + (f" (core concept: {concept})" if concept else ""), temperature=0.0, max_models=3)
+        q = q.strip().splitlines()[0][:100]
+    except Exception:
+        q = concept or topic  # the concept names the exact phenomenon; the topic question can be vague
+    keys = concept_keywords(concept)
+    notes = _wiki_search(q, pages, chars)
+    if keys:
+        notes = [n for n in notes if _mentions(n, keys)]
+        if not notes and q != concept:
+            notes = [n for n in _wiki_search(concept, pages, chars) if _mentions(n, keys)]
     return "\n\n".join(notes)
 
 
-def research(topic: str) -> str:
+def research(topic: str, concept: str = "") -> str:
     """Collect verified facts: Wikipedia first (free), then Google Search grounding if available."""
     try:
-        notes = wikipedia_notes(topic)
+        notes = wikipedia_notes(topic, concept=concept)
         if notes:
             print(f"[Research] Wikipedia: {notes.count('[')} articles")
             return notes
+        print("[Research] Wikipedia had no article about the topic")
     except Exception as e:
         print(f"[Research] Wikipedia failed: {e}")
     prompt = (f"Research this YouTube Shorts topic and list 8-12 accurate, surprising, verifiable facts with "
-              f"numbers where possible, plus the source website for each fact. Topic: {topic}")
+              f"numbers where possible, plus the source website for each fact. Topic: {topic}"
+              + (f" (core concept: {concept})" if concept else ""))
     try:
         text, model = gemini.call(prompt, search=True, temperature=0.2, max_models=2)
         print(f"[Research] facts collected with {model}")
@@ -341,11 +363,13 @@ def research(topic: str) -> str:
         return ""
 
 
-def write_short(topic: str, facts: str = "", series: str = "") -> dict:
+def write_short(topic: str, facts: str = "", series: str = "", concept: str = "", feedback: str = "") -> dict:
     prompt = f"""Write a YouTube Shorts script (35-50 seconds when narrated) for this topic:
 "{topic}" (series: {series or 'curiosity'}).
-
-Verified research notes (use ONLY facts consistent with these; never invent numbers):
+{f'The video MUST be about exactly this: {concept}. Name it in the narration.' if concept else ''}
+{f'A previous draft was rejected: {feedback}. Fix that.' if feedback else ''}
+Verified research notes (use ONLY facts consistent with these; never invent numbers; ignore any note that is
+not about the topic above):
 {facts or '(no notes - use only well-established, widely known facts)'}
 
 Requirements:
@@ -387,3 +411,48 @@ Requirements:
     data["topic"] = topic
     data["series"] = series
     return data
+
+
+CONSISTENCY_SCHEMA = {
+    "type": "OBJECT",
+    "properties": {
+        "script_matches_topic": {"type": "BOOLEAN"},
+        "title_matches_script": {"type": "BOOLEAN"},
+        "reason": {"type": "STRING"},
+    },
+    "required": ["script_matches_topic", "title_matches_script", "reason"],
+}
+
+
+def check_consistency(sb: dict, topic: str, concept: str = "") -> tuple[bool, str]:
+    """Pre-upload gate: the narration must be about the chosen topic, and the title / hook / description must
+    describe what the narration actually says. Returns (ok, reason)."""
+    narration = " ".join(s.get("narration", "") for s in sb.get("scenes", []))
+    packaging = f"{sb.get('youtube_title', '')} {sb.get('hook_text', '')} {sb.get('youtube_description', '')}"
+    keys = concept_keywords(concept)
+    if keys and not _mentions(narration, keys):
+        return False, f"narration never mentions the concept '{concept}'"
+    if keys and not _mentions(packaging, keys) and not (_words(sb.get("youtube_title", "")) & _words(narration)):
+        return False, "title / hook / description share nothing with the narration or the concept"
+    prompt = f"""You are the last check before a YouTube Short is published. Be strict.
+Planned topic: {topic}
+{f'Core concept: {concept}' if concept else ''}
+YouTube title: {sb.get('youtube_title', '')}
+On-screen hook: {sb.get('hook_text', '')}
+Description: {sb.get('youtube_description', '')}
+Narration: {narration}
+
+script_matches_topic: true only if the narration is mainly about the planned topic / concept.
+title_matches_script: true only if the title, hook and description accurately describe what the narration is
+about (no different subject, no promise the narration does not deliver).
+reason: one short sentence explaining any false."""
+    try:
+        text, model = gemini.call(prompt, CONSISTENCY_SCHEMA, temperature=0.0, lite_first=True)
+    except Exception as e:
+        print(f"[Check] Gemini unavailable, keyword check only: {str(e)[:150]}")
+        return (bool(keys), "" if keys else "could not verify (no concept keywords and Gemini unavailable)")
+    v = json.loads(text)
+    ok = bool(v.get("script_matches_topic")) and bool(v.get("title_matches_script"))
+    print(f"[Check] topic={v.get('script_matches_topic')} title={v.get('title_matches_script')} ({model})"
+          + ("" if ok else f": {v.get('reason', '')}"))
+    return ok, v.get("reason", "")

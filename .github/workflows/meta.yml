@@ -10,8 +10,12 @@ on:
       action:
         description: "check = 檢查授權；catchup = 補發還沒同步到 FB / IG 的 Shorts"
         type: choice
-        options: [check, catchup]
+        options: [check, catchup, takedown]
         default: check
+      youtube_id:
+        description: "takedown 用：要從 YouTube / FB / IG 全部刪掉的影片 ID"
+        required: false
+        type: string
 
 concurrency:
   group: daily-short
@@ -28,6 +32,9 @@ jobs:
       META_PAGE_ID: ${{ secrets.META_PAGE_ID }}
       META_PAGE_TOKEN: ${{ secrets.META_PAGE_TOKEN }}
       IG_USER_ID: ${{ secrets.IG_USER_ID }}
+      YT_CLIENT_ID: ${{ secrets.YT_CLIENT_ID }}
+      YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
+      YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -37,15 +44,27 @@ jobs:
       - run: pip install requests PyYAML
 
       - name: 檢查 FB / IG 授權
-        if: inputs.action != 'catchup'
+        if: inputs.action != 'catchup' && inputs.action != 'takedown'
         run: python -m storyvideo.meta check
 
       - name: 補發到 FB / IG
         if: inputs.action == 'catchup'
         run: python -m storyvideo.meta catchup --repo "${{ github.repository }}" --limit 10
 
+      - name: 下架影片（YouTube / FB / IG / Release）
+        if: inputs.action == 'takedown'
+        env:
+          VIDEO_ID: ${{ inputs.youtube_id }}
+        run: |
+          python -m storyvideo.meta takedown --youtube-id "$VIDEO_ID"
+          gh release list --limit 50 --json tagName --jq '.[].tagName' | while read -r tag; do
+            if gh release view "$tag" --json body --jq .body | grep -q "shorts/$VIDEO_ID"; then
+              gh release delete "$tag" --yes --cleanup-tag && echo "[Release] deleted $tag"
+            fi
+          done
+
       - name: 更新頻道紀錄
-        if: always() && inputs.action == 'catchup'
+        if: always() && (inputs.action == 'catchup' || inputs.action == 'takedown')
         run: |
           git config user.name "shorts-bot"
           git config user.email "shorts-bot@users.noreply.github.com"

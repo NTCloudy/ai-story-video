@@ -2,18 +2,23 @@ name: Daily Short
 
 run-name: "📱 Daily Short ${{ inputs.topic && format('— {0}', inputs.topic) || '' }} [${{ inputs.request_id || 'auto' }}]"
 
-# GitHub cron is best-effort, so we try several times a day; the job skips itself
-# once today's Short exists (see channel/history.json).
+# GitHub starts scheduled runs late (we measured 4-7 hours), so a single "08:23" cron used to land around
+# 02:00 the next night. Instead we fire every hour from the Taiwan evening onwards: runs that land before
+# channel.yaml `publish_after` (07:30 Taiwan) skip themselves, the first one after it makes the day's Short,
+# and every later one skips because today's Short already exists (see channel/history.json).
 on:
   schedule:
-    - cron: "23 0 * * *"    # 08:23 Taiwan
-    - cron: "23 4 * * *"
-    - cron: "23 8 * * *"
-    - cron: "23 13 * * *"
+    - cron: "23 14-23 * * *"   # 22:23-07:23 Taiwan (they arrive hours later)
+    - cron: "23 0-6 * * *"     # 08:23-14:23 Taiwan (fallbacks)
+    - cron: "23 9,12 * * *"
   workflow_dispatch:
     inputs:
       topic:
         description: "指定主題（留空 = 用排程清單或讓 AI 選）"
+        required: false
+        type: string
+      concept:
+        description: "（選填）主題的核心概念，1-4 個英文字，例如 hairy frog claws"
         required: false
         type: string
       force:
@@ -79,6 +84,7 @@ jobs:
           YT_CLIENT_SECRET: ${{ secrets.YT_CLIENT_SECRET }}
           YT_REFRESH_TOKEN: ${{ secrets.YT_REFRESH_TOKEN }}
           TOPIC: ${{ inputs.topic }}
+          CONCEPT: ${{ inputs.concept }}
           FORCE: ${{ inputs.force }}
           UPLOAD: ${{ inputs.upload }}
           ALLOW_PLACEHOLDER: ${{ inputs.test_placeholder && '1' || '' }}
@@ -87,6 +93,7 @@ jobs:
           args=()
           [ "$DRY_RUN" = "true" ] && args+=(--dry-run)
           [ -n "$TOPIC" ] && args+=(--topic "$TOPIC")
+          [ -n "$CONCEPT" ] && args+=(--concept "$CONCEPT")
           [ "$FORCE" = "true" ] && args+=(--force)
           [ "$UPLOAD" = "false" ] && args+=(--no-upload)
           python -m storyvideo.daily "${args[@]}" --out out
