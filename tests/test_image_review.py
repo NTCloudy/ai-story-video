@@ -27,16 +27,22 @@ class ReviewTest(unittest.TestCase):
         self.assertEqual(self._run([(False, "face is a planet"), (True, "")]), (True, 2, 1))
         self.assertEqual(self.img.read_bytes(), b"second")
 
-    def test_still_weird_extra_shot_is_dropped_required_is_kept(self):
+    def test_still_weird_extra_shot_is_dropped_required_stops(self):
         self.assertEqual(self._run([(False, "x"), (False, "x")], optional=True)[0], False)
         self.img.write_bytes(b"first")
-        self.assertEqual(self._run([(False, "x"), (False, "x")], optional=False)[0], True)
+        with self.assertRaises(RuntimeError):
+            self._run([(False, "x"), (False, "x")], optional=False)
 
-    def test_redraw_error_keeps_required_and_drops_extra(self):
-        self.assertTrue(self._run([(False, "x")], optional=False, redraw_error=RuntimeError("quota"))[0])
+    def test_redraw_error_drops_extra_required_stops(self):
+        with self.assertRaises(RuntimeError):
+            self._run([(False, "x")], optional=False, redraw_error=RuntimeError("quota"))
         self.assertFalse(self._run([(False, "x")], optional=True, redraw_error=RuntimeError("quota"))[0])
         self.assertEqual(self.img.read_bytes(), b"first")
 
+    def test_unverifiable_picture_drops_extra_required_stops(self):
+        self.assertFalse(self._run([images.CheckUnavailable("busy")], optional=True)[0])
+        with self.assertRaises(RuntimeError):
+            self._run([images.CheckUnavailable("busy")], optional=False)
 
 if __name__ == "__main__":
     unittest.main()

@@ -21,8 +21,14 @@ class ConsistencyTest(unittest.TestCase):
             ok, reason = shorts.check_consistency(WRONG, "Why Does This Animal Break Its Own Bones?", "hairy frog claws")
         assert not ok and "concept" in reason
 
-    def test_matching_script_passes_keyword_check(self):
+    def test_unverifiable_script_stops_instead_of_passing(self):
         with mock.patch.object(shorts.gemini, "call", _no_gemini):
+            with self.assertRaises(RuntimeError):
+                shorts.check_consistency(RIGHT, "Why Does This Animal Break Its Own Bones?", "hairy frog claws")
+
+    def test_matching_script_passes(self):
+        reply = '{"script_matches_topic": true, "title_matches_script": true, "reason": ""}'
+        with mock.patch.object(shorts.gemini, "call", return_value=(reply, "m")):
             ok, _ = shorts.check_consistency(RIGHT, "Why Does This Animal Break Its Own Bones?", "hairy frog claws")
         assert ok
 

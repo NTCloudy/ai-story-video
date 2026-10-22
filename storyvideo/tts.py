@@ -84,7 +84,8 @@ _EDGE_OK = True
 
 
 def narrate(scenes: list[dict], out_dir: Path, voice: str = "female", rate: str = "+0%",
-            lang: str = "zh") -> list[dict]:
+            lang: str = "zh", allow_backup: bool = True) -> list[dict]:
+    """allow_backup=False: stop instead of switching to the robotic Google voice when the main voice fails."""
     global _EDGE_OK
     out_dir.mkdir(parents=True, exist_ok=True)
     v = VOICES.get(voice, voice)
@@ -99,6 +100,8 @@ def narrate(scenes: list[dict], out_dir: Path, voice: str = "female", rate: str 
                     break
                 except Exception as e:  # network hiccups / blocked
                     print(f"[配音] 微軟語音失敗（{attempt + 1}/3）：{type(e).__name__}: {str(e)[:120]}")
+            if cues is None and not allow_backup:
+                raise RuntimeError("微軟語音連續失敗 3 次，不改用品質較差的備援語音")
             if cues is None:
                 print("[配音] 改用 Google 語音備援")
                 _EDGE_OK = False

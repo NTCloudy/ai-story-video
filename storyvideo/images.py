@@ -128,8 +128,12 @@ SAFER = (" Clear, literal, easy-to-read composition with natural anatomy; no fac
          " no reflections of other scenes inside helmets or eyes, no text.")
 
 
+class CheckUnavailable(RuntimeError):
+    """The picture could not be checked (Gemini busy / out of quota)."""
+
+
 def check_image(path: Path, prompt: str) -> tuple[bool, str]:
-    """Ask Gemini (vision) whether an illustration has an obvious AI mistake. Best effort: True on errors."""
+    """Ask Gemini (vision) whether an illustration has an obvious AI mistake. Raises CheckUnavailable."""
     import json
     from . import gemini
     q = ("You check AI-generated illustrations for a family-friendly science YouTube Short before publishing.\n"
@@ -139,14 +143,16 @@ def check_image(path: Path, prompt: str) -> tuple[bool, str]:
          "distorted faces or bodies, extra or missing limbs, duplicated people, visible text or letters, or a "
          "picture that does not show the requested subject at all. Artistic style, dramatic lighting and small "
          "imperfections are fine. Put a short reason in problem (empty when ok).")
-    try:
-        time.sleep(4)  # stay under the free tier's requests-per-minute limit
-        text, _ = gemini.call(q, QA_SCHEMA, temperature=0.0, max_models=3, images=[path], lite_first=True)
-        d = json.loads(text)
-        return bool(d.get("ok", True)), str(d.get("problem", ""))
-    except Exception as e:
-        print(f"[插畫檢查] 略過：{str(e)[:120]}")
-        return True, ""
+    last = None
+    for attempt in range(2):
+        try:
+            time.sleep(4 if not attempt else 30)  # stay under the free tier's requests-per-minute limit
+            text, _ = gemini.call(q, QA_SCHEMA, temperature=0.0, max_models=3, images=[path], lite_first=True)
+            d = json.loads(text)
+            return bool(d.get("ok", True)), str(d.get("problem", ""))
+        except Exception as e:
+            last = e
+    raise CheckUnavailable(f"插畫檢查無法執行：{str(last)[:150]}")
 
 
 def generate_images(scenes: list[dict], style: str, characters, out_dir: Path, vertical: bool = False,
@@ -193,7 +199,9 @@ def generate_images(scenes: list[dict], style: str, characters, out_dir: Path, v
                 if i in optional:
                     print(f"[插畫] 分鏡 {i + 1}（額外鏡頭）失敗，略過：{e2}")
                     continue
-                print(f"[插畫] 分鏡 {i + 1} 失敗，用預設背景代替：{e2}")
+                if not os.environ.get("ALLOW_PLACEHOLDER"):  # test flag only; never publish placeholder art
+                    raise RuntimeError(f"分鏡 {i + 1} 畫不出來：{e2}") from e2
+                print(f"[插畫] 分鏡 {i + 1} 失敗，用預設背景代替（測試模式）：{e2}")
                 placeholder(path, i)
                 failed += 1
                 drawn = False
@@ -209,20 +217,30 @@ def generate_images(scenes: list[dict], style: str, characters, out_dir: Path, v
 
 def _review(path: Path, i: int, wanted: str, prompt: str, refs: list[Path], w: int, h: int, optional: bool) -> bool:
     """Gemini checks the picture; a weird one is redrawn once with safer wording.
-    Returns False when an extra shot should be dropped (still wrong, or no quota left to redraw)."""
-    ok, problem = check_image(path, wanted)
+    Returns False when an extra shot should be dropped; raises when a required picture is still wrong or
+    cannot be checked (a flawed main picture is never published)."""
+    def fail(msg: str) -> bool:
+        if optional:
+            print(f"[插畫檢查] 分鏡 {i + 1}（額外鏡頭）{msg}，拿掉這張")
+            return False
+        raise RuntimeError(f"分鏡 {i + 1} {msg}")
+    try:
+        ok, problem = check_image(path, wanted)
+    except CheckUnavailable as e:
+        return fail(str(e))
     if ok:
         return True
     print(f"[插畫檢查] 分鏡 {i + 1} 有問題：{problem}，重畫一次")
     try:
         data = flux2(prompt + SAFER, refs, w, h)
-    except Exception as e:  # quota or API error: keep the first picture for required scenes
-        print(f"[插畫檢查] 分鏡 {i + 1} 重畫失敗：{str(e)[:120]}")
-        return not optional
+    except Exception as e:
+        return fail(f"有問題（{problem}）且重畫失敗：{str(e)[:120]}")
     path.write_bytes(data)
-    ok, problem = check_image(path, wanted)
+    try:
+        ok, problem = check_image(path, wanted)
+    except CheckUnavailable as e:
+        return fail(str(e))
     if not ok:
-        print(f"[插畫檢查] 分鏡 {i + 1} 重畫後仍有問題：{problem}" + ("，拿掉這張額外鏡頭" if optional else ""))
-        return not optional
+        return fail(f"重畫後仍有問題：{problem}")
     print(f"[插畫檢查] 分鏡 {i + 1} 重畫後通過")
     return True

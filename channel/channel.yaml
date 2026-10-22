@@ -4,6 +4,8 @@
 shorts_per_day: 1          # 每天自動產生幾支
 paused: false              # true = 暫停每日自動產生
 publish_after: "07:30"     # 每天自動發片的最早時間（台灣時間）；GitHub 排程會延遲，所以每小時檢查一次
+max_attempts_per_day: 3    # 做不出來時每天最多自動重試幾次（每次失敗都會開 GitHub Issue 通知你）
+allow_backup_voice: false  # 微軟語音失敗時不改用品質較差的 Google 語音，直接停下來通知
 upload: true               # 有 YouTube 授權時自動上傳
 privacy: private           # 上傳時的狀態（未通過 Google 審核前 API 只能用 private 上傳）
 auto_publish: true         # 上傳後自動改成公開；失敗的話下次排程會再補公開

@@ -449,8 +449,8 @@ reason: one short sentence explaining any false."""
     try:
         text, model = gemini.call(prompt, CONSISTENCY_SCHEMA, temperature=0.0, lite_first=True)
     except Exception as e:
-        print(f"[Check] Gemini unavailable, keyword check only: {str(e)[:150]}")
-        return (bool(keys), "" if keys else "could not verify (no concept keywords and Gemini unavailable)")
+        # never publish unverified: stop and let the next run try again
+        raise RuntimeError(f"無法確認標題和內容是否相符（Gemini 無法使用）：{str(e)[:200]}") from e
     v = json.loads(text)
     ok = bool(v.get("script_matches_topic")) and bool(v.get("title_matches_script"))
     print(f"[Check] topic={v.get('script_matches_topic')} title={v.get('title_matches_script')} ({model})"

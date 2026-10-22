@@ -22,6 +22,11 @@ import yaml
 from . import images, render, shorts, tts, youtube
 
 CH = Path("channel")
+
+
+class CannotGenerate(RuntimeError):
+    """A step could not be done properly; stop with a warning instead of publishing a worse Short."""
+
 TZ = ZoneInfo("Asia/Taipei")
 
 
@@ -199,6 +204,34 @@ def main(argv=None) -> int:
         (out / "SKIPPED").write_text("paused")
         return 0
 
+    # never force a bad Short out: anything that cannot be done properly stops the run with a warning, and the
+    # next hourly run tries again (at most `max_attempts_per_day` automatic tries)
+    attempts = _load(CH / "attempts.json", {})
+    tries = int(attempts.get(today, 0))
+    max_tries = int(cfg.get("max_attempts_per_day", 3))
+    automatic = not (args.force or args.topic)
+    if automatic and tries >= max_tries:
+        print(f"今天已經嘗試 {tries} 次都沒成功，今天不再自動重試。")
+        (out / "SKIPPED").write_text("gave up today")
+        return 0
+    try:
+        return make_short(args, cfg, history, queue, today, out, auto_publish)
+    except Exception as e:
+        reason = str(e) if isinstance(e, CannotGenerate) else f"{type(e).__name__}: {e}"
+        if not args.dry_run:
+            _save(CH / "attempts.json", {today: tries + 1})
+        last = automatic and tries + 1 >= max_tries
+        note = "今天不再自動重試，可以到 GitHub Actions 手動重跑" if last else "下一次排程會再試"
+        print(f"::warning title=今天的 Short 沒做出來（{note}）::{reason[:900]}")
+        (out / "GAVE_UP").write_text(f"{reason}\n\n（第 {tries + 1} 次嘗試；{note}）", encoding="utf-8")
+        for f in ("video.mp4", "meta.json"):  # nothing half-made may be released or cross-posted
+            (out / f).unlink(missing_ok=True)
+        return 0
+
+
+def make_short(args, cfg: dict, history: list, queue: list, today: str, out: Path, auto_publish: bool) -> int:
+    """Topic -> research -> script -> check -> images -> voice -> render -> upload.
+    Raises CannotGenerate instead of falling back to a worse result."""
     # 1. topic (never repeat a previous Short)
     series, concept, topic = "", "", ""
     if args.topic.strip():
@@ -226,6 +259,8 @@ def main(argv=None) -> int:
 
     # 2. research + script, then make sure the script is about the topic and the title matches the script
     facts = shorts.research(topic, concept)
+    if not facts:
+        raise CannotGenerate("查不到這個主題的可靠資料，不憑空寫腳本")
     feedback = ""
     for attempt in range(3):
         sb = shorts.write_short(topic, facts, series, concept, feedback)
@@ -234,8 +269,7 @@ def main(argv=None) -> int:
             break
         print(f"::warning title=標題或內容不符，重寫（第 {attempt + 1} 次）::{sb.get('youtube_title', '')}: {feedback}")
     else:
-        print(f"::error title=標題與內容不符，已停止上傳::{topic}: {feedback}")
-        return 5
+        raise CannotGenerate(f"重寫 3 次標題和內容還是對不上：{feedback}")
     (out / "script.json").write_text(json.dumps(sb, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"標題：{sb['youtube_title']}｜{len(sb['scenes'])} 個分鏡｜模型 {sb['model']}")
 
@@ -255,14 +289,13 @@ def main(argv=None) -> int:
                                       out / "work" / "images", vertical=True, optional=optional,
                                       check=bool(cfg.get("image_check", True)))
     except Exception as e:
-        print(f"::error title=插畫失敗::{e}")
-        return 3
+        raise CannotGenerate(f"插畫失敗：{e}") from e
     imgs = [[p for p, o in zip(flat, owner) if o == si and p] for si in range(len(sb["scenes"]))]
     print(f"[插畫] {sum(len(x) for x in imgs)} 張（{len(sb['scenes'])} 個分鏡）")
 
     # 4. voice
     nars = tts.narrate(sb["scenes"], out / "work" / "audio", cfg.get("voice", "en_male"),
-                       cfg.get("voice_rate", "+8%"), lang="en")
+                       cfg.get("voice_rate", "+8%"), lang="en", allow_backup=bool(cfg.get("allow_backup_voice", False)))
 
     # 5. render
     render.configure("short")
@@ -290,7 +323,7 @@ def main(argv=None) -> int:
                 time_mod.sleep(15)  # give YouTube a moment to register the upload
                 entry["privacy"] = publish_video(v["id"])
         except Exception as e:
-            print(f"::warning title=YouTube 上傳失敗::{e}")
+            raise CannotGenerate(f"YouTube 上傳失敗：{e}") from e
     else:
         print("[YouTube] 未設定授權或已關閉上傳，只產生影片")
 
