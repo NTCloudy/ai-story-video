@@ -53,15 +53,43 @@ permissions:
 jobs:
   short:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 360   # a scheduled run may wait up to ~5.5 h for publish_after (see below)
     steps:
       - name: 準備環境
         uses: actions/checkout@v4
 
-      - name: 安裝工具（ffmpeg、字型）
+      # GitHub only starts a handful of the hourly scheduled runs each day, at random times. A scheduled run
+      # that lands in the early morning therefore waits here until publish_after (07:30 Taiwan) instead of
+      # skipping, so the day's Short goes out on time even when no run happens to land after 07:30.
+      - name: 等到發片時間（排程提早到的話）
+        if: github.event_name == 'schedule'
+        timeout-minutes: 340
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq ffmpeg fonts-noto-cjk >/dev/null
+          WAIT=$(python3 - <<'PY'
+          import json, re
+          from datetime import datetime, timedelta
+          from zoneinfo import ZoneInfo
+          now = datetime.now(ZoneInfo("Asia/Taipei"))
+          cfg = open("channel/channel.yaml", encoding="utf-8").read()
+          m = re.search(r'^publish_after:\s*"?(\d{1,2}):(\d{2})', cfg, re.M)
+          h, mi = (int(m.group(1)), int(m.group(2))) if m else (7, 30)
+          target = now.replace(hour=h, minute=mi, second=0, microsecond=0)
+          done = any(e.get("date") == now.date().isoformat() for e in json.load(open("channel/history.json")))
+          wait = (target - now).total_seconds()
+          print(int(wait) if not done and 0 < wait <= 5.5 * 3600 else 0)
+          PY
+          )
+          if [ "$WAIT" -gt 0 ]; then
+            echo "排程提早到了，等 $((WAIT / 60)) 分鐘到發片時間"
+            sleep "$WAIT"
+            git pull -q --rebase   # a manual run may have made today's Short meanwhile
+          fi
+
+      - name: 安裝工具（ffmpeg、字型）
+        timeout-minutes: 15   # an Ubuntu mirror once hung here for 45 minutes
+        run: |
+          for i in 1 2 3; do sudo timeout 240 apt-get update -qq -o Acquire::Retries=3 && break; sleep 20; done
+          sudo apt-get install -y -qq -o Acquire::Retries=3 ffmpeg fonts-noto-cjk >/dev/null
 
       - uses: actions/setup-python@v5
         with:
