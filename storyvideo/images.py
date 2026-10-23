@@ -122,8 +122,9 @@ def scene_prompt(scene: dict, chars: list[dict], ref_names: list[str], style: st
     return " ".join(parts)
 
 
-QA_SCHEMA = {"type": "OBJECT", "properties": {"ok": {"type": "BOOLEAN"}, "problem": {"type": "STRING"}},
-             "required": ["ok", "problem"]}
+QA_SCHEMA = {"type": "OBJECT", "properties": {
+    "severity": {"type": "STRING", "enum": ["none", "minor", "major"]},
+    "problem": {"type": "STRING"}}, "required": ["severity", "problem"]}
 SAFER = (" Clear, literal, easy-to-read composition with natural anatomy; no faces replaced by objects or planets,"
          " no reflections of other scenes inside helmets or eyes, no text.")
 
@@ -138,18 +139,21 @@ def check_image(path: Path, prompt: str) -> tuple[bool, str]:
     from . import gemini
     q = ("You check AI-generated illustrations for a family-friendly science YouTube Short before publishing.\n"
          f"The picture should show: {prompt[:600]}\n"
-         "Answer ok=false ONLY for clear problems most viewers would find weird or wrong: a face replaced by an "
+         "Clear problems most viewers would find weird or wrong: a face replaced by an "
          "object or a planet, an empty or headless suit or helmet that looks like a creepy floating head, melted or "
          "distorted faces or bodies, extra or missing limbs, duplicated people, visible text or letters, or a "
-         "picture that does not show the requested subject at all. Artistic style, dramatic lighting and small "
-         "imperfections are fine. Put a short reason in problem (empty when ok).")
+         "picture that does not show the requested subject at all.\n"
+         "severity: major = one of those clear problems; minor = only details differ from the description (pose, "
+         "angle, sitting vs standing, colours, number of background objects, style); none = fine. Artistic style, "
+         "dramatic lighting and small imperfections are fine. Put a short reason in problem (empty when none).")
     last = None
     for attempt in range(2):
         try:
             time.sleep(4 if not attempt else 30)  # stay under the free tier's requests-per-minute limit
             text, _ = gemini.call(q, QA_SCHEMA, temperature=0.0, max_models=3, images=[path], lite_first=True)
             d = json.loads(text)
-            return bool(d.get("ok", True)), str(d.get("problem", ""))
+            # only clear AI mistakes block a picture; detail differences (pose, angle) do not
+            return d.get("severity", "none") != "major", str(d.get("problem", ""))
         except Exception as e:
             last = e
     raise CheckUnavailable(f"插畫檢查無法執行：{str(last)[:150]}")
