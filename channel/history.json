@@ -56,9 +56,9 @@
   "fb_url": "https://www.facebook.com/reel/1624878229422591/",
   "ig_id": "18108817511573805",
   "ig_url": "https://www.instagram.com/reel/Deoe9OcktZH/",
-  "engaged_views": 714,
-  "avg_view_pct": 60.6,
-  "avg_view_sec": 26,
+  "engaged_views": 738,
+  "avg_view_pct": 60.4,
+  "avg_view_sec": 25,
   "subs_gained": 1,
   "shares": 0
  },
@@ -77,8 +77,8 @@
   "ig_url": "https://www.instagram.com/reel/DepIoAul5Vm/",
   "views": 1084,
   "likes": 28,
-  "engaged_views": 600,
-  "avg_view_pct": 68.0,
+  "engaged_views": 616,
+  "avg_view_pct": 68.4,
   "avg_view_sec": 28,
   "subs_gained": 4,
   "shares": 0
@@ -92,16 +92,16 @@
   "duration": 42.9,
   "video_id": "iGKgma5kLhE",
   "privacy": "public",
-  "views": 2588,
+  "views": 2597,
   "likes": 73,
   "fb_id": "1578820660680924",
   "fb_url": "https://www.facebook.com/reel/1578820660680924/",
   "ig_id": "17923064925222783",
   "ig_url": "https://www.instagram.com/reel/DestGSdkinr/",
-  "engaged_views": 1437,
-  "avg_view_pct": 83.5,
-  "avg_view_sec": 35,
-  "subs_gained": 8,
+  "engaged_views": 1530,
+  "avg_view_pct": 83.9,
+  "avg_view_sec": 36,
+  "subs_gained": 10,
   "shares": 0
  },
  {
@@ -119,9 +119,9 @@
   "ig_url": "https://www.instagram.com/reel/DeueClmCNmN/",
   "views": 91,
   "likes": 6,
-  "engaged_views": 29,
-  "avg_view_pct": 69.6,
-  "avg_view_sec": 29,
+  "engaged_views": 34,
+  "avg_view_pct": 87.8,
+  "avg_view_sec": 37,
   "subs_gained": 0,
   "shares": 0
  },
@@ -138,8 +138,13 @@
   "fb_url": "https://www.facebook.com/reel/1736030561571010/",
   "ig_id": "18113471024030005",
   "ig_url": "https://www.instagram.com/reel/Dexudq3lf7O/",
-  "views": 964,
-  "likes": 46
+  "views": 990,
+  "likes": 46,
+  "engaged_views": 277,
+  "avg_view_pct": 113.2,
+  "avg_view_sec": 49,
+  "subs_gained": 5,
+  "shares": 1
  },
  {
   "date": "2026-10-23",
@@ -153,6 +158,8 @@
   "fb_id": "1135741065809224",
   "fb_url": "https://www.facebook.com/reel/1135741065809224/",
   "ig_id": "17972205723168084",
-  "ig_url": "https://www.instagram.com/reel/De0ZjfkmTKU/"
+  "ig_url": "https://www.instagram.com/reel/De0ZjfkmTKU/",
+  "views": 498,
+  "likes": 11
  }
 ]
