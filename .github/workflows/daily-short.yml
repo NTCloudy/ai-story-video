@@ -85,11 +85,29 @@ jobs:
             git pull -q --rebase   # a manual run may have made today's Short meanwhile
           fi
 
-      - name: 安裝工具（ffmpeg、字型）
-        timeout-minutes: 15   # an Ubuntu mirror once hung here for 45 minutes
+      # The runner's Ubuntu package mirror sometimes hangs for the whole timeout, so the packages are restored
+      # from the GitHub Actions cache; apt is only used when the cache is missing.
+      - name: 安裝工具（ffmpeg、字型，從快取還原）
+        id: aptcache
+        continue-on-error: true
+        timeout-minutes: 10
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: ffmpeg fonts-noto-cjk
+          version: "1.0"
+
+      - name: 安裝工具（快取沒有的話改用 apt）
+        timeout-minutes: 20
         run: |
+          if command -v ffmpeg >/dev/null && command -v ffprobe >/dev/null && fc-list | grep -q "Noto Sans CJK"; then
+            echo "ffmpeg 和字型已就緒"; exit 0
+          fi
           for i in 1 2 3; do sudo timeout 240 apt-get update -qq -o Acquire::Retries=3 && break; sleep 20; done
-          sudo apt-get install -y -qq -o Acquire::Retries=3 ffmpeg fonts-noto-cjk >/dev/null
+          for i in 1 2 3; do
+            sudo timeout 300 apt-get install -y -qq -o Acquire::Retries=3 ffmpeg fonts-noto-cjk >/dev/null && break
+            sleep 20
+          done
+          command -v ffmpeg >/dev/null
 
       - uses: actions/setup-python@v5
         with:
