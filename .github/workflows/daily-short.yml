@@ -99,15 +99,20 @@ jobs:
       - name: 安裝工具（快取沒有的話改用 apt）
         timeout-minutes: 20
         run: |
-          if command -v ffmpeg >/dev/null && command -v ffprobe >/dev/null && fc-list | grep -q "Noto Sans CJK"; then
+          # the apt cache can restore the binaries without all of their shared libraries (exit 127),
+          # so actually run them instead of only checking that they exist
+          if ffmpeg -hide_banner -version >/dev/null 2>&1 && ffprobe -hide_banner -version >/dev/null 2>&1 \
+             && fc-list | grep -q "Noto Sans CJK"; then
             echo "ffmpeg 和字型已就緒"; exit 0
           fi
+          echo "::warning::快取還原的 ffmpeg 無法執行，改用 apt 重新安裝"
+          ffprobe -hide_banner -version 2>&1 | head -3 || true
           for i in 1 2 3; do sudo timeout 240 apt-get update -qq -o Acquire::Retries=3 && break; sleep 20; done
           for i in 1 2 3; do
-            sudo timeout 300 apt-get install -y -qq -o Acquire::Retries=3 ffmpeg fonts-noto-cjk >/dev/null && break
+            sudo timeout 300 apt-get install -y -qq --reinstall -o Acquire::Retries=3 ffmpeg fonts-noto-cjk >/dev/null && break
             sleep 20
           done
-          command -v ffmpeg >/dev/null
+          ffmpeg -hide_banner -version >/dev/null && ffprobe -hide_banner -version >/dev/null
 
       - uses: actions/setup-python@v5
         with:
