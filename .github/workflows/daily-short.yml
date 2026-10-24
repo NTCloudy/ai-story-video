@@ -94,7 +94,7 @@ jobs:
         uses: awalsh128/cache-apt-pkgs-action@v1
         with:
           packages: ffmpeg fonts-noto-cjk
-          version: "1.0"
+          version: "1.1"
 
       - name: 安裝工具（快取沒有的話改用 apt）
         timeout-minutes: 20
@@ -217,10 +217,6 @@ jobs:
       - name: 更新頻道紀錄
         if: always()
         run: |
-          git config user.name "shorts-bot"
-          git config user.email "shorts-bot@users.noreply.github.com"
-          git add channel/history.json channel/queue.json channel/trends.json channel/attempts.json 2>/dev/null || git add channel/history.json channel/queue.json
           MSG="📱 Daily Short update"
           [ -f out/meta.json ] && MSG="📱 Daily Short: $(python -c "import json;print(json.load(open('out/meta.json'))['topic'][:60])")"
-          git commit -m "$MSG" || exit 0
-          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
+          python -m storyvideo.channel_sync --base "${{ github.sha }}" --message "$MSG"
