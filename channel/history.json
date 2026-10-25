@@ -98,7 +98,7 @@
   "fb_url": "https://www.facebook.com/reel/1578820660680924/",
   "ig_id": "17923064925222783",
   "ig_url": "https://www.instagram.com/reel/DestGSdkinr/",
-  "engaged_views": 1533,
+  "engaged_views": 1534,
   "avg_view_pct": 84.3,
   "avg_view_sec": 36,
   "subs_gained": 10,
@@ -117,7 +117,7 @@
   "fb_url": "https://www.facebook.com/reel/1100348112917418/",
   "ig_id": "18010348829776041",
   "ig_url": "https://www.instagram.com/reel/DeueClmCNmN/",
-  "views": 91,
+  "views": 92,
   "likes": 6,
   "engaged_views": 34,
   "avg_view_pct": 88.6,
@@ -138,11 +138,11 @@
   "fb_url": "https://www.facebook.com/reel/1736030561571010/",
   "ig_id": "18113471024030005",
   "ig_url": "https://www.instagram.com/reel/Dexudq3lf7O/",
-  "views": 993,
+  "views": 995,
   "likes": 46,
-  "engaged_views": 391,
-  "avg_view_pct": 110.1,
-  "avg_view_sec": 48,
+  "engaged_views": 403,
+  "avg_view_pct": 108.5,
+  "avg_view_sec": 47,
   "subs_gained": 8,
   "shares": 1
  },
@@ -159,12 +159,12 @@
   "fb_url": "https://www.facebook.com/reel/1135741065809224/",
   "ig_id": "17972205723168084",
   "ig_url": "https://www.instagram.com/reel/De0ZjfkmTKU/",
-  "views": 665,
-  "likes": 14,
-  "engaged_views": 122,
-  "avg_view_pct": 66.3,
-  "avg_view_sec": 26,
-  "subs_gained": 0,
+  "views": 668,
+  "likes": 15,
+  "engaged_views": 222,
+  "avg_view_pct": 58.7,
+  "avg_view_sec": 23,
+  "subs_gained": 1,
   "shares": 0
  },
  {
@@ -180,8 +180,13 @@
   "fb_url": "https://www.facebook.com/reel/1641234247465371/",
   "ig_id": "17905493355355212",
   "ig_url": "https://www.instagram.com/reel/De3GZBWgdoh/",
-  "views": 808,
-  "likes": 26
+  "views": 934,
+  "likes": 30,
+  "engaged_views": 184,
+  "avg_view_pct": 70.5,
+  "avg_view_sec": 27,
+  "subs_gained": 2,
+  "shares": 0
  },
  {
   "date": "2026-10-25",
@@ -196,8 +201,8 @@
   "fb_url": "https://www.facebook.com/reel/1775488200346196/",
   "ig_id": "18083041184532369",
   "ig_url": "https://www.instagram.com/reel/De5Vt09kWX8/",
-  "views": 224,
-  "likes": 7
+  "views": 391,
+  "likes": 13
  },
  {
   "date": "2026-10-25",
@@ -212,7 +217,21 @@
   "fb_url": "https://www.facebook.com/reel/1663572821936746/",
   "ig_id": "18464527801187361",
   "ig_url": "https://www.instagram.com/reel/De5XESQCh7Q/",
-  "views": 4,
+  "views": 36,
   "likes": 0
+ },
+ {
+  "date": "2026-10-26",
+  "topic": "Why Would Your Loyal Pet Dog Actually Eat You Faster Than a Cat?",
+  "concept": "postmortem pet scavenging",
+  "series": "Pets",
+  "title": "Why Dogs Eat Owners Faster Than Cats #shorts",
+  "duration": 41.5,
+  "video_id": "Ps1hl2JcuEk",
+  "privacy": "public",
+  "fb_id": "1646634543531388",
+  "fb_url": "https://www.facebook.com/reel/1646634543531388/",
+  "ig_id": "18113818457144722",
+  "ig_url": "https://www.instagram.com/reel/De76YzGEXKL/"
  }
 ]
