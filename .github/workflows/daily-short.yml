@@ -57,6 +57,10 @@ jobs:
     steps:
       - name: 準備環境
         uses: actions/checkout@v4
+        with:
+          # a run that waited in the queue must see what the previous run recorded (otherwise it makes a
+          # second Short the same day), so check out the latest main instead of the commit at trigger time
+          ref: main
 
       # GitHub only starts a handful of the hourly scheduled runs each day, at random times. A scheduled run
       # that lands in the early morning therefore waits here until publish_after (07:30 Taiwan) instead of
@@ -126,6 +130,11 @@ jobs:
         with:
           path: ~/.cache/storyvideo
           key: depth-anything-v2-small-onnx-v1
+
+      - name: 取得最新頻道紀錄
+        run: |
+          git pull -q --rebase origin main || git pull -q origin main
+          echo "CHANNEL_BASE=$(git rev-parse HEAD)" >> "$GITHUB_ENV"
 
       - name: AI 製作 Short（選題 → 查證 → 腳本 → 插畫 → 配音 → 合成 → 上傳）
         env:
@@ -219,4 +228,4 @@ jobs:
         run: |
           MSG="📱 Daily Short update"
           [ -f out/meta.json ] && MSG="📱 Daily Short: $(python -c "import json;print(json.load(open('out/meta.json'))['topic'][:60])")"
-          python -m storyvideo.channel_sync --base "${{ github.sha }}" --message "$MSG"
+          python -m storyvideo.channel_sync --base "${CHANNEL_BASE:-${{ github.sha }}}" --message "$MSG"
