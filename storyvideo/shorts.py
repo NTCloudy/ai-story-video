@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 
 from . import gemini
 
@@ -132,7 +133,20 @@ VIRAL_PATTERNS = """Patterns of the most-viewed curiosity Shorts on YouTube (use
 - counter-intuitive facts about YOUR body that viewers can test or feel themselves
 - weird animal abilities and predators
 - rankings with numbers ("5 animals that...")
-Avoid: abstract self-help / mindset content, dry definitions, topics that need long setup."""
+Avoid: abstract self-help / mindset content, dry definitions, topics that need long setup.
+Never pick gruesome or morbid angles - YouTube shows them to far fewer people and they earn less: animals or pets
+eating / attacking their owners, corpses or decomposition, cannibalism, gore and graphic injuries, torture,
+suicide or self-harm, disturbing deaths of people or pets. A danger topic is fine when it is about the science of
+surviving it (e.g. "what would kill you first at the bottom of the ocean"), not about the gore."""
+
+MORBID = re.compile(
+    r"\b(eat|eats|eating|ate|devour\w*)\b[^.?!]{0,30}\b(owner|owners|human|humans|people|person|corpse|body|bodies)\b"
+    r"|\b(corpse|corpses|cadaver|decompos\w*|rotting|cannibal\w*|gore|gory|gruesome|torture\w*|suicide|self[- ]harm|"
+    r"dismember\w*|mutilat\w*|disembowel\w*)\b", re.I)
+
+
+def is_morbid(topic: str, concept: str = "") -> bool:
+    return bool(MORBID.search(f"{topic} {concept}"))
 
 
 def performance_summary(history: list[dict]) -> str:
@@ -172,6 +186,10 @@ def pick_topic(history: list[dict], series: list[str] | None = None, attempts: i
     for _ in range(attempts):
         t = (_propose_in_theme(history, theme, rejected) if theme
              else _propose_topic(history, series, rejected, trends or [], mode))
+        if is_morbid(t["topic"], t.get("concept", "")):
+            print(f"[Topic] 題目太獵奇，換一個：{t['topic']}")
+            rejected.append(t["topic"] + " (too morbid)")
+            continue
         dup = find_duplicate(t["topic"], t.get("concept", ""), history)
         if not dup:
             return t

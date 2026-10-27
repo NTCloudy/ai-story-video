@@ -21,5 +21,15 @@ class TopicDedupTest(unittest.TestCase):
         self.assertFalse(lexical_duplicate("What if Earth had rings like Saturn?", "earth rings", HISTORY))
 
 
+class MorbidTopicTest(unittest.TestCase):
+    def test_gruesome_topics_rejected_survival_science_allowed(self):
+        from storyvideo.shorts import is_morbid
+        self.assertTrue(is_morbid("Why Dogs Eat Owners Faster Than Cats"))
+        self.assertTrue(is_morbid("What Happens to a Corpse on Mount Everest?"))
+        self.assertFalse(is_morbid("What Would Actually Kill You First at the Bottom of the Ocean?"))
+        self.assertFalse(is_morbid("Why Do People Freezing to Death Rip Off All Their Clothes?"))
+        self.assertFalse(is_morbid("Why Do Octopuses Eat Themselves?"))
+
+
 if __name__ == "__main__":
     unittest.main()
