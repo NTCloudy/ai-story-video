@@ -37,5 +37,39 @@ class ThemeTest(unittest.TestCase):
         self.assertEqual(picked, {"Animals", "History"})
 
 
+class ProvenThemeTest(unittest.TestCase):
+    H = [{"date": "2026-10-16", "series": "What If", "views": 800, "title": "A"},
+         {"date": "2026-10-18", "series": "Space", "views": 1400, "title": "B"},
+         {"date": "2026-10-20", "series": "Space", "views": 2600, "title": "C"},
+         {"date": "2026-10-21", "series": "Earth & Geology", "views": 90, "title": "D"},
+         {"date": "2026-10-22", "series": "Animals", "views": 990, "title": "E"},
+         {"date": "2026-10-27", "series": "Pets", "views": 4, "title": "F"}]   # too new to judge
+
+    def test_ranking_groups_old_series_names_and_skips_new_shorts(self):
+        best = shorts.proven_themes(self.H, "2026-10-28")
+        self.assertEqual([t["theme"] for t in best], ["Space", "Animals", "Physics & What-Ifs"])
+        self.assertEqual(best[0]["avg_views"], 2000)
+
+    def test_need_proven_counts_last_six(self):
+        h = [{"mode": "trend"}] * 6
+        self.assertTrue(shorts.need_proven(h, 2))
+        h = [{"mode": "proven"}, {"mode": "trend"}, {"mode": "proven"}] + [{"mode": "trend"}] * 3
+        self.assertFalse(shorts.need_proven(h, 2))
+        self.assertFalse(shorts.need_proven(h, 0))
+
+    def test_every_week_has_two_proven(self):
+        modes = []
+        for _ in range(28):
+            modes.append("proven" if shorts.need_proven([{"mode": m} for m in modes], 2) else "trend")
+        for i in range(len(modes) - 6):
+            self.assertGreaterEqual(modes[i:i + 7].count("proven"), 2, modes)
+
+    def test_proven_theme_not_same_as_yesterday(self):
+        random.seed(3)
+        h = self.H[:-1] + [{"date": "2026-10-27", "series": "Space", "views": 5, "title": "G"}]
+        for _ in range(20):
+            self.assertNotEqual(shorts.pick_proven_theme(h, "2026-10-28")["theme"], "Space")
+
+
 if __name__ == "__main__":
     unittest.main()

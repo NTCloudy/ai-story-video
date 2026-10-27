@@ -172,16 +172,73 @@ def trends_summary(trends: list[dict], n: int = 30) -> str:
     return "\n".join(f"- {t['views']:,} views: {t['title']}" for t in good) or "(no trend data)"
 
 
-def pick_topic(history: list[dict], series: list[str] | None = None, attempts: int = 6,
-               trends: list[dict] | None = None, themes: list[dict] | None = None, cooldown: int = 7) -> dict:
-    """Pick a topic guaranteed (lexical + semantic checks) not to overlap any previous Short.
-    With `themes` (trend mode): today's theme is the most popular trending theme not used in the last
-    `cooldown` days, and the topic is proposed inside it. Otherwise: 70% exploit our best series, 30% explore."""
+# old series names -> current theme names (so our own stats can be grouped by theme)
+THEME_ALIASES = {"what if": "Physics & What-Ifs", "space": "Space", "scary science": "Survival & Danger",
+                 "psychology": "Psychology & Brain", "your body": "Human Body", "history mysteries": "History",
+                 "animal superpowers": "Animals", "unsolved mysteries": "Mysteries & Unexplained"}
+
+
+def normalize_theme(series: str) -> str:
+    s = (series or "").strip()
+    return THEME_ALIASES.get(s.lower(), s)
+
+
+def proven_themes(history: list[dict], today: str = "", min_age_days: int = 2, top: int = 3) -> list[dict]:
+    """Our own best themes: average views of Shorts that are at least `min_age_days` old (newer ones have not
+    been shown to many people yet). [{theme, avg_views, count, examples}] best first."""
+    from datetime import date, timedelta
+    cutoff = (date.fromisoformat(today) if today else date.today()) - timedelta(days=min_age_days)
+    groups: dict[str, list[dict]] = {}
+    for h in history:
+        theme = normalize_theme(h.get("series", ""))
+        if not theme or h.get("views") is None or h.get("date", "9999") > cutoff.isoformat():
+            continue
+        groups.setdefault(theme, []).append(h)
+    out = []
+    for theme, rows in groups.items():
+        rows.sort(key=lambda h: -h["views"])
+        out.append({"theme": theme, "avg_views": sum(h["views"] for h in rows) // len(rows), "count": len(rows),
+                    "examples": [f"{h.get('title', h.get('topic', ''))} ({h['views']:,} views on our channel)"
+                                 for h in rows[:4]]})
+    out.sort(key=lambda t: -t["avg_views"])
+    return out[:top]
+
+
+def need_proven(history: list[dict], per_week: int = 2) -> bool:
+    """True when the last 6 Shorts contain fewer than `per_week` 'proven' picks, so every 7 consecutive
+    Shorts include at least `per_week` Shorts from our best-performing themes."""
+    return per_week > 0 and sum(1 for h in history[-6:] if h.get("mode") == "proven") < per_week
+
+
+def pick_proven_theme(history: list[dict], today: str = "") -> dict | None:
     import random
-    theme = pick_theme(themes, history, cooldown) if themes else None
-    mode = "trend" if theme else ("exploit" if random.random() < 0.7 else "explore")
-    print(f"[Topic] mode: {mode}" + (f" | theme: {theme['theme']} (median {theme['median_views']:,} views)"
-                                     if theme else ""))
+    best = proven_themes(history, today)
+    yesterday = normalize_theme(history[-1].get("series", "")) if history else ""
+    pool = [t for t in best if t["theme"] != yesterday] or best
+    if not pool:
+        return None
+    t = random.choices(pool, weights=[max(t["avg_views"], 1) for t in pool], k=1)[0]
+    return {"theme": t["theme"], "median_views": t["avg_views"], "examples": t["examples"]}
+
+
+def pick_topic(history: list[dict], series: list[str] | None = None, attempts: int = 6,
+               trends: list[dict] | None = None, themes: list[dict] | None = None, cooldown: int = 7,
+               proven_per_week: int = 2, today: str = "") -> dict:
+    """Pick a topic guaranteed (lexical + semantic checks) not to overlap any previous Short.
+    At least `proven_per_week` of every 7 Shorts come from our own best-viewed themes ("proven").
+    Otherwise with `themes` (trend mode): today's theme is the most popular trending theme not used in the last
+    `cooldown` days, and the topic is proposed inside it. Without themes: 70% exploit our best series, 30% explore."""
+    import random
+    theme = pick_proven_theme(history, today) if need_proven(history, proven_per_week) else None
+    mode = "proven" if theme else ""
+    if theme:
+        trend = next((t for t in themes or [] if t["theme"] == theme["theme"]), None)
+        if trend:  # what is hot in that theme on YouTube right now, plus our own winners
+            theme["examples"] = theme["examples"] + trend["examples"][:4]
+    else:
+        theme = pick_theme(themes, history, cooldown) if themes else None
+        mode = "trend" if theme else ("exploit" if random.random() < 0.7 else "explore")
+    print(f"[Topic] mode: {mode}" + (f" | theme: {theme['theme']} ({theme['median_views']:,} views)" if theme else ""))
     rejected: list[str] = []
     for _ in range(attempts):
         t = (_propose_in_theme(history, theme, rejected) if theme
@@ -192,6 +249,7 @@ def pick_topic(history: list[dict], series: list[str] | None = None, attempts: i
             continue
         dup = find_duplicate(t["topic"], t.get("concept", ""), history)
         if not dup:
+            t["mode"] = mode
             return t
         print(f"[Topic] 重複，換一個：{t['topic']} ≈ {dup}")
         rejected.append(t["topic"])

@@ -233,7 +233,7 @@ def make_short(args, cfg: dict, history: list, queue: list, today: str, out: Pat
     """Topic -> research -> script -> check -> images -> voice -> render -> upload.
     Raises CannotGenerate instead of falling back to a worse result."""
     # 1. topic (never repeat a previous Short)
-    series, concept, topic = "", "", ""
+    series, concept, topic, mode = "", "", "", ""
     if args.topic.strip():
         dup = shorts.find_duplicate(args.topic.strip(), "", history)
         if dup:
@@ -253,8 +253,9 @@ def make_short(args, cfg: dict, history: list, queue: list, today: str, out: Pat
         trends, themes = load_trends(cfg)
         use_themes = cfg.get("topic_mode", "trends") == "trends"
         t = shorts.pick_topic(history, cfg.get("series"), trends=trends, themes=themes if use_themes else None,
+                              proven_per_week=int(cfg.get("proven_per_week", 2)), today=today,
                               cooldown=int(cfg.get("theme_cooldown_days", 7)))
-        topic, series, concept = t["topic"], t["series"], t.get("concept", "")
+        topic, series, concept, mode = t["topic"], t["series"], t.get("concept", ""), t.get("mode", "")
     print(f"== 主題：{topic}（{series or '自訂'}）==")
 
     # 2. research + script, then make sure the script is about the topic and the title matches the script
@@ -311,7 +312,7 @@ def make_short(args, cfg: dict, history: list, queue: list, today: str, out: Pat
     desc += "\n\nVisuals and voice are AI-generated."
     entry = {"date": today, "topic": topic, "concept": concept, "series": series or sb.get("series", ""),
              "title": sb["youtube_title"],
-             "duration": round(dur, 1), "video_id": "", "privacy": ""}
+             "duration": round(dur, 1), "video_id": "", "privacy": "", "mode": mode}
     if not args.no_upload and cfg.get("upload", True) and youtube.configured():
         try:
             v = youtube.upload(out / "video.mp4", sb["youtube_title"], desc, sb.get("tags", []),

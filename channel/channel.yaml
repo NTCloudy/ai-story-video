@@ -13,6 +13,7 @@ made_for_kids: false
 category: "27"             # 27 = Education
 topic_mode: trends         # trends = 每天從 YouTube Shorts 目前最熱門的題材類別中挑一個（同類別 7 天內不重複）；series = 只用下面的系列
 theme_cooldown_days: 7     # 同一個題材類別隔幾支才能再用
+proven_per_week: 2         # 每 7 支至少幾支用「我們頻道觀看數最高的題材」（其餘跟著 YouTube 熱門題材）
 voice: en_male             # en_male（Andrew）/ en_male2（Christopher）/ en_female（Ava）
 voice_rate: "+8%"
 series:
