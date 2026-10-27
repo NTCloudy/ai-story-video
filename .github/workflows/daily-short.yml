@@ -98,7 +98,10 @@ jobs:
         uses: awalsh128/cache-apt-pkgs-action@v1
         with:
           packages: ffmpeg fonts-noto-cjk
-          version: "1.1"
+          version: "1.2"
+          # run the packages' install scripts: ffmpeg finds libblas.so.3 / liblapack.so.3 through
+          # update-alternatives links that only those scripts create (missing link = exit 127)
+          execute_install_scripts: true
 
       - name: 安裝工具（快取沒有的話改用 apt）
         timeout-minutes: 20
@@ -109,11 +112,22 @@ jobs:
              && fc-list | grep -q "Noto Sans CJK"; then
             echo "ffmpeg 和字型已就緒"; exit 0
           fi
+          # cheap repair first: recreate the BLAS/LAPACK alternatives links and refresh the linker cache
+          for lib in libblas.so.3 liblapack.so.3; do
+            f=$(ls /usr/lib/x86_64-linux-gnu/*/"$lib" 2>/dev/null | head -1)
+            [ -n "$f" ] && sudo ln -sf "$f" "/usr/lib/x86_64-linux-gnu/$lib"
+          done
+          sudo ldconfig
+          if ffmpeg -hide_banner -version >/dev/null 2>&1 && ffprobe -hide_banner -version >/dev/null 2>&1 \
+             && fc-list | grep -q "Noto Sans CJK"; then
+            echo "ffmpeg 修復完成"; exit 0
+          fi
           echo "::warning::快取還原的 ffmpeg 無法執行，改用 apt 重新安裝"
           ffprobe -hide_banner -version 2>&1 | head -3 || true
           for i in 1 2 3; do sudo timeout 240 apt-get update -qq -o Acquire::Retries=3 && break; sleep 20; done
           for i in 1 2 3; do
-            sudo timeout 300 apt-get install -y -qq --reinstall -o Acquire::Retries=3 ffmpeg fonts-noto-cjk >/dev/null && break
+            sudo timeout 300 apt-get install -y -qq --reinstall -o Acquire::Retries=3 \
+              ffmpeg libblas3 liblapack3 fonts-noto-cjk >/dev/null && break
             sleep 20
           done
           ffmpeg -hide_banner -version >/dev/null && ffprobe -hide_banner -version >/dev/null

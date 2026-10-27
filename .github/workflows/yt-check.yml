@@ -24,10 +24,13 @@ jobs:
           import json, requests
           from storyvideo import youtube
           ids = ",".join(h["video_id"] for h in json.load(open("channel/history.json")) if h.get("video_id"))
-          r = requests.get(f"{youtube.API}/videos", params={"part": "snippet,status,processingDetails", "id": ids},
+          r = requests.get(f"{youtube.API}/videos", params={"part": "snippet,status,processingDetails,contentDetails", "id": ids},
                            headers={"Authorization": f"Bearer {youtube.access_token()}"}, timeout=30).json()
           for v in r.get("items", []):
               print("VIDEO", v["id"], v["snippet"]["channelId"], v["status"]["privacyStatus"], v["status"]["uploadStatus"],
-                    v["status"].get("rejectionReason", ""), v["snippet"]["title"])
+                    v["status"].get("rejectionReason", ""), v["snippet"]["title"],
+                    "| kids:", v["status"].get("madeForKids"), "| rating:", json.dumps(v.get("contentDetails", {}).get("contentRating", {})),
+                    "| region:", json.dumps(v.get("contentDetails", {}).get("regionRestriction", {})),
+                    "| synthetic:", v["status"].get("containsSyntheticMedia"), "| dur:", v.get("contentDetails", {}).get("duration"))
           print("FOUND", len(r.get("items", [])), "of", len(ids.split(",")))
           PY
