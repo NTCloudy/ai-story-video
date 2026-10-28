@@ -98,8 +98,8 @@
   "fb_url": "https://www.facebook.com/reel/1578820660680924/",
   "ig_id": "17923064925222783",
   "ig_url": "https://www.instagram.com/reel/DestGSdkinr/",
-  "engaged_views": 1538,
-  "avg_view_pct": 84.2,
+  "engaged_views": 1546,
+  "avg_view_pct": 84.1,
   "avg_view_sec": 36,
   "subs_gained": 10,
   "shares": 0
@@ -162,7 +162,7 @@
   "views": 668,
   "likes": 16,
   "engaged_views": 272,
-  "avg_view_pct": 61.3,
+  "avg_view_pct": 61.7,
   "avg_view_sec": 24,
   "subs_gained": 2,
   "shares": 0
@@ -180,10 +180,10 @@
   "fb_url": "https://www.facebook.com/reel/1641234247465371/",
   "ig_id": "17905493355355212",
   "ig_url": "https://www.instagram.com/reel/De3GZBWgdoh/",
-  "views": 956,
+  "views": 955,
   "likes": 32,
   "engaged_views": 450,
-  "avg_view_pct": 67.2,
+  "avg_view_pct": 66.9,
   "avg_view_sec": 26,
   "subs_gained": 2,
   "shares": 0
@@ -201,9 +201,9 @@
   "fb_url": "https://www.facebook.com/reel/1775488200346196/",
   "ig_id": "18083041184532369",
   "ig_url": "https://www.instagram.com/reel/De5Vt09kWX8/",
-  "views": 440,
+  "views": 441,
   "likes": 14,
-  "engaged_views": 171,
+  "engaged_views": 178,
   "avg_view_pct": 44.3,
   "avg_view_sec": 18,
   "subs_gained": 1,
@@ -224,9 +224,9 @@
   "ig_url": "https://www.instagram.com/reel/De5XESQCh7Q/",
   "views": 61,
   "likes": 1,
-  "engaged_views": 17,
-  "avg_view_pct": 44.2,
-  "avg_view_sec": 16,
+  "engaged_views": 21,
+  "avg_view_pct": 107.7,
+  "avg_view_sec": 39,
   "subs_gained": 0,
   "shares": 0
  },
@@ -244,7 +244,12 @@
   "ig_id": "18113818457144722",
   "ig_url": "https://www.instagram.com/reel/De76YzGEXKL/",
   "views": 3,
-  "likes": 1
+  "likes": 1,
+  "engaged_views": 2,
+  "avg_view_pct": 65.0,
+  "avg_view_sec": 27,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-10-27",
@@ -259,8 +264,13 @@
   "fb_url": "https://www.facebook.com/reel/1680430180321529/",
   "ig_id": "18033321710909295",
   "ig_url": "https://www.instagram.com/reel/De-h4NCFH11/",
-  "views": 20,
-  "likes": 1
+  "views": 57,
+  "likes": 4,
+  "engaged_views": 0,
+  "avg_view_pct": 0,
+  "avg_view_sec": 0,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-10-28",
@@ -275,6 +285,23 @@
   "fb_id": "1436135678625245",
   "fb_url": "https://www.facebook.com/reel/1436135678625245/",
   "ig_id": "17909084343569057",
-  "ig_url": "https://www.instagram.com/reel/DfBF3Uggcyp/"
+  "ig_url": "https://www.instagram.com/reel/DfBF3Uggcyp/",
+  "views": 288,
+  "likes": 20
+ },
+ {
+  "date": "2026-10-29",
+  "topic": "Why Does Avalanche Snow Turn Into Solid Concrete the Second It Stops?",
+  "concept": "avalanche snow sintering",
+  "series": "Survival & Danger",
+  "title": "Why Avalanche Snow Instantly Turns Into Concrete #shorts",
+  "duration": 42.9,
+  "video_id": "kojH4jdRtPA",
+  "privacy": "public",
+  "mode": "proven",
+  "fb_id": "1737207730672634",
+  "fb_url": "https://www.facebook.com/reel/1737207730672634/",
+  "ig_id": "18130647034884759",
+  "ig_url": "https://www.instagram.com/reel/DfDqDLMAtCG/"
  }
 ]
