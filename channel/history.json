@@ -98,7 +98,7 @@
   "fb_url": "https://www.facebook.com/reel/1578820660680924/",
   "ig_id": "17923064925222783",
   "ig_url": "https://www.instagram.com/reel/DestGSdkinr/",
-  "engaged_views": 1546,
+  "engaged_views": 1547,
   "avg_view_pct": 84.1,
   "avg_view_sec": 36,
   "subs_gained": 10,
@@ -243,7 +243,7 @@
   "fb_url": "https://www.facebook.com/reel/1680430180321529/",
   "ig_id": "18033321710909295",
   "ig_url": "https://www.instagram.com/reel/De-h4NCFH11/",
-  "views": 66,
+  "views": 65,
   "likes": 4,
   "engaged_views": 31,
   "avg_view_pct": 72.3,
@@ -265,7 +265,7 @@
   "fb_url": "https://www.facebook.com/reel/1436135678625245/",
   "ig_id": "17909084343569057",
   "ig_url": "https://www.instagram.com/reel/DfBF3Uggcyp/",
-  "views": 381,
+  "views": 380,
   "likes": 20,
   "engaged_views": 203,
   "avg_view_pct": 147.9,
@@ -287,11 +287,11 @@
   "fb_url": "https://www.facebook.com/reel/1737207730672634/",
   "ig_id": "18130647034884759",
   "ig_url": "https://www.instagram.com/reel/DfDqDLMAtCG/",
-  "views": 157,
+  "views": 158,
   "likes": 12,
-  "engaged_views": 74,
-  "avg_view_pct": 58.6,
-  "avg_view_sec": 25,
+  "engaged_views": 81,
+  "avg_view_pct": 55.5,
+  "avg_view_sec": 23,
   "subs_gained": 1,
   "shares": 0
  },
@@ -309,8 +309,13 @@
   "fb_url": "https://www.facebook.com/reel/953246094171343/",
   "ig_id": "18413682976089625",
   "ig_url": "https://www.instagram.com/reel/DfGNqQOAkT3/",
-  "views": 459,
-  "likes": 29
+  "views": 464,
+  "likes": 29,
+  "engaged_views": 232,
+  "avg_view_pct": 112.5,
+  "avg_view_sec": 46,
+  "subs_gained": 4,
+  "shares": 3
  },
  {
   "date": "2026-10-31",
@@ -326,7 +331,7 @@
   "fb_url": "https://www.facebook.com/reel/2320459282102140/",
   "ig_id": "17873610939637209",
   "ig_url": "https://www.instagram.com/reel/DfI14VVk2Ih/",
-  "views": 152,
+  "views": 153,
   "likes": 18
  }
 ]
