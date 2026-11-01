@@ -243,7 +243,7 @@
   "fb_url": "https://www.facebook.com/reel/1680430180321529/",
   "ig_id": "18033321710909295",
   "ig_url": "https://www.instagram.com/reel/De-h4NCFH11/",
-  "views": 65,
+  "views": 66,
   "likes": 4,
   "engaged_views": 31,
   "avg_view_pct": 72.3,
@@ -267,8 +267,8 @@
   "ig_url": "https://www.instagram.com/reel/DfBF3Uggcyp/",
   "views": 380,
   "likes": 20,
-  "engaged_views": 203,
-  "avg_view_pct": 147.9,
+  "engaged_views": 202,
+  "avg_view_pct": 148.1,
   "avg_view_sec": 62,
   "subs_gained": 1,
   "shares": 0
@@ -309,11 +309,11 @@
   "fb_url": "https://www.facebook.com/reel/953246094171343/",
   "ig_id": "18413682976089625",
   "ig_url": "https://www.instagram.com/reel/DfGNqQOAkT3/",
-  "views": 465,
+  "views": 469,
   "likes": 29,
-  "engaged_views": 232,
-  "avg_view_pct": 112.5,
-  "avg_view_sec": 46,
+  "engaged_views": 250,
+  "avg_view_pct": 109.6,
+  "avg_view_sec": 44,
   "subs_gained": 4,
   "shares": 3
  },
@@ -331,8 +331,13 @@
   "fb_url": "https://www.facebook.com/reel/2320459282102140/",
   "ig_id": "17873610939637209",
   "ig_url": "https://www.instagram.com/reel/DfI14VVk2Ih/",
-  "views": 153,
-  "likes": 18
+  "views": 164,
+  "likes": 20,
+  "engaged_views": 66,
+  "avg_view_pct": 72.5,
+  "avg_view_sec": 28,
+  "subs_gained": 1,
+  "shares": 0
  },
  {
   "date": "2026-11-01",
@@ -347,6 +352,23 @@
   "fb_id": "40181307081467824",
   "fb_url": "https://www.facebook.com/reel/40181307081467824/",
   "ig_id": "17930582406423358",
-  "ig_url": "https://www.instagram.com/reel/DfLXvxhj90f/"
+  "ig_url": "https://www.instagram.com/reel/DfLXvxhj90f/",
+  "views": 276,
+  "likes": 21
+ },
+ {
+  "date": "2026-11-02",
+  "topic": "Why Does Pineapple Try to Digest You Back While You Eat It?",
+  "concept": "pineapple bromelain enzyme",
+  "series": "Food Facts",
+  "title": "Why Does Pineapple Sting Your Tongue? #shorts",
+  "duration": 41.4,
+  "video_id": "Xyf-3Jmm3fM",
+  "privacy": "public",
+  "mode": "trend",
+  "fb_id": "2139541090260248",
+  "fb_url": "https://www.facebook.com/reel/2139541090260248/",
+  "ig_id": "17928910425430189",
+  "ig_url": "https://www.instagram.com/reel/DfN8CAxkcyj/"
  }
 ]
