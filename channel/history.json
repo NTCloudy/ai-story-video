@@ -8,7 +8,7 @@
   "video_id": "AHTIzfBBwy8",
   "privacy": "public",
   "concept": "earth stops spinning",
-  "views": 828,
+  "views": 829,
   "likes": 28,
   "fb_id": "1624136759093208",
   "fb_url": "https://www.facebook.com/reel/1624136759093208/",
@@ -243,10 +243,10 @@
   "fb_url": "https://www.facebook.com/reel/1680430180321529/",
   "ig_id": "18033321710909295",
   "ig_url": "https://www.instagram.com/reel/De-h4NCFH11/",
-  "views": 66,
+  "views": 67,
   "likes": 4,
-  "engaged_views": 31,
-  "avg_view_pct": 72.3,
+  "engaged_views": 32,
+  "avg_view_pct": 73.1,
   "avg_view_sec": 30,
   "subs_gained": 1,
   "shares": 0
@@ -290,7 +290,7 @@
   "views": 158,
   "likes": 12,
   "engaged_views": 81,
-  "avg_view_pct": 55.5,
+  "avg_view_pct": 55.4,
   "avg_view_sec": 23,
   "subs_gained": 1,
   "shares": 0
@@ -311,8 +311,8 @@
   "ig_url": "https://www.instagram.com/reel/DfGNqQOAkT3/",
   "views": 469,
   "likes": 29,
-  "engaged_views": 250,
-  "avg_view_pct": 109.6,
+  "engaged_views": 258,
+  "avg_view_pct": 108.4,
   "avg_view_sec": 44,
   "subs_gained": 4,
   "shares": 3
@@ -333,9 +333,9 @@
   "ig_url": "https://www.instagram.com/reel/DfI14VVk2Ih/",
   "views": 164,
   "likes": 20,
-  "engaged_views": 66,
-  "avg_view_pct": 72.5,
-  "avg_view_sec": 28,
+  "engaged_views": 70,
+  "avg_view_pct": 69.6,
+  "avg_view_sec": 27,
   "subs_gained": 1,
   "shares": 0
  },
@@ -353,8 +353,13 @@
   "fb_url": "https://www.facebook.com/reel/40181307081467824/",
   "ig_id": "17930582406423358",
   "ig_url": "https://www.instagram.com/reel/DfLXvxhj90f/",
-  "views": 276,
-  "likes": 21
+  "views": 918,
+  "likes": 53,
+  "engaged_views": 104,
+  "avg_view_pct": 74.3,
+  "avg_view_sec": 28,
+  "subs_gained": 1,
+  "shares": 0
  },
  {
   "date": "2026-11-02",
@@ -369,6 +374,8 @@
   "fb_id": "2139541090260248",
   "fb_url": "https://www.facebook.com/reel/2139541090260248/",
   "ig_id": "17928910425430189",
-  "ig_url": "https://www.instagram.com/reel/DfN8CAxkcyj/"
+  "ig_url": "https://www.instagram.com/reel/DfN8CAxkcyj/",
+  "views": 63,
+  "likes": 6
  }
 ]
