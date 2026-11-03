@@ -289,7 +289,7 @@
   "ig_url": "https://www.instagram.com/reel/DfDqDLMAtCG/",
   "views": 158,
   "likes": 12,
-  "engaged_views": 81,
+  "engaged_views": 80,
   "avg_view_pct": 55.4,
   "avg_view_sec": 23,
   "subs_gained": 1,
@@ -309,7 +309,7 @@
   "fb_url": "https://www.facebook.com/reel/953246094171343/",
   "ig_id": "18413682976089625",
   "ig_url": "https://www.instagram.com/reel/DfGNqQOAkT3/",
-  "views": 469,
+  "views": 468,
   "likes": 29,
   "engaged_views": 258,
   "avg_view_pct": 108.4,
@@ -333,9 +333,9 @@
   "ig_url": "https://www.instagram.com/reel/DfI14VVk2Ih/",
   "views": 164,
   "likes": 20,
-  "engaged_views": 70,
-  "avg_view_pct": 69.6,
-  "avg_view_sec": 27,
+  "engaged_views": 73,
+  "avg_view_pct": 70.4,
+  "avg_view_sec": 28,
   "subs_gained": 1,
   "shares": 0
  },
@@ -353,11 +353,11 @@
   "fb_url": "https://www.facebook.com/reel/40181307081467824/",
   "ig_id": "17930582406423358",
   "ig_url": "https://www.instagram.com/reel/DfLXvxhj90f/",
-  "views": 928,
+  "views": 994,
   "likes": 53,
-  "engaged_views": 104,
-  "avg_view_pct": 74.3,
-  "avg_view_sec": 28,
+  "engaged_views": 277,
+  "avg_view_pct": 68.6,
+  "avg_view_sec": 26,
   "subs_gained": 1,
   "shares": 0
  },
@@ -375,8 +375,13 @@
   "fb_url": "https://www.facebook.com/reel/2139541090260248/",
   "ig_id": "17928910425430189",
   "ig_url": "https://www.instagram.com/reel/DfN8CAxkcyj/",
-  "views": 64,
-  "likes": 6
+  "views": 71,
+  "likes": 8,
+  "engaged_views": 32,
+  "avg_view_pct": 61.8,
+  "avg_view_sec": 25,
+  "subs_gained": 1,
+  "shares": 0
  },
  {
   "date": "2026-11-03",
@@ -391,6 +396,23 @@
   "fb_id": "1418743637000317",
   "fb_url": "https://www.facebook.com/reel/1418743637000317/",
   "ig_id": "17996691150021867",
-  "ig_url": "https://www.instagram.com/reel/DfQhaB5jj8f/"
+  "ig_url": "https://www.instagram.com/reel/DfQhaB5jj8f/",
+  "views": 192,
+  "likes": 15
+ },
+ {
+  "date": "2026-11-04",
+  "topic": "Why Can a Sperm Whale's Voice Vibrate a Human to Death Underwater?",
+  "concept": "sperm whale clicks",
+  "series": "Animals",
+  "title": "Can a Sperm Whale's Click Kill a Human? #shorts",
+  "duration": 42.4,
+  "video_id": "37Qp7JwKTi0",
+  "privacy": "public",
+  "mode": "proven",
+  "fb_id": "1798395598060051",
+  "fb_url": "https://www.facebook.com/reel/1798395598060051/",
+  "ig_id": "17914317243555360",
+  "ig_url": "https://www.instagram.com/reel/DfTFxKwgq8D/"
  }
 ]
