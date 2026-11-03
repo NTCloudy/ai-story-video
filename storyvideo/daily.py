@@ -57,22 +57,27 @@ def load_trends(cfg: dict) -> tuple[list[dict], list[dict]]:
     fresh = (cache.get("fetched") and cache.get("queries") == queries
              and (datetime.now(TZ) - datetime.fromisoformat(cache["fetched"])).days < 3)
     items = cache.get("items", [])
+    previous_themes = cache.get("themes", [])
     if not fresh and youtube.configured():
         try:
             items = youtube.trending_shorts(queries)[:150]
-            cache = {"fetched": datetime.now(TZ).isoformat(), "queries": queries, "items": items}
+            cache = {"fetched": datetime.now(TZ).isoformat(), "queries": queries, "items": items,
+                     "themes": previous_themes, "themes_pending": True}
+            _save(path, cache)   # keep the (quota-expensive) search result even if labelling fails below
             print(f"[Trends] {len(items)} trending Shorts collected")
         except Exception as e:
             print(f"[Trends] skipped: {e}")
-    if items and not cache.get("themes"):
+    if items and (cache.get("themes_pending") or not cache.get("themes")):
         try:
             cache["themes"] = shorts.label_themes(items)
-            cache.setdefault("items", items)
+            cache["items"] = items
+            cache.pop("themes_pending", None)
             _save(path, cache)
             print("[Trends] hot themes: " + ", ".join(f"{t['theme']} ({t['median_views']:,})" for t in cache["themes"][:10]))
         except Exception as e:
-            print(f"[Trends] theme labelling skipped: {e}")
-    return items, cache.get("themes", [])
+            # Gemini busy: keep using the previous themes and relabel on the next run
+            print(f"[Trends] theme labelling skipped (using the previous themes, retry next run): {e}")
+    return items, cache.get("themes") or previous_themes
 
 
 def publish_video(video_id: str, attempts: int = 6, wait: int = 20) -> str:
