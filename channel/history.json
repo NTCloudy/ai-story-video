@@ -290,7 +290,7 @@
   "views": 158,
   "likes": 12,
   "engaged_views": 80,
-  "avg_view_pct": 55.4,
+  "avg_view_pct": 55.5,
   "avg_view_sec": 23,
   "subs_gained": 1,
   "shares": 0
@@ -353,11 +353,11 @@
   "fb_url": "https://www.facebook.com/reel/40181307081467824/",
   "ig_id": "17930582406423358",
   "ig_url": "https://www.instagram.com/reel/DfLXvxhj90f/",
-  "views": 994,
+  "views": 998,
   "likes": 53,
-  "engaged_views": 277,
-  "avg_view_pct": 68.6,
-  "avg_view_sec": 26,
+  "engaged_views": 547,
+  "avg_view_pct": 67.1,
+  "avg_view_sec": 25,
   "subs_gained": 1,
   "shares": 0
  },
@@ -375,11 +375,11 @@
   "fb_url": "https://www.facebook.com/reel/2139541090260248/",
   "ig_id": "17928910425430189",
   "ig_url": "https://www.instagram.com/reel/DfN8CAxkcyj/",
-  "views": 71,
+  "views": 72,
   "likes": 8,
-  "engaged_views": 32,
-  "avg_view_pct": 61.8,
-  "avg_view_sec": 25,
+  "engaged_views": 40,
+  "avg_view_pct": 58.9,
+  "avg_view_sec": 24,
   "subs_gained": 1,
   "shares": 0
  },
@@ -397,8 +397,13 @@
   "fb_url": "https://www.facebook.com/reel/1418743637000317/",
   "ig_id": "17996691150021867",
   "ig_url": "https://www.instagram.com/reel/DfQhaB5jj8f/",
-  "views": 192,
-  "likes": 15
+  "views": 202,
+  "likes": 16,
+  "engaged_views": 102,
+  "avg_view_pct": 60.3,
+  "avg_view_sec": 27,
+  "subs_gained": 4,
+  "shares": 0
  },
  {
   "date": "2026-11-04",
@@ -413,6 +418,23 @@
   "fb_id": "1798395598060051",
   "fb_url": "https://www.facebook.com/reel/1798395598060051/",
   "ig_id": "17914317243555360",
-  "ig_url": "https://www.instagram.com/reel/DfTFxKwgq8D/"
+  "ig_url": "https://www.instagram.com/reel/DfTFxKwgq8D/",
+  "views": 202,
+  "likes": 21
+ },
+ {
+  "date": "2026-11-05",
+  "topic": "Why Does Every Airplane Window Have a Tiny Hole That Stops the Cabin From Exploding?",
+  "concept": "airplane window bleed hole",
+  "series": "Technology & Inventions",
+  "title": "Why Do Airplane Windows Have Tiny Holes? #shorts",
+  "duration": 41.5,
+  "video_id": "WgiyDL84bdI",
+  "privacy": "public",
+  "mode": "proven",
+  "fb_id": "1065375813187910",
+  "fb_url": "https://www.facebook.com/reel/1065375813187910/",
+  "ig_id": "18064112066638872",
+  "ig_url": "https://www.instagram.com/reel/DfVrGCMirXs/"
  }
 ]
