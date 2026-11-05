@@ -355,8 +355,8 @@
   "ig_url": "https://www.instagram.com/reel/DfLXvxhj90f/",
   "views": 998,
   "likes": 53,
-  "engaged_views": 547,
-  "avg_view_pct": 67.1,
+  "engaged_views": 549,
+  "avg_view_pct": 67.2,
   "avg_view_sec": 25,
   "subs_gained": 1,
   "shares": 0
@@ -377,7 +377,7 @@
   "ig_url": "https://www.instagram.com/reel/DfN8CAxkcyj/",
   "views": 72,
   "likes": 8,
-  "engaged_views": 40,
+  "engaged_views": 43,
   "avg_view_pct": 58.9,
   "avg_view_sec": 24,
   "subs_gained": 1,
@@ -397,11 +397,11 @@
   "fb_url": "https://www.facebook.com/reel/1418743637000317/",
   "ig_id": "17996691150021867",
   "ig_url": "https://www.instagram.com/reel/DfQhaB5jj8f/",
-  "views": 202,
+  "views": 205,
   "likes": 16,
-  "engaged_views": 102,
-  "avg_view_pct": 60.3,
-  "avg_view_sec": 27,
+  "engaged_views": 109,
+  "avg_view_pct": 59,
+  "avg_view_sec": 26,
   "subs_gained": 4,
   "shares": 0
  },
@@ -419,8 +419,13 @@
   "fb_url": "https://www.facebook.com/reel/1798395598060051/",
   "ig_id": "17914317243555360",
   "ig_url": "https://www.instagram.com/reel/DfTFxKwgq8D/",
-  "views": 202,
-  "likes": 21
+  "views": 215,
+  "likes": 21,
+  "engaged_views": 92,
+  "avg_view_pct": 81.2,
+  "avg_view_sec": 34,
+  "subs_gained": 1,
+  "shares": 0
  },
  {
   "date": "2026-11-05",
@@ -435,6 +440,23 @@
   "fb_id": "1065375813187910",
   "fb_url": "https://www.facebook.com/reel/1065375813187910/",
   "ig_id": "18064112066638872",
-  "ig_url": "https://www.instagram.com/reel/DfVrGCMirXs/"
+  "ig_url": "https://www.instagram.com/reel/DfVrGCMirXs/",
+  "views": 267,
+  "likes": 15
+ },
+ {
+  "date": "2026-11-06",
+  "topic": "Why Can't You Open a Car Door Underwater Until the Cabin Completely Fills?",
+  "concept": "hydrostatic door pressure",
+  "series": "Survival & Danger",
+  "title": "Why Sinking Car Doors Won't Open #shorts",
+  "duration": 44.0,
+  "video_id": "ZbxBvlJXPko",
+  "privacy": "public",
+  "mode": "trend",
+  "fb_id": "1174297255273377",
+  "fb_url": "https://www.facebook.com/reel/1174297255273377/",
+  "ig_id": "18016800611966558",
+  "ig_url": "https://www.instagram.com/reel/DfYQF3gkfOt/"
  }
 ]
