@@ -31,5 +31,16 @@ class MorbidTopicTest(unittest.TestCase):
         self.assertFalse(is_morbid("Why Do Octopuses Eat Themselves?"))
 
 
+class AdviceTopicTest(unittest.TestCase):
+    def test_safety_advice_topics_rejected_science_allowed(self):
+        from storyvideo.shorts import is_advice
+        self.assertTrue(is_advice("How to Escape a Sinking Car"))
+        self.assertTrue(is_advice("What To Do If a Bear Attacks You?"))
+        self.assertTrue(is_advice("How to Survive an Avalanche"))
+        self.assertFalse(is_advice("Why Can't You Open a Car Door Underwater Until the Cabin Fills?"))
+        self.assertFalse(is_advice("Why Does Avalanche Snow Turn Into Solid Concrete the Second It Stops?"))
+        self.assertFalse(is_advice("Why Do Airplane Windows Have Tiny Holes?"))
+
+
 if __name__ == "__main__":
     unittest.main()

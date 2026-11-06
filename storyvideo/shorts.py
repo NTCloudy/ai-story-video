@@ -137,7 +137,20 @@ Avoid: abstract self-help / mindset content, dry definitions, topics that need l
 Never pick gruesome or morbid angles - YouTube shows them to far fewer people and they earn less: animals or pets
 eating / attacking their owners, corpses or decomposition, cannibalism, gore and graphic injuries, torture,
 suicide or self-harm, disturbing deaths of people or pets. A danger topic is fine when it is about the science of
-surviving it (e.g. "what would kill you first at the bottom of the ocean"), not about the gore."""
+surviving it (e.g. "what would kill you first at the bottom of the ocean"), not about the gore.
+Never pick topics whose point is practical safety / survival / first-aid / medical advice that viewers might act on
+in a real emergency ("how to escape a sinking car", "what to do if...", "how to survive a...", treating bites,
+burns or poisoning): one wrong or outdated tip can hurt someone. Explain the science of a phenomenon instead,
+without telling viewers what to do."""
+
+ADVICE = re.compile(
+    r"\b(how to|what to do|should you|escape|survive|survival tips?|first[- ]aid|treat(?:ing)?|cure|remedy|"
+    r"save your life|stay alive)\b", re.I)
+
+
+def is_advice(topic: str, concept: str = "") -> bool:
+    """Topics framed as real-world safety / survival / medical instructions."""
+    return bool(ADVICE.search(f"{topic} {concept}"))
 
 MORBID = re.compile(
     r"\b(eat|eats|eating|ate|devour\w*)\b[^.?!]{0,30}\b(owner|owners|human|humans|people|person|corpse|body|bodies)\b"
@@ -243,6 +256,10 @@ def pick_topic(history: list[dict], series: list[str] | None = None, attempts: i
     for _ in range(attempts):
         t = (_propose_in_theme(history, theme, rejected) if theme
              else _propose_topic(history, series, rejected, trends or [], mode))
+        if is_advice(t["topic"], t.get("concept", "")):
+            print(f"[Topic] 題目是求生／安全建議，換一個：{t['topic']}")
+            rejected.append(t["topic"] + " (safety advice)")
+            continue
         if is_morbid(t["topic"], t.get("concept", "")):
             print(f"[Topic] 題目太獵奇，換一個：{t['topic']}")
             rejected.append(t["topic"] + " (too morbid)")
@@ -476,6 +493,9 @@ Requirements:
    youtube_description: 2 sentences + 4 relevant hashtags. tags: 10-15 search keywords.
 8. sources: up to 3 source websites used.
 9. Must be accurate, family-friendly, and original. Hypotheticals must be clearly framed as hypothetical.
+   Never give viewers safety, survival, first-aid, medical or "what to do" instructions (no "you must...",
+   "break the window", "wait until..."); explain why something happens, not how to act in an emergency.
+   Never turn a theoretical possibility into a claim in the title or hook (say "could", not "will kill you").
 10. Never overstate science: no pop-science myths, no "scientists proved" unless the notes say so, use
     "may", "scientists think" for uncertain claims. sources: list the Wikipedia URLs you actually used."""
     text, model = gemini.call(prompt, SHORT_SCHEMA, temperature=0.9)
