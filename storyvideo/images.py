@@ -127,6 +127,8 @@ QA_SCHEMA = {"type": "OBJECT", "properties": {
     "problem": {"type": "STRING"}}, "required": ["severity", "problem"]}
 SAFER = (" Clear, literal, easy-to-read composition with natural anatomy; no faces replaced by objects or planets,"
          " no reflections of other scenes inside helmets or eyes, no text.")
+NO_PEOPLE = (" Show no people, faces, hands or body parts at all: show only the objects, place or phenomenon,"
+             " for example an empty scene, a close-up of the object, or a wide view.")
 
 
 class CheckUnavailable(RuntimeError):
@@ -235,16 +237,20 @@ def _review(path: Path, i: int, wanted: str, prompt: str, refs: list[Path], w: i
     if ok:
         return True
     print(f"[插畫檢查] 分鏡 {i + 1} 有問題：{problem}，重畫一次")
-    try:
-        data = flux2(prompt + SAFER, refs, w, h)
-    except Exception as e:
-        return fail(f"有問題（{problem}）且重畫失敗：{str(e)[:120]}")
-    path.write_bytes(data)
-    try:
-        ok, problem = check_image(path, wanted)
-    except CheckUnavailable as e:
-        return fail(str(e))
-    if not ok:
-        return fail(f"重畫後仍有問題：{problem}")
-    print(f"[插畫檢查] 分鏡 {i + 1} 重畫後通過")
-    return True
+    # 1st redraw: safer wording; 2nd redraw: no people at all (hands / bodies are what AI draws wrong most)
+    for attempt, extra in enumerate((SAFER, SAFER + NO_PEOPLE)):
+        try:
+            data = flux2(prompt + extra, refs, w, h)
+        except Exception as e:
+            return fail(f"有問題（{problem}）且重畫失敗：{str(e)[:120]}")
+        path.write_bytes(data)
+        try:
+            ok, problem = check_image(path, wanted)
+        except CheckUnavailable as e:
+            return fail(str(e))
+        if ok:
+            print(f"[插畫檢查] 分鏡 {i + 1} 重畫{'（不畫人物）' if attempt else ''}後通過")
+            return True
+        if attempt == 0:
+            print(f"[插畫檢查] 分鏡 {i + 1} 重畫後仍有問題：{problem}，改成不畫人物再試一次")
+    return fail(f"重畫後仍有問題：{problem}")

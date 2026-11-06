@@ -27,11 +27,14 @@ class ReviewTest(unittest.TestCase):
         self.assertEqual(self._run([(False, "face is a planet"), (True, "")]), (True, 2, 1))
         self.assertEqual(self.img.read_bytes(), b"second")
 
+    def test_second_redraw_without_people(self):
+        self.assertEqual(self._run([(False, "floating arm"), (False, "missing body"), (True, "")]), (True, 3, 2))
+
     def test_still_weird_extra_shot_is_dropped_required_stops(self):
-        self.assertEqual(self._run([(False, "x"), (False, "x")], optional=True)[0], False)
+        self.assertEqual(self._run([(False, "x"), (False, "x"), (False, "x")], optional=True)[0], False)
         self.img.write_bytes(b"first")
         with self.assertRaises(RuntimeError):
-            self._run([(False, "x"), (False, "x")], optional=False)
+            self._run([(False, "x"), (False, "x"), (False, "x")], optional=False)
 
     def test_redraw_error_drops_extra_required_stops(self):
         with self.assertRaises(RuntimeError):
