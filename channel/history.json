@@ -355,7 +355,7 @@
   "ig_url": "https://www.instagram.com/reel/DfLXvxhj90f/",
   "views": 998,
   "likes": 53,
-  "engaged_views": 549,
+  "engaged_views": 545,
   "avg_view_pct": 67.2,
   "avg_view_sec": 25,
   "subs_gained": 1,
@@ -399,8 +399,8 @@
   "ig_url": "https://www.instagram.com/reel/DfQhaB5jj8f/",
   "views": 205,
   "likes": 16,
-  "engaged_views": 109,
-  "avg_view_pct": 59,
+  "engaged_views": 110,
+  "avg_view_pct": 58.7,
   "avg_view_sec": 26,
   "subs_gained": 4,
   "shares": 0
@@ -421,8 +421,8 @@
   "ig_url": "https://www.instagram.com/reel/DfTFxKwgq8D/",
   "views": 215,
   "likes": 21,
-  "engaged_views": 92,
-  "avg_view_pct": 81.2,
+  "engaged_views": 99,
+  "avg_view_pct": 79.3,
   "avg_view_sec": 34,
   "subs_gained": 1,
   "shares": 0
@@ -441,8 +441,13 @@
   "fb_url": "https://www.facebook.com/reel/1065375813187910/",
   "ig_id": "18064112066638872",
   "ig_url": "https://www.instagram.com/reel/DfVrGCMirXs/",
-  "views": 267,
-  "likes": 15
+  "views": 293,
+  "likes": 16,
+  "engaged_views": 151,
+  "avg_view_pct": 60.6,
+  "avg_view_sec": 25,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-11-06",
@@ -457,6 +462,23 @@
   "fb_id": "1453764493393595",
   "fb_url": "https://www.facebook.com/reel/1453764493393595/",
   "ig_id": "17938148199404059",
-  "ig_url": "https://www.instagram.com/reel/DfYhaxtDscc/"
+  "ig_url": "https://www.instagram.com/reel/DfYhaxtDscc/",
+  "views": 18,
+  "likes": 3
+ },
+ {
+  "date": "2026-11-07",
+  "topic": "Why Are Two Massive Pieces of an Alien Planet Buried Inside Earth?",
+  "concept": "theia mantle remnants",
+  "series": "Earth & Geology",
+  "title": "Why Are Alien Planet Pieces Buried Inside Earth? #shorts",
+  "duration": 41.5,
+  "video_id": "eTDVam8ABw0",
+  "privacy": "public",
+  "mode": "trend",
+  "fb_id": "1870651364113479",
+  "fb_url": "https://www.facebook.com/reel/1870651364113479/",
+  "ig_id": "18120319066990505",
+  "ig_url": "https://www.instagram.com/reel/Dfa05IACtJ5/"
  }
 ]
