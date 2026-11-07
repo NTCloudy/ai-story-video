@@ -29,7 +29,7 @@
   "video_id": "QbQ1cab3sCM",
   "privacy": "public",
   "concept": "phantom phone vibration",
-  "views": 59,
+  "views": 61,
   "likes": 0,
   "ig_id": "18084830246326776",
   "ig_url": "https://www.instagram.com/reel/Deoe0KfifVW/",
@@ -290,8 +290,8 @@
   "views": 158,
   "likes": 12,
   "engaged_views": 80,
-  "avg_view_pct": 55.5,
-  "avg_view_sec": 23,
+  "avg_view_pct": 56.1,
+  "avg_view_sec": 24,
   "subs_gained": 1,
   "shares": 0
  },
@@ -312,7 +312,7 @@
   "views": 468,
   "likes": 29,
   "engaged_views": 258,
-  "avg_view_pct": 108.4,
+  "avg_view_pct": 108.3,
   "avg_view_sec": 44,
   "subs_gained": 4,
   "shares": 3
@@ -353,10 +353,10 @@
   "fb_url": "https://www.facebook.com/reel/40181307081467824/",
   "ig_id": "17930582406423358",
   "ig_url": "https://www.instagram.com/reel/DfLXvxhj90f/",
-  "views": 998,
+  "views": 999,
   "likes": 53,
   "engaged_views": 545,
-  "avg_view_pct": 67.2,
+  "avg_view_pct": 67.5,
   "avg_view_sec": 25,
   "subs_gained": 1,
   "shares": 0
@@ -421,8 +421,8 @@
   "ig_url": "https://www.instagram.com/reel/DfTFxKwgq8D/",
   "views": 215,
   "likes": 21,
-  "engaged_views": 99,
-  "avg_view_pct": 79.3,
+  "engaged_views": 103,
+  "avg_view_pct": 80.0,
   "avg_view_sec": 34,
   "subs_gained": 1,
   "shares": 0
@@ -441,11 +441,11 @@
   "fb_url": "https://www.facebook.com/reel/1065375813187910/",
   "ig_id": "18064112066638872",
   "ig_url": "https://www.instagram.com/reel/DfVrGCMirXs/",
-  "views": 293,
+  "views": 295,
   "likes": 16,
-  "engaged_views": 151,
-  "avg_view_pct": 60.6,
-  "avg_view_sec": 25,
+  "engaged_views": 169,
+  "avg_view_pct": 63.8,
+  "avg_view_sec": 26,
   "subs_gained": 0,
   "shares": 0
  },
@@ -463,8 +463,13 @@
   "fb_url": "https://www.facebook.com/reel/1453764493393595/",
   "ig_id": "17938148199404059",
   "ig_url": "https://www.instagram.com/reel/DfYhaxtDscc/",
-  "views": 18,
-  "likes": 3
+  "views": 20,
+  "likes": 4,
+  "engaged_views": 14,
+  "avg_view_pct": 47.7,
+  "avg_view_sec": 20,
+  "subs_gained": 1,
+  "shares": 0
  },
  {
   "date": "2026-11-07",
@@ -479,6 +484,23 @@
   "fb_id": "1870651364113479",
   "fb_url": "https://www.facebook.com/reel/1870651364113479/",
   "ig_id": "18120319066990505",
-  "ig_url": "https://www.instagram.com/reel/Dfa05IACtJ5/"
+  "ig_url": "https://www.instagram.com/reel/Dfa05IACtJ5/",
+  "views": 172,
+  "likes": 8
+ },
+ {
+  "date": "2026-11-08",
+  "topic": "Why Did the Allies Try to Build an Unsinkable 2-Million-Ton Warship Out of Ice?",
+  "concept": "project habakkuk",
+  "series": "History",
+  "title": "The WWII Secret Plan to Build an Ice Warship #shorts",
+  "duration": 43.3,
+  "video_id": "UP3qPZ3Rv_M",
+  "privacy": "public",
+  "mode": "trend",
+  "fb_id": "1119328707409803",
+  "fb_url": "https://www.facebook.com/reel/1119328707409803/",
+  "ig_id": "18077097104788036",
+  "ig_url": "https://www.instagram.com/reel/Dfdaf6AGE_m/"
  }
 ]
