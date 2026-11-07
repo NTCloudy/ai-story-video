@@ -129,6 +129,8 @@ VIRAL_PATTERNS = """Patterns of the most-viewed curiosity Shorts on YouTube (use
 - danger / fear / survival ("the deadliest...", "what would kill you first...")
 - extreme superlatives and scale ("the most powerful...", "bigger than...", "hotter than the Sun")
 - unsolved mysteries, lost treasures, strange true events
+- open scientific debates and controversial hypotheses (e.g. "is there a hidden Planet Nine?") - welcome, as
+  long as the claim has not already been disproven
 - catastrophic or mind-bending what-ifs (black holes, Earth changes, time travel)
 - counter-intuitive facts about YOUR body that viewers can test or feel themselves
 - weird animal abilities and predators
@@ -497,7 +499,10 @@ Requirements:
    "break the window", "wait until..."); explain why something happens, not how to act in an emergency.
    Never turn a theoretical possibility into a claim in the title or hook (say "could", not "will kill you").
 10. Never overstate science: no pop-science myths, no "scientists proved" unless the notes say so, use
-    "may", "scientists think" for uncertain claims. sources: list the Wikipedia URLs you actually used."""
+    "may", "scientists think" for uncertain claims. sources: list the Wikipedia URLs you actually used.
+11. Unsolved mysteries, controversies and debated hypotheses are welcome: present them as open questions or
+    competing theories. Never present a claim that has already been disproven or debunked as true or possible
+    (e.g. hoaxes, fake photos, refuted theories); if you mention one, say clearly that it was debunked."""
     text, model = gemini.call(prompt, SHORT_SCHEMA, temperature=0.9)
     data = json.loads(text)
     data["scenes"] = [s for s in data.get("scenes", []) if s.get("narration", "").strip()]
