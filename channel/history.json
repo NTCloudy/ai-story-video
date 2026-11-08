@@ -201,7 +201,7 @@
   "fb_url": "https://www.facebook.com/reel/1775488200346196/",
   "ig_id": "18083041184532369",
   "ig_url": "https://www.instagram.com/reel/De5Vt09kWX8/",
-  "views": 441,
+  "views": 443,
   "likes": 14,
   "engaged_views": 178,
   "avg_view_pct": 44.3,
@@ -353,9 +353,9 @@
   "fb_url": "https://www.facebook.com/reel/40181307081467824/",
   "ig_id": "17930582406423358",
   "ig_url": "https://www.instagram.com/reel/DfLXvxhj90f/",
-  "views": 999,
+  "views": 1000,
   "likes": 53,
-  "engaged_views": 545,
+  "engaged_views": 544,
   "avg_view_pct": 67.5,
   "avg_view_sec": 25,
   "subs_gained": 1,
@@ -421,7 +421,7 @@
   "ig_url": "https://www.instagram.com/reel/DfTFxKwgq8D/",
   "views": 215,
   "likes": 21,
-  "engaged_views": 103,
+  "engaged_views": 102,
   "avg_view_pct": 80.0,
   "avg_view_sec": 34,
   "subs_gained": 1,
@@ -443,8 +443,8 @@
   "ig_url": "https://www.instagram.com/reel/DfVrGCMirXs/",
   "views": 295,
   "likes": 16,
-  "engaged_views": 169,
-  "avg_view_pct": 63.8,
+  "engaged_views": 175,
+  "avg_view_pct": 64.2,
   "avg_view_sec": 26,
   "subs_gained": 0,
   "shares": 0
@@ -465,9 +465,9 @@
   "ig_url": "https://www.instagram.com/reel/DfYhaxtDscc/",
   "views": 20,
   "likes": 4,
-  "engaged_views": 14,
-  "avg_view_pct": 47.7,
-  "avg_view_sec": 20,
+  "engaged_views": 16,
+  "avg_view_pct": 52.8,
+  "avg_view_sec": 22,
   "subs_gained": 1,
   "shares": 0
  },
@@ -485,8 +485,13 @@
   "fb_url": "https://www.facebook.com/reel/1870651364113479/",
   "ig_id": "18120319066990505",
   "ig_url": "https://www.instagram.com/reel/Dfa05IACtJ5/",
-  "views": 172,
-  "likes": 8
+  "views": 182,
+  "likes": 9,
+  "engaged_views": 84,
+  "avg_view_pct": 118.5,
+  "avg_view_sec": 49,
+  "subs_gained": 1,
+  "shares": 0
  },
  {
   "date": "2026-11-08",
@@ -501,6 +506,8 @@
   "fb_id": "1119328707409803",
   "fb_url": "https://www.facebook.com/reel/1119328707409803/",
   "ig_id": "18077097104788036",
-  "ig_url": "https://www.instagram.com/reel/Dfdaf6AGE_m/"
+  "ig_url": "https://www.instagram.com/reel/Dfdaf6AGE_m/",
+  "views": 201,
+  "likes": 13
  }
 ]
