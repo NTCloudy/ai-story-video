@@ -35,9 +35,9 @@
   "ig_url": "https://www.instagram.com/reel/Deoe0KfifVW/",
   "fb_id": "2497625537380761",
   "fb_url": "https://www.facebook.com/reel/2497625537380761/",
-  "engaged_views": 14,
-  "avg_view_pct": 79.5,
-  "avg_view_sec": 22,
+  "engaged_views": 15,
+  "avg_view_pct": 75.1,
+  "avg_view_sec": 21,
   "subs_gained": 0,
   "shares": 0
  },
@@ -203,8 +203,8 @@
   "ig_url": "https://www.instagram.com/reel/De5Vt09kWX8/",
   "views": 443,
   "likes": 14,
-  "engaged_views": 178,
-  "avg_view_pct": 44.3,
+  "engaged_views": 179,
+  "avg_view_pct": 44.8,
   "avg_view_sec": 18,
   "subs_gained": 1,
   "shares": 0
@@ -355,8 +355,8 @@
   "ig_url": "https://www.instagram.com/reel/DfLXvxhj90f/",
   "views": 1000,
   "likes": 53,
-  "engaged_views": 544,
-  "avg_view_pct": 67.5,
+  "engaged_views": 545,
+  "avg_view_pct": 67.3,
   "avg_view_sec": 25,
   "subs_gained": 1,
   "shares": 0
@@ -465,9 +465,9 @@
   "ig_url": "https://www.instagram.com/reel/DfYhaxtDscc/",
   "views": 20,
   "likes": 4,
-  "engaged_views": 16,
-  "avg_view_pct": 52.8,
-  "avg_view_sec": 22,
+  "engaged_views": 17,
+  "avg_view_pct": 50.3,
+  "avg_view_sec": 21,
   "subs_gained": 1,
   "shares": 0
  },
@@ -485,11 +485,11 @@
   "fb_url": "https://www.facebook.com/reel/1870651364113479/",
   "ig_id": "18120319066990505",
   "ig_url": "https://www.instagram.com/reel/Dfa05IACtJ5/",
-  "views": 182,
+  "views": 185,
   "likes": 9,
-  "engaged_views": 84,
-  "avg_view_pct": 118.5,
-  "avg_view_sec": 49,
+  "engaged_views": 96,
+  "avg_view_pct": 109.1,
+  "avg_view_sec": 45,
   "subs_gained": 1,
   "shares": 0
  },
@@ -507,8 +507,13 @@
   "fb_url": "https://www.facebook.com/reel/1119328707409803/",
   "ig_id": "18077097104788036",
   "ig_url": "https://www.instagram.com/reel/Dfdaf6AGE_m/",
-  "views": 201,
-  "likes": 13
+  "views": 214,
+  "likes": 13,
+  "engaged_views": 80,
+  "avg_view_pct": 94.3,
+  "avg_view_sec": 41,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-11-09",
@@ -523,6 +528,8 @@
   "fb_id": "1852656085752543",
   "fb_url": "https://www.facebook.com/reel/1852656085752543/",
   "ig_id": "18253043464312362",
-  "ig_url": "https://www.instagram.com/reel/Dff_IyEkiIC/"
+  "ig_url": "https://www.instagram.com/reel/Dff_IyEkiIC/",
+  "views": 23,
+  "likes": 3
  }
 ]
