@@ -397,7 +397,7 @@
   "fb_url": "https://www.facebook.com/reel/1418743637000317/",
   "ig_id": "17996691150021867",
   "ig_url": "https://www.instagram.com/reel/DfQhaB5jj8f/",
-  "views": 205,
+  "views": 206,
   "likes": 16,
   "engaged_views": 110,
   "avg_view_pct": 58.7,
@@ -487,9 +487,9 @@
   "ig_url": "https://www.instagram.com/reel/Dfa05IACtJ5/",
   "views": 185,
   "likes": 9,
-  "engaged_views": 98,
-  "avg_view_pct": 108.0,
-  "avg_view_sec": 45,
+  "engaged_views": 99,
+  "avg_view_pct": 107.0,
+  "avg_view_sec": 44,
   "subs_gained": 1,
   "shares": 0
  },
@@ -509,8 +509,8 @@
   "ig_url": "https://www.instagram.com/reel/Dfdaf6AGE_m/",
   "views": 215,
   "likes": 13,
-  "engaged_views": 87,
-  "avg_view_pct": 90.2,
+  "engaged_views": 88,
+  "avg_view_pct": 89.3,
   "avg_view_sec": 39,
   "subs_gained": 0,
   "shares": 0
@@ -531,9 +531,9 @@
   "ig_url": "https://www.instagram.com/reel/Dff_IyEkiIC/",
   "views": 23,
   "likes": 3,
-  "engaged_views": 12,
-  "avg_view_pct": 104.7,
-  "avg_view_sec": 49,
+  "engaged_views": 13,
+  "avg_view_pct": 97.4,
+  "avg_view_sec": 45,
   "subs_gained": 1,
   "shares": 0
  },
@@ -551,8 +551,13 @@
   "fb_url": "https://www.facebook.com/reel/1844581186540796/",
   "ig_id": "18029721485700117",
   "ig_url": "https://www.instagram.com/reel/DfikZ0bjKV-/",
-  "views": 2,
-  "likes": 0
+  "views": 3,
+  "likes": 0,
+  "engaged_views": 1,
+  "avg_view_pct": 69.8,
+  "avg_view_sec": 31,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-11-11",
@@ -567,6 +572,23 @@
   "fb_id": "3622565094560042",
   "fb_url": "https://www.facebook.com/reel/3622565094560042/",
   "ig_id": "17986916022104546",
-  "ig_url": "https://www.instagram.com/reel/DflMi-nEfhI/"
+  "ig_url": "https://www.instagram.com/reel/DflMi-nEfhI/",
+  "views": 37,
+  "likes": 0
+ },
+ {
+  "date": "2026-11-12",
+  "topic": "Why Does Metal Instantly Fuse Into One Solid Piece If It Touches in Open Space?",
+  "concept": "cold welding",
+  "series": "Space",
+  "title": "Why Metal Fuses Instantly in Deep Space #shorts",
+  "duration": 46.2,
+  "video_id": "Usr2AT0IFl0",
+  "privacy": "public",
+  "mode": "proven",
+  "fb_id": "877570252080687",
+  "fb_url": "https://www.facebook.com/reel/877570252080687/",
+  "ig_id": "18200097325389096",
+  "ig_url": "https://www.instagram.com/reel/DfnsvdrDBV4/"
  }
 ]
