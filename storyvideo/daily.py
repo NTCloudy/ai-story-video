@@ -228,7 +228,10 @@ def main(argv=None) -> int:
         last = automatic and tries + 1 >= max_tries
         note = "今天不再自動重試，可以到 GitHub Actions 手動重跑" if last else "下一次排程會再試"
         print(f"::warning title=今天的 Short 沒做出來（{note}）::{reason[:900]}")
-        (out / "GAVE_UP").write_text(f"{reason}\n\n（第 {tries + 1} 次嘗試；{note}）", encoding="utf-8")
+        # only open a GitHub issue when today's last automatic try failed (or a manual run failed);
+        # earlier failures just wait for the next try
+        note_file = "GAVE_UP" if (last or not automatic) else "RETRY_LATER"
+        (out / note_file).write_text(f"{reason}\n\n（第 {tries + 1} 次嘗試；{note}）", encoding="utf-8")
         for f in ("video.mp4", "meta.json"):  # nothing half-made may be released or cross-posted
             (out / f).unlink(missing_ok=True)
         return 0
@@ -270,12 +273,12 @@ def make_short(args, cfg: dict, history: list, queue: list, today: str, out: Pat
     feedback = ""
     for attempt in range(3):
         sb = shorts.write_short(topic, facts, series, concept, feedback)
-        ok, feedback = shorts.check_consistency(sb, topic, concept)
+        ok, feedback = shorts.check_consistency(sb, topic, concept, facts)
         if ok:
             break
-        print(f"::warning title=標題或內容不符，重寫（第 {attempt + 1} 次）::{sb.get('youtube_title', '')}: {feedback}")
+        print(f"::warning title=標題、內容或事實查核不符，重寫（第 {attempt + 1} 次）::{sb.get('youtube_title', '')}: {feedback}")
     else:
-        raise CannotGenerate(f"重寫 3 次標題和內容還是對不上：{feedback}")
+        raise CannotGenerate(f"重寫 3 次標題、內容或事實查核還是沒通過：{feedback}")
     (out / "script.json").write_text(json.dumps(sb, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"標題：{sb['youtube_title']}｜{len(sb['scenes'])} 個分鏡｜模型 {sb['model']}")
 

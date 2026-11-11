@@ -38,6 +38,15 @@ class ConsistencyTest(unittest.TestCase):
             ok, reason = shorts.check_consistency(RIGHT, "frog", "hairy frog claws")
         assert not ok and "laws" in reason
 
+    def test_unsupported_claim_is_rejected(self):
+        reply = ('{"script_matches_topic": true, "title_matches_script": true, "claims_supported": false, '
+                 '"reason": "\'40% of your strength\' is not in the notes"}')
+        with mock.patch.object(shorts.gemini, "call", return_value=(reply, "m")) as call:
+            ok, reason = shorts.check_consistency(RIGHT, "frog", "hairy frog claws",
+                                                  facts="[Hairy frog] (u)\nThe hairy frog breaks its toe bones.")
+        assert not ok and "40%" in reason
+        assert "Research notes" in call.call_args[0][0]
+
     def test_wikipedia_drops_articles_without_the_concept(self):
         notes = ["[Animal cruelty] (u)\nLaws about cruelty to animals.", "[Hairy frog] (u)\nThe hairy frog has claws."]
         with mock.patch.object(shorts.gemini, "call", _no_gemini), \

@@ -500,7 +500,10 @@ Requirements:
    Never turn a theoretical possibility into a claim in the title or hook (say "could", not "will kill you").
 10. Never overstate science: no pop-science myths, no "scientists proved" unless the notes say so, use
     "may", "scientists think" for uncertain claims. sources: list the Wikipedia URLs you actually used.
-11. Unsolved mysteries, controversies and debated hypotheses are welcome: present them as open questions or
+11. Every specific number, percentage, date, record or superlative ("the longest", "the first") and every
+    technical term must appear in the research notes - if the notes do not have it, leave it out or say it
+    without the number. Never invent names for effects. Never state anecdotes as proven science.
+12. Unsolved mysteries, controversies and debated hypotheses are welcome: present them as open questions or
     competing theories. Never present a claim that has already been disproven or debunked as true or possible
     (e.g. hoaxes, fake photos, refuted theories); if you mention one, say clearly that it was debunked."""
     text, model = gemini.call(prompt, SHORT_SCHEMA, temperature=0.9)
@@ -519,13 +522,14 @@ CONSISTENCY_SCHEMA = {
     "properties": {
         "script_matches_topic": {"type": "BOOLEAN"},
         "title_matches_script": {"type": "BOOLEAN"},
+        "claims_supported": {"type": "BOOLEAN"},
         "reason": {"type": "STRING"},
     },
     "required": ["script_matches_topic", "title_matches_script", "reason"],
 }
 
 
-def check_consistency(sb: dict, topic: str, concept: str = "") -> tuple[bool, str]:
+def check_consistency(sb: dict, topic: str, concept: str = "", facts: str = "") -> tuple[bool, str]:
     """Pre-upload gate: the narration must be about the chosen topic, and the title / hook / description must
     describe what the narration actually says. Returns (ok, reason)."""
     narration = " ".join(s.get("narration", "") for s in sb.get("scenes", []))
@@ -535,6 +539,12 @@ def check_consistency(sb: dict, topic: str, concept: str = "") -> tuple[bool, st
         return False, f"narration never mentions the concept '{concept}'"
     if keys and not _mentions(packaging, keys) and not (_words(sb.get("youtube_title", "")) & _words(narration)):
         return False, "title / hook / description share nothing with the narration or the concept"
+    notes_block = f"Research notes (the only allowed source of specific claims):\n{facts[:12000]}" if facts else ""
+    claims_rule = ("false if the title, hook, description or narration contains a specific number, percentage, date, "
+                   "record or superlative (\"the longest\", \"the loudest\"), named effect / technical term, or a "
+                   "claim stated as settled fact that the research notes do not support (or contradict). Common "
+                   "general knowledge is fine; debated ideas are fine when framed as possibilities. Otherwise true."
+                   if facts else "always true.")
     prompt = f"""You are the last check before a YouTube Short is published. Be strict.
 Planned topic: {topic}
 {f'Core concept: {concept}' if concept else ''}
@@ -542,18 +552,22 @@ YouTube title: {sb.get('youtube_title', '')}
 On-screen hook: {sb.get('hook_text', '')}
 Description: {sb.get('youtube_description', '')}
 Narration: {narration}
+{notes_block}
 
 script_matches_topic: true only if the narration is mainly about the planned topic / concept.
 title_matches_script: true only if the title, hook and description accurately describe what the narration is
 about (no different subject, no promise the narration does not deliver).
-reason: one short sentence explaining any false."""
+claims_supported: {claims_rule}
+reason: one short sentence explaining any false (quote the unsupported claim)."""
     try:
         text, model = gemini.call(prompt, CONSISTENCY_SCHEMA, temperature=0.0, lite_first=True)
     except Exception as e:
         # never publish unverified: stop and let the next run try again
         raise RuntimeError(f"無法確認標題和內容是否相符（Gemini 無法使用）：{str(e)[:200]}") from e
     v = json.loads(text)
-    ok = bool(v.get("script_matches_topic")) and bool(v.get("title_matches_script"))
-    print(f"[Check] topic={v.get('script_matches_topic')} title={v.get('title_matches_script')} ({model})"
+    ok = bool(v.get("script_matches_topic")) and bool(v.get("title_matches_script")) \
+        and (not facts or v.get("claims_supported", True) is not False)
+    print(f"[Check] topic={v.get('script_matches_topic')} title={v.get('title_matches_script')}"
+          f" claims={v.get('claims_supported')} ({model})"
           + ("" if ok else f": {v.get('reason', '')}"))
     return ok, v.get("reason", "")
