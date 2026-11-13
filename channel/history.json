@@ -398,7 +398,7 @@
   "ig_id": "17996691150021867",
   "ig_url": "https://www.instagram.com/reel/DfQhaB5jj8f/",
   "views": 206,
-  "likes": 16,
+  "likes": 15,
   "engaged_views": 110,
   "avg_view_pct": 58.7,
   "avg_view_sec": 26,
@@ -419,7 +419,7 @@
   "fb_url": "https://www.facebook.com/reel/1798395598060051/",
   "ig_id": "17914317243555360",
   "ig_url": "https://www.instagram.com/reel/DfTFxKwgq8D/",
-  "views": 215,
+  "views": 216,
   "likes": 21,
   "engaged_views": 102,
   "avg_view_pct": 79.8,
@@ -463,7 +463,7 @@
   "fb_url": "https://www.facebook.com/reel/1453764493393595/",
   "ig_id": "17938148199404059",
   "ig_url": "https://www.instagram.com/reel/DfYhaxtDscc/",
-  "views": 20,
+  "views": 21,
   "likes": 4,
   "engaged_views": 17,
   "avg_view_pct": 50.3,
@@ -551,7 +551,7 @@
   "fb_url": "https://www.facebook.com/reel/1844581186540796/",
   "ig_id": "18029721485700117",
   "ig_url": "https://www.instagram.com/reel/DfikZ0bjKV-/",
-  "views": 3,
+  "views": 4,
   "likes": 0,
   "engaged_views": 1,
   "avg_view_pct": 69.8,
@@ -573,8 +573,13 @@
   "fb_url": "https://www.facebook.com/reel/3622565094560042/",
   "ig_id": "17986916022104546",
   "ig_url": "https://www.instagram.com/reel/DflMi-nEfhI/",
-  "views": 37,
-  "likes": 0
+  "views": 38,
+  "likes": 0,
+  "engaged_views": 21,
+  "avg_view_pct": 46.2,
+  "avg_view_sec": 18,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-11-12",
@@ -589,6 +594,23 @@
   "fb_id": "877570252080687",
   "fb_url": "https://www.facebook.com/reel/877570252080687/",
   "ig_id": "18200097325389096",
-  "ig_url": "https://www.instagram.com/reel/DfnsvdrDBV4/"
+  "ig_url": "https://www.instagram.com/reel/DfnsvdrDBV4/",
+  "views": 29,
+  "likes": 1
+ },
+ {
+  "date": "2026-11-13",
+  "topic": "Why Is the Longest Creature Ever Discovered in the Ocean Not Actually One Animal?",
+  "concept": "siphonophore colony",
+  "series": "Ocean Life",
+  "title": "The Longest Creature in the Ocean Isn't One Animal! #shorts",
+  "duration": 45.5,
+  "video_id": "yLS7g_FBeGA",
+  "privacy": "public",
+  "mode": "trend",
+  "fb_id": "1690772872496138",
+  "fb_url": "https://www.facebook.com/reel/1690772872496138/",
+  "ig_id": "17985846006085425",
+  "ig_url": "https://www.instagram.com/reel/DfqTTEJDMn6/"
  }
 ]
