@@ -346,6 +346,8 @@ original angle (never copy a title).
 Rules:
 - Must be factual / scientifically or historically accurate (hypotheticals must follow real science).
 - Must have a strong curiosity hook that makes people stop scrolling in 1 second; a little-known fact beats a famous one.
+- Do not put specific numbers, measurements or statistics in the topic (no "2-inch", "1,000 pounds", "millions of
+  gallons"); they are not verified yet. A list count like "5 animals" is fine.
 - Must NOT repeat or closely resemble any of these previous topics:
 {recent}
 
@@ -375,6 +377,8 @@ Series to rotate between:
 Rules:
 - Must be factual / scientifically grounded (hypotheticals must follow real physics/biology).
 - Must have a strong curiosity hook that makes people stop scrolling in 1 second.
+- Do not put specific numbers, measurements or statistics in the topic (no "2-inch", "1,000 pounds", "millions of
+  gallons"); they are not verified yet. A list count like "5 animals" is fine.
 - Must NOT repeat or closely resemble any of these previous topics:
 {recent}
 - Recent series, newest last: {last_series}. Do not use the same series as the most recent Short.
@@ -417,6 +421,17 @@ def _wiki_search(q: str, pages: int, chars: int) -> list[str]:
     return [f"[{p['title']}] ({p.get('fullurl', '')})\n{p.get('extract', '')[:chars]}" for p in found if p.get("extract")]
 
 
+def search_words(topic: str, limit: int = 8) -> str:
+    """Wikipedia query for a question when no keywords are available: its content words OR-ed together.
+    The full question ("Why Do Rocket Launch Pads ...?") usually finds nothing."""
+    out = []
+    for w in _re.findall(r"[a-z][a-z'-]+", topic.lower()):
+        w = w.strip("'-")
+        if len(w) >= 3 and w not in _STOP and w not in out:
+            out.append(w)
+    return " OR ".join(out[:limit]) or topic
+
+
 def wikipedia_notes(topic: str, pages: int = 3, chars: int = 2500, concept: str = "") -> str:
     """Free, reliable research source: intro sections of the most relevant Wikipedia articles.
     Articles that never mention the core concept are dropped, so a vague question ("this animal") cannot
@@ -426,7 +441,7 @@ def wikipedia_notes(topic: str, pages: int = 3, chars: int = 2500, concept: str 
                            + (f" (core concept: {concept})" if concept else ""), temperature=0.0, max_models=3)
         q = q.strip().splitlines()[0][:100]
     except Exception:
-        q = concept or topic  # the concept names the exact phenomenon; the topic question can be vague
+        q = concept or search_words(topic)  # the concept names the exact phenomenon; the question can be vague
     keys = concept_keywords(concept)
     notes = _wiki_search(q, pages, chars)
     if keys:
@@ -500,8 +515,9 @@ Requirements:
    Never turn a theoretical possibility into a claim in the title or hook (say "could", not "will kill you").
 10. Never overstate science: no pop-science myths, no "scientists proved" unless the notes say so, use
     "may", "scientists think" for uncertain claims. sources: list the Wikipedia URLs you actually used.
-11. Every specific number, percentage, date, record or superlative ("the longest", "the first") and every
-    technical term must appear in the research notes - if the notes do not have it, leave it out or say it
+11. Every specific number, percentage, date, record or superlative ("the longest", "the first"), every vague
+    magnitude ("millions of", "hundreds of thousands of") and every technical term must appear in the research
+    notes (the topic's own numbers were NOT verified - drop them unless the notes have them) - if the notes do not have it, leave it out or say it
     without the number. Never invent names for effects. Never state anecdotes as proven science.
 12. Unsolved mysteries, controversies and debated hypotheses are welcome: present them as open questions or
     competing theories. Never present a claim that has already been disproven or debunked as true or possible
@@ -515,6 +531,118 @@ Requirements:
     data["topic"] = topic
     data["series"] = series
     return data
+
+
+# ---------------- deterministic figure check ----------------
+# Gemini's claims check (lite model first) passed "millions of gallons" and "hundreds of thousands of galaxies"
+# when the notes said nothing / "approximately 100,000". Every figure must be backed by a number in the notes.
+_SCALE = {"thousand": 1e3, "million": 1e6, "billion": 1e9, "trillion": 1e12}
+_WORDNUM = {"a": 1, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8,
+            "nine": 9, "ten": 10, "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "hundred": 100,
+            "a hundred": 100, "one hundred": 100, "several": 3, "half a": 0.5}
+# vague magnitudes -> (low, high): "hundreds of thousands" means at least 200,000, so "about 100,000" is not enough
+_VAGUE = [
+    ("hundreds of thousands", 2e5, 1e6), ("tens of thousands", 2e4, 1e5),
+    ("hundreds of millions", 2e8, 1e9), ("tens of millions", 2e7, 1e8),
+    ("hundreds of billions", 2e11, 1e12), ("tens of billions", 2e10, 1e11),
+    ("trillions", 2e12, 1e15), ("billions", 2e9, 1e12), ("millions", 2e6, 1e9),
+    ("thousands", 2e3, 1e6), ("hundreds", 200, 1e3),
+]
+_NUM = r"\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?"
+_FIG = re.compile(
+    r"(?P<vague>" + "|".join(v[0] for v in _VAGUE) + r")\b"
+    r"|(?<![\w.,/:])(?P<num>" + _NUM + r")(?![\w,]*\d)(?P<ord>st|nd|rd|th)?\b"
+    r"(?:\s*(?P<pct>%|percent))?(?:[\s-]*(?P<sc>thousand|million|billion|trillion)\b)?"
+    r"|\b(?P<word>half a|a hundred|one hundred|" + "|".join(k for k in _WORDNUM if " " not in k) + r")"
+    r"[\s-]+(?P<wsc>thousand|million|billion|trillion)\b",
+    re.I)
+_UNIT = re.compile(
+    r"^[\s-]*(%|percent|x\b|times|inch|inches|in\b|foot|feet|ft|yard|meters?|metres?|cm|mm|km|kilometers?|miles?|"
+    r"mph|km/h|pounds?|lbs?|kg|kilograms?|grams?|tons?|tonnes?|degrees?|°|gallons?|liters?|litres?|psi|atm|"
+    r"seconds?|minutes?|hours?|days?|weeks?|months?|years?|decades?|centuries|century|light[- ]years?|"
+    r"volts?|watts?|decibels?|db\b|hz)", re.I)
+
+
+def _figures(text: str) -> list[tuple[str, float, float, str, str]]:
+    """(phrase, low, high, vague_key, following_text) for every figure in the text. Exact numbers have
+    low == high and key ""."""
+    text = re.sub(r"https?://\S+", " ", text)
+    out = []
+    for m in _FIG.finditer(text):
+        end = text[m.end():m.end() + 25]
+        if m.group("vague"):
+            key = m.group("vague").lower()
+            lo, hi = next((lo, hi) for v, lo, hi in _VAGUE if v == key)
+            nxt = re.match(r"\s+(?:of\s+)?[A-Za-z]+", end)
+            out.append((m.group(0) + (nxt.group(0) if nxt else ""), lo, hi, key, end))
+            continue
+        if m.group("word"):
+            v = _WORDNUM[m.group("word").lower()] * _SCALE[m.group("wsc").lower()]
+            out.append((m.group(0), v, v, "", end))
+            continue
+        if m.group("ord"):
+            continue  # "the 3rd", "20th century"
+        v = float(m.group("num").replace(",", ""))
+        if m.group("sc"):
+            v *= _SCALE[m.group("sc").lower()]
+        unit = _UNIT.match(end)
+        if not (m.group("pct") or m.group("sc")) and v <= 10 and v == int(v) and not unit:
+            continue  # small counts ("5 animals", "3 hearts") are not measurements
+        if v in (0, 1):
+            continue
+        out.append((m.group(0) + (unit.group(0) if unit and not m.group("sc") else ""), v, v, "", end))
+    return out
+
+
+def unsupported_figures(text: str, facts: str, tolerance: float = 0.1) -> list[str]:
+    """Figures in text that no number in the research notes backs. An exact figure needs a notes number within
+    10 % (rounding); a vague magnitude needs a notes number inside its range or the same wording in the notes."""
+    known = _figures(facts)
+    values = [(lo, after) for _, lo, hi, key, after in known if not key]
+    vague_in_notes = {k[3] for k in known if k[3]}
+    bad = []
+    for phrase, lo, hi, key, _ in _figures(text):
+        if key:
+            # "millions of gallons" needs a notes number in range that is about gallons, not "520 million years"
+            noun = _words(phrase[len(key):])
+            ok = key in vague_in_notes or any(lo <= f < hi and (not noun or noun & _words(a)) for f, a in values)
+        else:
+            tol = 0 if re.fullmatch(r"1\d{3}s?|20\d{2}s?", phrase) else tolerance  # years must match exactly
+            ok = any(abs(lo - f) <= tol * max(abs(lo), abs(f)) for f, _ in values)
+        if not ok and phrase not in bad:
+            bad.append(phrase)
+    return bad
+
+
+def notes_figures(facts: str, n: int = 15) -> str:
+    vals = [k[0] for k in _figures(facts) if not k[3]]
+    return ", ".join(dict.fromkeys(vals[:n])) or "none"
+
+
+def ground_topic(topic: str, concept: str, facts: str) -> str:
+    """The topic is picked before research, so it can carry figures nobody checked (e.g. "2-Inch Hole",
+    "1,000 Pounds of Force"). After research, rewrite it without them so the script is not tied to them."""
+    bad = unsupported_figures(topic, facts) if facts else []
+    if not bad:
+        return topic
+    prompt = f"""Rewrite this YouTube Shorts video question. Keep the same subject and curiosity hook, but remove
+these figures because the research notes do not support them: {bad}. Use a number only if it appears in the
+research notes. Return only the new question, nothing else.
+Question: {topic}
+{f'Core concept: {concept}' if concept else ''}
+Research notes:
+{facts[:6000]}"""
+    try:
+        new, _ = gemini.call(prompt, temperature=0.3, max_models=3)
+        new = new.strip().splitlines()[0].strip().strip('"').strip()
+    except Exception as e:
+        print(f"[Topic] could not remove unsupported figures {bad}: {str(e)[:120]}")
+        return topic
+    if new and not unsupported_figures(new, facts):
+        print(f"[Topic] removed unsupported figures {bad}: {new}")
+        return new
+    print(f"[Topic] rewrite still has unsupported figures, keeping the original: {new}")
+    return topic
 
 
 CONSISTENCY_SCHEMA = {
@@ -539,6 +667,13 @@ def check_consistency(sb: dict, topic: str, concept: str = "", facts: str = "") 
         return False, f"narration never mentions the concept '{concept}'"
     if keys and not _mentions(packaging, keys) and not (_words(sb.get("youtube_title", "")) & _words(narration)):
         return False, "title / hook / description share nothing with the narration or the concept"
+    if facts:
+        bad = unsupported_figures(f"{packaging} {narration}", facts)
+        if bad:
+            reason = (f"figures not in the research notes: {', '.join(repr(b) for b in bad)}. Leave them out or "
+                      f"use only figures the notes give ({notes_figures(facts)})")
+            print(f"[Check] figures: {reason}")
+            return False, reason
     notes_block = f"Research notes (the only allowed source of specific claims):\n{facts[:12000]}" if facts else ""
     claims_rule = ("false if the title, hook, description or narration contains a specific number, percentage, date, "
                    "record or superlative (\"the longest\", \"the loudest\"), named effect / technical term, or a "
@@ -554,7 +689,8 @@ Description: {sb.get('youtube_description', '')}
 Narration: {narration}
 {notes_block}
 
-script_matches_topic: true only if the narration is mainly about the planned topic / concept.
+script_matches_topic: true only if the narration is mainly about the planned topic / concept. Judge the subject
+only: the narration may leave out or correct numbers and measurements in the planned topic (they were not verified).
 title_matches_script: true only if the title, hook and description accurately describe what the narration is
 about (no different subject, no promise the narration does not deliver).
 claims_supported: {claims_rule}

@@ -270,6 +270,7 @@ def make_short(args, cfg: dict, history: list, queue: list, today: str, out: Pat
     facts = shorts.research(topic, concept)
     if not facts:
         raise CannotGenerate("查不到這個主題的可靠資料，不憑空寫腳本")
+    topic = shorts.ground_topic(topic, concept, facts)  # drop figures the notes do not back
     feedback = ""
     for attempt in range(3):
         sb = shorts.write_short(topic, facts, series, concept, feedback)

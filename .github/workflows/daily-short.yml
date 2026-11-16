@@ -225,7 +225,7 @@ jobs:
         run: python -m storyvideo.meta catchup --repo "${{ github.repository }}"
 
       - name: 通知：今天的 Short 沒做出來
-        if: hashFiles('out/GAVE_UP') != ''
+        if: hashFiles('out/GAVE_UP') != '' && !inputs.dry_run
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
