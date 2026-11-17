@@ -98,7 +98,7 @@
   "fb_url": "https://www.facebook.com/reel/1578820660680924/",
   "ig_id": "17923064925222783",
   "ig_url": "https://www.instagram.com/reel/DestGSdkinr/",
-  "engaged_views": 1548,
+  "engaged_views": 1549,
   "avg_view_pct": 84.1,
   "avg_view_sec": 36,
   "subs_gained": 10,
@@ -617,10 +617,10 @@
   "fb_url": "https://www.facebook.com/reel/1690772872496138/",
   "ig_id": "17985846006085425",
   "ig_url": "https://www.instagram.com/reel/DfqTTEJDMn6/",
-  "views": 226,
+  "views": 227,
   "likes": 7,
-  "engaged_views": 93,
-  "avg_view_pct": 69.3,
+  "engaged_views": 100,
+  "avg_view_pct": 67.8,
   "avg_view_sec": 31,
   "subs_gained": 0,
   "shares": 0
@@ -639,11 +639,11 @@
   "fb_url": "https://www.facebook.com/reel/1519181563645205/",
   "ig_id": "17998942902033632",
   "ig_url": "https://www.instagram.com/reel/Dfs3XBckiIN/",
-  "views": 208,
+  "views": 209,
   "likes": 7,
-  "engaged_views": 38,
-  "avg_view_pct": 64.5,
-  "avg_view_sec": 25,
+  "engaged_views": 78,
+  "avg_view_pct": 107.5,
+  "avg_view_sec": 42,
   "subs_gained": 0,
   "shares": 2
  },
@@ -661,8 +661,13 @@
   "fb_url": "https://www.facebook.com/reel/2025122774838914/",
   "ig_id": "17968271967195007",
   "ig_url": "https://www.instagram.com/reel/DfvgRuqmGBE/",
-  "views": 58,
-  "likes": 2
+  "views": 67,
+  "likes": 4,
+  "engaged_views": 17,
+  "avg_view_pct": 53.5,
+  "avg_view_sec": 24,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-11-16",
@@ -678,7 +683,22 @@
   "fb_url": "https://www.facebook.com/reel/3445088678996478/",
   "ig_id": "18120294271824217",
   "ig_url": "https://www.instagram.com/reel/Dfx_XuXDjr_/",
-  "views": 18,
-  "likes": 1
+  "views": 462,
+  "likes": 8
+ },
+ {
+  "date": "2026-11-17",
+  "topic": "Why Does This Frog Freeze Completely Solid and Thaw Back to Life?",
+  "concept": "wood frog cryoprotectant",
+  "series": "Animals",
+  "title": "How This Frog Freezes Solid and Survives! #shorts",
+  "duration": 40.0,
+  "video_id": "K2NWXeEovA8",
+  "privacy": "public",
+  "mode": "trend",
+  "fb_id": "30337968719126757",
+  "fb_url": "https://www.facebook.com/reel/30337968719126757/",
+  "ig_id": "18133787548686542",
+  "ig_url": "https://www.instagram.com/reel/Df0mlt9DEp5/"
  }
 ]
