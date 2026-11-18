@@ -201,7 +201,7 @@
   "fb_url": "https://www.facebook.com/reel/1775488200346196/",
   "ig_id": "18083041184532369",
   "ig_url": "https://www.instagram.com/reel/De5Vt09kWX8/",
-  "views": 443,
+  "views": 444,
   "likes": 14,
   "engaged_views": 179,
   "avg_view_pct": 44.8,
@@ -619,9 +619,9 @@
   "ig_url": "https://www.instagram.com/reel/DfqTTEJDMn6/",
   "views": 227,
   "likes": 7,
-  "engaged_views": 100,
-  "avg_view_pct": 67.8,
-  "avg_view_sec": 31,
+  "engaged_views": 103,
+  "avg_view_pct": 66.7,
+  "avg_view_sec": 30,
   "subs_gained": 0,
   "shares": 0
  },
@@ -641,8 +641,8 @@
   "ig_url": "https://www.instagram.com/reel/Dfs3XBckiIN/",
   "views": 210,
   "likes": 7,
-  "engaged_views": 78,
-  "avg_view_pct": 107.5,
+  "engaged_views": 79,
+  "avg_view_pct": 106.6,
   "avg_view_sec": 42,
   "subs_gained": 0,
   "shares": 2
@@ -663,10 +663,10 @@
   "ig_url": "https://www.instagram.com/reel/DfvgRuqmGBE/",
   "views": 69,
   "likes": 4,
-  "engaged_views": 17,
-  "avg_view_pct": 53.5,
+  "engaged_views": 30,
+  "avg_view_pct": 52.7,
   "avg_view_sec": 24,
-  "subs_gained": 0,
+  "subs_gained": 1,
   "shares": 0
  },
  {
@@ -683,8 +683,13 @@
   "fb_url": "https://www.facebook.com/reel/3445088678996478/",
   "ig_id": "18120294271824217",
   "ig_url": "https://www.instagram.com/reel/Dfx_XuXDjr_/",
-  "views": 563,
-  "likes": 10
+  "views": 610,
+  "likes": 11,
+  "engaged_views": 155,
+  "avg_view_pct": 60.9,
+  "avg_view_sec": 25,
+  "subs_gained": 1,
+  "shares": 0
  },
  {
   "date": "2026-11-17",
@@ -700,7 +705,22 @@
   "fb_url": "https://www.facebook.com/reel/30337968719126757/",
   "ig_id": "18133787548686542",
   "ig_url": "https://www.instagram.com/reel/Df0mlt9DEp5/",
-  "views": 11,
+  "views": 27,
   "likes": 1
+ },
+ {
+  "date": "2026-11-18",
+  "topic": "Why Are Cashews the Only Common Nut Never Sold in Their Shells?",
+  "concept": "cashew urushiol toxicity",
+  "series": "Food Facts",
+  "title": "Why Cashews Are Never Sold in Shells #shorts",
+  "duration": 39.3,
+  "video_id": "8KSB1V6cEQU",
+  "privacy": "public",
+  "mode": "trend",
+  "fb_id": "1664251485369780",
+  "fb_url": "https://www.facebook.com/reel/1664251485369780/",
+  "ig_id": "17920864590528326",
+  "ig_url": "https://www.instagram.com/reel/Df3L0lglRC-/"
  }
 ]
