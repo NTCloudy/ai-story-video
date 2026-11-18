@@ -54,6 +54,20 @@ class ReviewTest(unittest.TestCase):
                     mock.patch.object(images.time, "sleep"):
                 self.assertEqual(images.check_image(self.img, "a sitting dog")[0], ok)
 
+    def test_graphic_skin_picture_is_major(self):
+        reply = '{"severity": "major", "problem": "raw open wound-like lesions on the forearm"}'
+        with mock.patch("storyvideo.gemini.call", return_value=(reply, "m")) as call, \
+                mock.patch.object(images.time, "sleep"):
+            ok, problem = images.check_image(self.img, "dermatitis welts on a forearm")
+        self.assertFalse(ok)
+        self.assertIn("lesions", problem)
+        q = call.call_args[0][0]
+        self.assertIn("open wounds", q)
+        self.assertIn("skin diseases", q)
+
+    def test_redraw_wording_forbids_wounds(self):
+        self.assertIn("No wounds", images.SAFER)
+
 
 if __name__ == "__main__":
     unittest.main()

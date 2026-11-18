@@ -13,7 +13,7 @@ on:
         options: [check, catchup, takedown]
         default: check
       youtube_id:
-        description: "takedown 用：要從 YouTube / FB / IG 全部刪掉的影片 ID"
+        description: "takedown 用：要從 YouTube / FB / IG 全部刪掉的影片 ID（IG 通常要手動刪，會開 issue 附連結）"
         required: false
         type: string
 
@@ -23,6 +23,7 @@ concurrency:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   meta:
@@ -66,3 +67,15 @@ jobs:
       - name: 更新頻道紀錄
         if: always() && (inputs.action == 'catchup' || inputs.action == 'takedown')
         run: python -m storyvideo.channel_sync --base "${{ github.sha }}" --message "📣 FB / IG cross-post update"
+
+      # Instagram's API refuses to delete a Reel with this app's permissions: open an issue with the link and end
+      # the run as failed, so a Reel left online is never missed
+      - name: 通知：有平台要手動刪除
+        if: always() && inputs.action == 'takedown' && hashFiles('out/MANUAL_DELETE') != ''
+        run: |
+          cat out/MANUAL_DELETE
+          gh issue create --title "🗑️ 下架 ${{ inputs.youtube_id }}：需要手動刪除" --body "$(cat out/MANUAL_DELETE)
+
+          執行紀錄：${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          echo "::error::有平台沒刪掉，請看上面的連結手動刪除（Instagram 通常需要手動刪）"
+          exit 1

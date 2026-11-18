@@ -503,6 +503,9 @@ Requirements:
    Avoid things image AIs draw badly or confusingly: reflections of scenes inside helmet visors or eyes, empty
    suits or helmets, books / letters / manuscripts / signs / screens with writing, close-up hands, and
    metaphorical or surreal mash-ups. Keep each picture literal and instantly readable.
+   Never ask for graphic or medical pictures: no wounds, blood, burns, rashes, blisters, welts, sores, lesions,
+   skin irritation or skin diseases, injuries or surgery. Show the cause instead (the plant, the substance, the
+   animal, the place) or a person seen from a distance.
 6. characters: always [] - this channel does not use recurring characters. When a person is needed, describe
    them generically inside that image_prompt (e.g. "a tiny astronaut silhouette falling", "a diver seen from below"),
    and prefer showing the phenomenon itself.
@@ -533,13 +536,36 @@ Requirements:
     return data
 
 
+# ---------------- graphic picture prompts ----------------
+# 11/18: "raised, reddened skin irritation and dermatitis welts on a forearm" was drawn as raw open wounds
+GRAPHIC = re.compile(
+    r"\b(wounds?|wounded|lesions?|rash(es)?|blisters?|blistering|welts?|dermatitis|eczema|ulcers?|pus|scabs?|"
+    r"gangrene|necro\w*|sores?|bleeding|bloody|blood[- ]?soaked|gore|gory|corpses?|injur(y|ies|ed)|mutilat\w*|"
+    r"severed|surgery|surgical|infected|burn(ed|t)? skin|skin (irritation|disease|infection|condition|burns?)|"
+    r"open flesh|raw flesh)\b", re.I)
+
+
+def graphic_prompts(sb: dict) -> list[str]:
+    """Picture prompts asking for wounds, rashes, blood or other medical close-ups."""
+    out = []
+    for i, sc in enumerate(sb.get("scenes", []), 1):
+        for key in ("image_prompt", "image_prompt_2"):
+            m = GRAPHIC.search(sc.get(key) or "")
+            if m:
+                out.append(f"scene {i} {key}: '{m.group(0)}'")
+    return out
+
+
 # ---------------- deterministic figure check ----------------
 # Gemini's claims check (lite model first) passed "millions of gallons" and "hundreds of thousands of galaxies"
 # when the notes said nothing / "approximately 100,000". Every figure must be backed by a number in the notes.
 _SCALE = {"thousand": 1e3, "million": 1e6, "billion": 1e9, "trillion": 1e12}
-_WORDNUM = {"a": 1, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8,
-            "nine": 9, "ten": 10, "twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "hundred": 100,
-            "a hundred": 100, "one hundred": 100, "several": 3, "half a": 0.5}
+_UNITS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve",
+          "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"]
+_TENS = {"twenty": 20, "thirty": 30, "forty": 40, "fifty": 50, "sixty": 60, "seventy": 70, "eighty": 80, "ninety": 90}
+_NUMWORD = {**{w: i for i, w in enumerate(_UNITS)}, **_TENS}
+_NW = "|".join(sorted(list(_NUMWORD) + ["hundred", "point", "a", "half"], key=len, reverse=True))
+_WORDRUN = rf"(?:{_NW})(?:[\s-]+(?:and[\s-]+)?(?:{_NW}))*"
 # vague magnitudes -> (low, high): "hundreds of thousands" means at least 200,000, so "about 100,000" is not enough
 _VAGUE = [
     ("hundreds of thousands", 2e5, 1e6), ("tens of thousands", 2e4, 1e5),
@@ -548,19 +574,64 @@ _VAGUE = [
     ("trillions", 2e12, 1e15), ("billions", 2e9, 1e12), ("millions", 2e6, 1e9),
     ("thousands", 2e3, 1e6), ("hundreds", 200, 1e3),
 ]
+_UNIT_RE = (r"%|percent|x\b|times|inch|inches|in\b|foot|feet|ft|yards?|meters?|metres?|cm|mm|km|kilometers?|"
+            r"kilometres?|miles?|mph|km/h|pounds?|lbs?|kg|kilograms?|grams?|tons?|tonnes?|degrees?|°|gallons?|"
+            r"liters?|litres?|psi|atm|seconds?|minutes?|hours?|days?|weeks?|months?|years?|decades?|centuries|"
+            r"century|light[- ]years?|volts?|watts?|decibels?|db\b|hz")
 _NUM = r"\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?"
 _FIG = re.compile(
     r"(?P<vague>" + "|".join(v[0] for v in _VAGUE) + r")\b"
     r"|(?<![\w.,/:])(?P<num>" + _NUM + r")(?![\w,]*\d)(?P<ord>st|nd|rd|th)?\b"
     r"(?:\s*(?P<pct>%|percent))?(?:[\s-]*(?P<sc>thousand|million|billion|trillion)\b)?"
-    r"|\b(?P<word>half a|a hundred|one hundred|" + "|".join(k for k in _WORDNUM if " " not in k) + r")"
-    r"[\s-]+(?P<wsc>thousand|million|billion|trillion)\b",
+    # spelled out for the voice: "two hundred fifty million", "one point two billion", "forty percent"
+    rf"|\b(?P<word>{_WORDRUN})(?:[\s-]+(?P<wsc>thousand|million|billion|trillion)\b"
+    rf"|(?=[\s-]+(?:{_UNIT_RE})\b))",
     re.I)
-_UNIT = re.compile(
-    r"^[\s-]*(%|percent|x\b|times|inch|inches|in\b|foot|feet|ft|yard|meters?|metres?|cm|mm|km|kilometers?|miles?|"
-    r"mph|km/h|pounds?|lbs?|kg|kilograms?|grams?|tons?|tonnes?|degrees?|°|gallons?|liters?|litres?|psi|atm|"
-    r"seconds?|minutes?|hours?|days?|weeks?|months?|years?|decades?|centuries|century|light[- ]years?|"
-    r"volts?|watts?|decibels?|db\b|hz)", re.I)
+_UNIT = re.compile(rf"^[\s-]*({_UNIT_RE})", re.I)
+# unit spellings and abbreviations compared as one word ("60,000 ft" backs "thousands of feet")
+_ALIAS = {"ft": "foot", "feet": "foot", "km": "kilometer", "kilometre": "kilometer", "kilometres": "kilometer",
+          "kilometers": "kilometer", "m": "meter", "metre": "meter", "metres": "meter", "meters": "meter",
+          "lb": "pound", "lbs": "pound", "pounds": "pound", "mi": "mile", "miles": "mile", "kg": "kilogram",
+          "kilograms": "kilogram", "litre": "liter", "litres": "liter", "liters": "liter", "gallons": "gallon",
+          "tonnes": "ton", "tonne": "ton", "tons": "ton", "yrs": "year", "years": "year"}
+
+
+def _words_to_number(run: str) -> float | None:
+    toks = [t for t in re.split(r"[\s-]+", run.lower()) if t and t != "and"]
+    total, decimals, frac = 0.0, None, False
+    for t in toks:
+        if t == "point":
+            decimals = ""
+        elif decimals is not None:
+            if t not in _NUMWORD or _NUMWORD[t] > 9:
+                return None
+            decimals += str(_NUMWORD[t])
+        elif t == "half":
+            frac = True
+        elif t == "a":
+            total = total or (0 if frac else 1)
+        elif t == "hundred":
+            total = (total or 1) * 100
+        else:
+            total += _NUMWORD[t]
+    if frac:
+        total = (total or 1) * 0.5
+    if decimals:
+        total += float("0." + decimals)
+    return total or None
+
+
+def _context(text: str, n: int = 3) -> set[str]:
+    """First content words of a text, unit abbreviations normalised ("ft" -> "foot")."""
+    out = set()
+    for w in re.findall(r"[a-z]+", text.lower()):
+        if w in ("of", "the", "a", "an", "about", "some", "over", "up", "to", "and", "per", "in"):
+            continue
+        w = _ALIAS.get(w, w)
+        out |= _words(w) or {w}
+        if len(out) >= n:
+            break
+    return out
 
 
 def _figures(text: str) -> list[tuple[str, float, float, str, str]]:
@@ -569,7 +640,7 @@ def _figures(text: str) -> list[tuple[str, float, float, str, str]]:
     text = re.sub(r"https?://\S+", " ", text)
     out = []
     for m in _FIG.finditer(text):
-        end = text[m.end():m.end() + 25]
+        end = text[m.end():m.end() + 40]
         if m.group("vague"):
             key = m.group("vague").lower()
             lo, hi = next((lo, hi) for v, lo, hi in _VAGUE if v == key)
@@ -577,8 +648,19 @@ def _figures(text: str) -> list[tuple[str, float, float, str, str]]:
             out.append((m.group(0) + (nxt.group(0) if nxt else ""), lo, hi, key, end))
             continue
         if m.group("word"):
-            v = _WORDNUM[m.group("word").lower()] * _SCALE[m.group("wsc").lower()]
-            out.append((m.group(0), v, v, "", end))
+            v = _words_to_number(m.group("word"))
+            if v is None:
+                continue
+            unit = None
+            if m.group("wsc"):
+                v *= _SCALE[m.group("wsc").lower()]
+            else:
+                unit = _UNIT.match(end)
+                if v <= 10 and not (unit and unit.group(1).lower() in ("%", "percent")):
+                    continue  # "two years", "three times": small counts, as for digits
+            if v in (0, 1):
+                continue
+            out.append((m.group(0) + (unit.group(0) if unit else ""), v, v, "", end))
             continue
         if m.group("ord"):
             continue  # "the 3rd", "20th century"
@@ -594,18 +676,26 @@ def _figures(text: str) -> list[tuple[str, float, float, str, str]]:
     return out
 
 
-def unsupported_figures(text: str, facts: str, tolerance: float = 0.1) -> list[str]:
+HYPOTHETICAL = re.compile(
+    r"\b(what if|what would (\w+ )?happen|what (\w+ )?happens if|imagine|hypothetical(ly)?|if you could)\b", re.I)
+
+
+def unsupported_figures(text: str, facts: str, tolerance: float = 0.1, premise: str = "") -> list[str]:
     """Figures in text that no number in the research notes backs. An exact figure needs a notes number within
-    10 % (rounding); a vague magnitude needs a notes number inside its range or the same wording in the notes."""
-    known = _figures(facts)
+    10 % (rounding); a vague magnitude needs a notes number inside its range about the same thing (one of its
+    next words), or the same wording in the notes. `premise`: a what-if topic whose own figures are the
+    hypothetical setup ("a baseball at 90% light speed"), not claims, so they are allowed."""
+    known = _figures(facts) + (_figures(premise) if premise and HYPOTHETICAL.search(premise) else [])
     values = [(lo, after) for _, lo, hi, key, after in known if not key]
     vague_in_notes = {k[3] for k in known if k[3]}
     bad = []
-    for phrase, lo, hi, key, _ in _figures(text):
+    for phrase, lo, hi, key, after in _figures(text):
         if key:
-            # "millions of gallons" needs a notes number in range that is about gallons, not "520 million years"
-            noun = _words(phrase[len(key):])
-            ok = key in vague_in_notes or any(lo <= f < hi and (not noun or noun & _words(a)) for f, a in values)
+            # "millions of gallons" needs a notes number in range that is about gallons, not "520 million years";
+            # the thing counted can come after a modifier ("thousands of tiny zooids")
+            noun = _context(after, 3)
+            ok = key in vague_in_notes or any(lo <= f < hi and (not noun or noun & _context(a, 4))
+                                              for f, a in values)
         else:
             tol = 0 if re.fullmatch(r"1\d{3}s?|20\d{2}s?", phrase) else tolerance  # years must match exactly
             ok = any(abs(lo - f) <= tol * max(abs(lo), abs(f)) for f, _ in values)
@@ -622,7 +712,7 @@ def notes_figures(facts: str, n: int = 15) -> str:
 def ground_topic(topic: str, concept: str, facts: str) -> str:
     """The topic is picked before research, so it can carry figures nobody checked (e.g. "2-Inch Hole",
     "1,000 Pounds of Force"). After research, rewrite it without them so the script is not tied to them."""
-    bad = unsupported_figures(topic, facts) if facts else []
+    bad = unsupported_figures(topic, facts, premise=topic) if facts else []
     if not bad:
         return topic
     prompt = f"""Rewrite this YouTube Shorts video question. Keep the same subject and curiosity hook, but remove
@@ -667,8 +757,14 @@ def check_consistency(sb: dict, topic: str, concept: str = "", facts: str = "") 
         return False, f"narration never mentions the concept '{concept}'"
     if keys and not _mentions(packaging, keys) and not (_words(sb.get("youtube_title", "")) & _words(narration)):
         return False, "title / hook / description share nothing with the narration or the concept"
+    graphic = graphic_prompts(sb)
+    if graphic:
+        reason = (f"graphic medical pictures requested ({'; '.join(graphic)}). Show the cause instead (the plant, "
+                  f"substance, animal or place) or a person from a distance - no wounds, rashes, blood or sick skin")
+        print(f"[Check] pictures: {reason}")
+        return False, reason
     if facts:
-        bad = unsupported_figures(f"{packaging} {narration}", facts)
+        bad = unsupported_figures(f"{packaging} {narration}", facts, premise=topic)
         if bad:
             reason = (f"figures not in the research notes: {', '.join(repr(b) for b in bad)}. Leave them out or "
                       f"use only figures the notes give ({notes_figures(facts)})")

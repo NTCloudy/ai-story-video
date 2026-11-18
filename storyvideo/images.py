@@ -126,7 +126,8 @@ QA_SCHEMA = {"type": "OBJECT", "properties": {
     "severity": {"type": "STRING", "enum": ["none", "minor", "major"]},
     "problem": {"type": "STRING"}}, "required": ["severity", "problem"]}
 SAFER = (" Clear, literal, easy-to-read composition with natural anatomy; no faces replaced by objects or planets,"
-         " no reflections of other scenes inside helmets or eyes, no text.")
+         " no reflections of other scenes inside helmets or eyes, no text. No wounds, blood, rashes, blisters,"
+         " sores or diseased skin.")
 NO_PEOPLE = (" Show no people, faces, hands or body parts at all: show only the objects, place or phenomenon,"
              " for example an empty scene, a close-up of the object, or a wide view.")
 
@@ -144,7 +145,9 @@ def check_image(path: Path, prompt: str) -> tuple[bool, str]:
          "Clear problems most viewers would find weird or wrong: a face replaced by an "
          "object or a planet, an empty or headless suit or helmet that looks like a creepy floating head, melted or "
          "distorted faces or bodies, extra or missing limbs, duplicated people, visible text or letters, or a "
-         "picture that does not show the requested subject at all.\n"
+         "picture that does not show the requested subject at all. Also a clear problem, even when drawn well: "
+         "graphic or disturbing medical imagery - open wounds, blood, gore, burns, rashes, blisters, welts, sores, "
+         "lesions, skin diseases or infected skin, or injured bodies - because many viewers find it disgusting.\n"
          "severity: major = one of those clear problems; minor = only details differ from the description (pose, "
          "angle, sitting vs standing, colours, number of background objects, style); none = fine. Artistic style, "
          "dramatic lighting and small imperfections are fine. Put a short reason in problem (empty when none).")

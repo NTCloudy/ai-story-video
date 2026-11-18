@@ -372,17 +372,41 @@ def takedown(video_id: str) -> int:
     if entry.get("ig_id"):
         steps.append(("Instagram", lambda: _check(requests.delete(f"{GRAPH}/{entry['ig_id']}",
                                                                     params={"access_token": _token()}, timeout=60))))
+    links = {"YouTube": f"https://studio.youtube.com/video/{video_id}/edit",
+             "Facebook": f"https://www.facebook.com/{entry.get('fb_id', '')}",
+             "Instagram": _ig_permalink(entry.get("ig_id", ""))}
+    manual = []
     for name, fn in steps:
         try:
             fn()
             print(f"[{name}] deleted")
         except Exception as e:
             problems += 1
-            print(f"::warning title={name} 刪除失敗，請手動刪除::{entry.get('title')}: {str(e)[:300]}")
+            manual.append(f"- {name}: {links[name]}（錯誤：{str(e)[:200]}）")
+            print(f"::error title={name} 刪除失敗，請手動刪除::{links[name]} {str(e)[:300]}")
     history.remove(entry)
     HISTORY.write_text(json.dumps(history, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"[History] removed {entry.get('date')} {entry.get('title')}")
+    if manual:
+        # the history entry (with the ids) is gone now, so this file / the issue is the only record left
+        MANUAL_DELETE.parent.mkdir(parents=True, exist_ok=True)
+        MANUAL_DELETE.write_text(f"下架 {entry.get('date')}「{entry.get('title')}」（{video_id}）時，下列平台沒刪掉，"
+                                 f"請手動刪除：\n" + "\n".join(manual) + "\n", encoding="utf-8")
     return 0
+
+
+MANUAL_DELETE = Path("out/MANUAL_DELETE")
+
+
+def _ig_permalink(ig_id: str) -> str:
+    """The Reel's public URL (reading it works with instagram_basic, unlike deleting it)."""
+    if not ig_id:
+        return ""
+    try:
+        r = requests.get(f"{GRAPH}/{ig_id}", params={"fields": "permalink", "access_token": _token()}, timeout=30)
+        return r.json().get("permalink") or f"(ig_id {ig_id})"
+    except Exception:
+        return f"(ig_id {ig_id})"
 
 
 def main(argv=None) -> int:

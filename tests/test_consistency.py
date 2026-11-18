@@ -141,3 +141,66 @@ class FigureCheckTest(unittest.TestCase):
                 mock.patch.object(shorts, "_wiki_search", return_value=["[Launch pad] (u)\nwater"]) as ws:
             shorts.wikipedia_notes("Why Do Rocket Launch Pads Dump Water in Seconds?")
         assert ws.call_args[0][0] == "rocket OR launch OR pads OR dump OR water"
+
+
+class FigureParserTest(unittest.TestCase):
+    """Follow-up 11/17: spelled-out compound numbers and vague magnitudes with modifiers / unit abbreviations."""
+
+    def test_spelled_out_compound_numbers(self):
+        for said, notes in (("two hundred fifty million light-years", "150–250 million light-years"),
+                            ("one point two billion years", "1.248 billion years"),
+                            ("five hundred million years", "at least 500 million years"),
+                            ("sixty-six million years ago", "about 66 million years ago"),
+                            ("three hundred thousand kilometers per second", "roughly 300,000 kilometres per second"),
+                            ("sixty million stars", "60 million stars"),
+                            ("fifteen thousand feet", "15,000 ft"),
+                            ("half a million people", "500,000 people"),
+                            ("forty percent", "40%")):
+            self.assertEqual(shorts.unsupported_figures(said, notes), [], said)
+        # a different fact no longer passes by accident
+        self.assertEqual(shorts.unsupported_figures("three hundred million years", "100 million years ago"),
+                         ["three hundred million"])
+        self.assertEqual(shorts.unsupported_figures("fifty meters", "30 m"), ["fifty meters"])
+
+    def test_vague_magnitude_matches_the_thing_counted(self):
+        for said, notes in (("thousands of potassium nuclei", "about 4,300 nuclei of 40K decay per second"),
+                            ("thousands of feet", "up to 60,000 ft (18,288 m) ... 6,000 ft"),
+                            ("thousands of tiny zooids", "a colony of about 5,000 zooids")):
+            self.assertEqual(shorts.unsupported_figures(said, notes), [], said)
+        self.assertEqual(shorts.unsupported_figures("millions of gallons", "spans 520 million light-years"),
+                         ["millions of gallons"])
+
+    def test_what_if_premise_is_not_a_claim(self):
+        topic = "What If You Pitched a Baseball at 90% Light Speed?"
+        sb = {"youtube_title": "A Baseball at 90% Light Speed #shorts", "hook_text": "90% LIGHT SPEED",
+              "youtube_description": "What a near-light-speed pitch would do.",
+              "scenes": [{"narration": "A baseball thrown at 90% of light speed would fuse with the air."}]}
+        notes = "[Baseball] (u)\nA baseball is a ball used in the sport of the same name."
+        with mock.patch.object(shorts.gemini, "call", return_value=(PASS, "lite")):
+            ok, _ = shorts.check_consistency(sb, topic, "baseball", notes)
+        assert ok
+        with mock.patch.object(shorts.gemini, "call", _no_gemini):
+            assert shorts.ground_topic(topic, "baseball", notes) == topic
+        # outside a what-if the same figure still needs the notes
+        assert shorts.unsupported_figures("90% light speed", notes, premise="Why Do Baseballs Curve?") == ["90%"]
+        real = "What Would Actually Happen If a Pitcher Threw a Baseball at 90% the Speed of Light?"  # 11/11
+        assert shorts.unsupported_figures("ninety percent of light speed", notes, premise=real) == []
+
+
+class GraphicPictureTest(unittest.TestCase):
+    def test_skin_lesion_picture_prompt_is_rewritten(self):
+        sb = {"youtube_title": "Why Cashews Are Never Sold in Shells #shorts", "hook_text": "TOXIC SHELL",
+              "youtube_description": "Cashew shells contain urushiol.",
+              "scenes": [{"narration": "Cashew shells contain urushiol, the same oil as poison ivy.",
+                          "image_prompt": "cashew apples hanging on a tree",
+                          "image_prompt_2": "Clinical close-up shot showing raised, reddened skin irritation and "
+                                            "dermatitis welts on a forearm against a neutral background."}]}
+        with mock.patch.object(shorts.gemini, "call", return_value=(PASS, "lite")):
+            ok, reason = shorts.check_consistency(sb, "Why are cashews never sold in shells?", "cashew shells",
+                                                  "[Cashew] (u)\nCashew shells contain urushiol.")
+        assert not ok and "scene 1 image_prompt_2" in reason and "cause instead" in reason
+
+    def test_harmless_prompts_pass(self):
+        sb = {"scenes": [{"image_prompt": "red blood cells flowing through a vessel, microscope view",
+                          "image_prompt_2": "a rocket engine burn seen from far away"}]}
+        assert shorts.graphic_prompts(sb) == []
