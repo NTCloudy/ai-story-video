@@ -182,8 +182,8 @@
   "ig_url": "https://www.instagram.com/reel/De3GZBWgdoh/",
   "views": 958,
   "likes": 32,
-  "engaged_views": 449,
-  "avg_view_pct": 67.0,
+  "engaged_views": 451,
+  "avg_view_pct": 66.8,
   "avg_view_sec": 26,
   "subs_gained": 2,
   "shares": 0
@@ -201,7 +201,7 @@
   "fb_url": "https://www.facebook.com/reel/1775488200346196/",
   "ig_id": "18083041184532369",
   "ig_url": "https://www.instagram.com/reel/De5Vt09kWX8/",
-  "views": 444,
+  "views": 445,
   "likes": 14,
   "engaged_views": 179,
   "avg_view_pct": 44.8,
@@ -243,7 +243,7 @@
   "fb_url": "https://www.facebook.com/reel/1680430180321529/",
   "ig_id": "18033321710909295",
   "ig_url": "https://www.instagram.com/reel/De-h4NCFH11/",
-  "views": 67,
+  "views": 68,
   "likes": 4,
   "engaged_views": 32,
   "avg_view_pct": 73.1,
@@ -510,8 +510,8 @@
   "views": 215,
   "likes": 13,
   "engaged_views": 86,
-  "avg_view_pct": 89.3,
-  "avg_view_sec": 39,
+  "avg_view_pct": 85.2,
+  "avg_view_sec": 37,
   "subs_gained": 0,
   "shares": 0
  },
@@ -532,8 +532,8 @@
   "views": 23,
   "likes": 3,
   "engaged_views": 12,
-  "avg_view_pct": 97.4,
-  "avg_view_sec": 45,
+  "avg_view_pct": 104.0,
+  "avg_view_sec": 48,
   "subs_gained": 1,
   "shares": 0
  },
@@ -663,8 +663,8 @@
   "ig_url": "https://www.instagram.com/reel/DfvgRuqmGBE/",
   "views": 68,
   "likes": 4,
-  "engaged_views": 33,
-  "avg_view_pct": 52.7,
+  "engaged_views": 32,
+  "avg_view_pct": 53.5,
   "avg_view_sec": 24,
   "subs_gained": 1,
   "shares": 0
@@ -685,8 +685,8 @@
   "ig_url": "https://www.instagram.com/reel/Dfx_XuXDjr_/",
   "views": 617,
   "likes": 11,
-  "engaged_views": 348,
-  "avg_view_pct": 100.5,
+  "engaged_views": 349,
+  "avg_view_pct": 100.2,
   "avg_view_sec": 42,
   "subs_gained": 4,
   "shares": 0
@@ -707,9 +707,9 @@
   "ig_url": "https://www.instagram.com/reel/Df0mlt9DEp5/",
   "views": 29,
   "likes": 1,
-  "engaged_views": 12,
-  "avg_view_pct": 61,
-  "avg_view_sec": 25,
+  "engaged_views": 14,
+  "avg_view_pct": 56.5,
+  "avg_view_sec": 23,
   "subs_gained": 0,
   "shares": 0
  },
@@ -727,8 +727,13 @@
   "fb_url": "https://www.facebook.com/reel/1662980438840921/",
   "ig_id": "18115615034173836",
   "ig_url": "https://www.instagram.com/reel/Df3_K8kHPVC/",
-  "views": 16,
-  "likes": 0
+  "views": 17,
+  "likes": 0,
+  "engaged_views": 7,
+  "avg_view_pct": 61.7,
+  "avg_view_sec": 24,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-11-19",
@@ -744,8 +749,13 @@
   "fb_url": "https://www.facebook.com/reel/1497227722301979/",
   "ig_id": "18113761013617819",
   "ig_url": "https://www.instagram.com/reel/Df5ybRMgO9l/",
-  "views": 39,
-  "likes": 0
+  "views": 40,
+  "likes": 0,
+  "engaged_views": 12,
+  "avg_view_pct": 67.4,
+  "avg_view_sec": 26,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-11-20",
@@ -760,6 +770,23 @@
   "fb_id": "943967245313448",
   "fb_url": "https://www.facebook.com/reel/943967245313448/",
   "ig_id": "18223240711350912",
-  "ig_url": "https://www.instagram.com/reel/Df8S3siCA3I/"
+  "ig_url": "https://www.instagram.com/reel/Df8S3siCA3I/",
+  "views": 7,
+  "likes": 0
+ },
+ {
+  "date": "2026-11-21",
+  "topic": "Why Could You Fly Like a Bird on Saturn's Moon Just by Flapping Artificial Wings?",
+  "concept": "flying on titan",
+  "series": "Space",
+  "title": "Could You Fly on Saturn's Moon Titan? #shorts",
+  "duration": 38.6,
+  "video_id": "eQ-s9B3T6vs",
+  "privacy": "public",
+  "mode": "proven",
+  "fb_id": "1822103545675724",
+  "fb_url": "https://www.facebook.com/reel/1822103545675724/",
+  "ig_id": "18375129193246014",
+  "ig_url": "https://www.instagram.com/reel/Df-25OTgAwM/"
  }
 ]
