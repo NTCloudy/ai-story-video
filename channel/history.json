@@ -245,8 +245,8 @@
   "ig_url": "https://www.instagram.com/reel/De-h4NCFH11/",
   "views": 68,
   "likes": 4,
-  "engaged_views": 32,
-  "avg_view_pct": 73.1,
+  "engaged_views": 33,
+  "avg_view_pct": 72.7,
   "avg_view_sec": 30,
   "subs_gained": 1,
   "shares": 0
@@ -397,7 +397,7 @@
   "fb_url": "https://www.facebook.com/reel/1418743637000317/",
   "ig_id": "17996691150021867",
   "ig_url": "https://www.instagram.com/reel/DfQhaB5jj8f/",
-  "views": 207,
+  "views": 208,
   "likes": 15,
   "engaged_views": 110,
   "avg_view_pct": 58.7,
@@ -685,8 +685,8 @@
   "ig_url": "https://www.instagram.com/reel/Dfx_XuXDjr_/",
   "views": 617,
   "likes": 11,
-  "engaged_views": 349,
-  "avg_view_pct": 100.2,
+  "engaged_views": 350,
+  "avg_view_pct": 100.1,
   "avg_view_sec": 42,
   "subs_gained": 4,
   "shares": 0
@@ -729,9 +729,9 @@
   "ig_url": "https://www.instagram.com/reel/Df3_K8kHPVC/",
   "views": 17,
   "likes": 0,
-  "engaged_views": 7,
-  "avg_view_pct": 61.7,
-  "avg_view_sec": 24,
+  "engaged_views": 8,
+  "avg_view_pct": 63.0,
+  "avg_view_sec": 25,
   "subs_gained": 0,
   "shares": 0
  },
@@ -751,9 +751,9 @@
   "ig_url": "https://www.instagram.com/reel/Df5ybRMgO9l/",
   "views": 40,
   "likes": 0,
-  "engaged_views": 12,
-  "avg_view_pct": 67.4,
-  "avg_view_sec": 26,
+  "engaged_views": 16,
+  "avg_view_pct": 64.9,
+  "avg_view_sec": 25,
   "subs_gained": 0,
   "shares": 0
  },
@@ -771,8 +771,13 @@
   "fb_url": "https://www.facebook.com/reel/943967245313448/",
   "ig_id": "18223240711350912",
   "ig_url": "https://www.instagram.com/reel/Df8S3siCA3I/",
-  "views": 7,
-  "likes": 0
+  "views": 8,
+  "likes": 0,
+  "engaged_views": 5,
+  "avg_view_pct": 77.3,
+  "avg_view_sec": 28,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-11-21",
@@ -787,6 +792,23 @@
   "fb_id": "1822103545675724",
   "fb_url": "https://www.facebook.com/reel/1822103545675724/",
   "ig_id": "18375129193246014",
-  "ig_url": "https://www.instagram.com/reel/Df-25OTgAwM/"
+  "ig_url": "https://www.instagram.com/reel/Df-25OTgAwM/",
+  "views": 5,
+  "likes": 0
+ },
+ {
+  "date": "2026-11-22",
+  "topic": "Why Can This Terrifying Chemical Set Fire to Glass, Sand, and Concrete?",
+  "concept": "chlorine trifluoride",
+  "series": "Chemistry & Materials",
+  "title": "The Chemical That Burns Almost Anything #shorts",
+  "duration": 42.3,
+  "video_id": "qJanJpV5Jfs",
+  "privacy": "public",
+  "mode": "trend",
+  "fb_id": "2226766685389209",
+  "fb_url": "https://www.facebook.com/reel/2226766685389209/",
+  "ig_id": "18098528795159680",
+  "ig_url": "https://www.instagram.com/reel/DgBbpEoEubW/"
  }
 ]
