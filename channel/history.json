@@ -793,8 +793,13 @@
   "fb_url": "https://www.facebook.com/reel/1822103545675724/",
   "ig_id": "18375129193246014",
   "ig_url": "https://www.instagram.com/reel/Df-25OTgAwM/",
-  "views": 5,
-  "likes": 0
+  "views": 6,
+  "likes": 0,
+  "engaged_views": 2,
+  "avg_view_pct": 65.4,
+  "avg_view_sec": 25,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-11-22",
@@ -809,6 +814,8 @@
   "fb_id": "2226766685389209",
   "fb_url": "https://www.facebook.com/reel/2226766685389209/",
   "ig_id": "18098528795159680",
-  "ig_url": "https://www.instagram.com/reel/DgBbpEoEubW/"
+  "ig_url": "https://www.instagram.com/reel/DgBbpEoEubW/",
+  "views": 85,
+  "likes": 2
  }
 ]
