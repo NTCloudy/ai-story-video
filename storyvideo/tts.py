@@ -5,6 +5,7 @@ from __future__ import annotations
 import asyncio
 import re
 import subprocess
+import time
 from pathlib import Path
 
 import edge_tts
@@ -81,6 +82,10 @@ def _gtts(text: str, mp3: Path, lang: str = "zh"):
 
 
 _EDGE_OK = True
+# The free Microsoft voice service sometimes answers with no audio (NoAudioReceived), often for a few calls
+# in a row: three back-to-back tries dropped whole Shorts (11/19, twice on 11/23). Seconds to wait before each
+# further try; every scene gets len(RETRY_WAITS) + 1 tries.
+RETRY_WAITS = (3, 10, 25, 60)
 
 
 def narrate(scenes: list[dict], out_dir: Path, voice: str = "female", rate: str = "+0%",
@@ -94,14 +99,17 @@ def narrate(scenes: list[dict], out_dir: Path, voice: str = "female", rate: str 
         mp3 = out_dir / f"scene_{i:02d}.mp3"
         cues, words = None, []
         if _EDGE_OK:
-            for attempt in range(3):
+            tries = len(RETRY_WAITS) + 1
+            for attempt in range(tries):
                 try:
                     cues, words = asyncio.run(asyncio.wait_for(_tts(sc["narration"], v, rate, mp3, lang), 90))
                     break
                 except Exception as e:  # network hiccups / blocked
-                    print(f"[配音] 微軟語音失敗（{attempt + 1}/3）：{type(e).__name__}: {str(e)[:120]}")
+                    print(f"[配音] 微軟語音失敗（{attempt + 1}/{tries}）：{type(e).__name__}: {str(e)[:120]}")
+                    if attempt + 1 < tries:
+                        time.sleep(RETRY_WAITS[attempt])
             if cues is None and not allow_backup:
-                raise RuntimeError("微軟語音連續失敗 3 次，不改用品質較差的備援語音")
+                raise RuntimeError(f"微軟語音連續失敗 {tries} 次，不改用品質較差的備援語音")
             if cues is None:
                 print("[配音] 改用 Google 語音備援")
                 _EDGE_OK = False
