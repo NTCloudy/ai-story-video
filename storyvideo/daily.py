@@ -237,6 +237,23 @@ def main(argv=None) -> int:
         return 0
 
 
+def checked_script(topic: str, series: str, concept: str) -> tuple[str, str, dict]:
+    """Research -> script -> last check for one topic. Returns (topic, research notes, script); the topic comes
+    back without the figures the notes do not back. Raises CannotGenerate when the topic cannot be done properly."""
+    facts = shorts.research(topic, concept)
+    if not facts:
+        raise CannotGenerate("查不到這個主題的可靠資料，不憑空寫腳本")
+    topic = shorts.ground_topic(topic, concept, facts)  # drop figures the notes do not back
+    feedback = ""
+    for attempt in range(3):
+        sb = shorts.write_short(topic, facts, series, concept, feedback)
+        ok, feedback = shorts.check_consistency(sb, topic, concept, facts)
+        if ok:
+            return topic, facts, sb
+        print(f"::warning title=標題、內容或事實查核不符，重寫（第 {attempt + 1} 次）::{sb.get('youtube_title', '')}: {feedback}")
+    raise CannotGenerate(f"重寫 3 次標題、內容或事實查核還是沒通過：{feedback}")
+
+
 def make_short(args, cfg: dict, history: list, queue: list, today: str, out: Path, auto_publish: bool) -> int:
     """Topic -> research -> script -> check -> images -> voice -> render -> upload.
     Raises CannotGenerate instead of falling back to a worse result."""
@@ -257,29 +274,32 @@ def make_short(args, cfg: dict, history: list, queue: list, today: str, out: Pat
             print(f"::warning title=排程主題重複，已略過::「{cand}」≈「{dup}」")
             continue
         topic, series = cand, ser
-    if not topic:
+
+    # 2. research + script, then make sure the script is about the topic and the title matches the script.
+    # A topic the job picked itself is replaced when it cannot be researched or its drafts keep failing the check
+    # (up to `topics_per_attempt` topics), so one bad topic does not use up one of the day's automatic tries.
+    # A topic that was given (--topic or the queue) is never replaced.
+    own_pick = not topic
+    picks = max(1, int(cfg.get("topics_per_attempt", 2))) if own_pick else 1
+    if own_pick:
         trends, themes = load_trends(cfg)
         use_themes = cfg.get("topic_mode", "trends") == "trends"
-        t = shorts.pick_topic(history, cfg.get("series"), trends=trends, themes=themes if use_themes else None,
-                              proven_per_week=int(cfg.get("proven_per_week", 2)), today=today,
-                              cooldown=int(cfg.get("theme_cooldown_days", 7)))
-        topic, series, concept, mode = t["topic"], t["series"], t.get("concept", ""), t.get("mode", "")
-    print(f"== 主題：{topic}（{series or '自訂'}）==")
-
-    # 2. research + script, then make sure the script is about the topic and the title matches the script
-    facts = shorts.research(topic, concept)
-    if not facts:
-        raise CannotGenerate("查不到這個主題的可靠資料，不憑空寫腳本")
-    topic = shorts.ground_topic(topic, concept, facts)  # drop figures the notes do not back
-    feedback = ""
-    for attempt in range(3):
-        sb = shorts.write_short(topic, facts, series, concept, feedback)
-        ok, feedback = shorts.check_consistency(sb, topic, concept, facts)
-        if ok:
+    dropped: list[dict] = []
+    for n in range(picks):
+        if own_pick:
+            t = shorts.pick_topic(history, cfg.get("series"), trends=trends, themes=themes if use_themes else None,
+                                  proven_per_week=int(cfg.get("proven_per_week", 2)), today=today,
+                                  cooldown=int(cfg.get("theme_cooldown_days", 7)), exclude=dropped)
+            topic, series, concept, mode = t["topic"], t["series"], t.get("concept", ""), t.get("mode", "")
+        print(f"== 主題：{topic}（{series or '自訂'}）==")
+        try:
+            topic, facts, sb = checked_script(topic, series, concept)
             break
-        print(f"::warning title=標題、內容或事實查核不符，重寫（第 {attempt + 1} 次）::{sb.get('youtube_title', '')}: {feedback}")
-    else:
-        raise CannotGenerate(f"重寫 3 次標題、內容或事實查核還是沒通過：{feedback}")
+        except CannotGenerate as e:
+            if n + 1 >= picks:
+                raise
+            print(f"::warning title=這個主題做不出來，換一個主題::{topic}: {e}")
+            dropped.append({"topic": topic, "concept": concept, "series": series})
     (out / "script.json").write_text(json.dumps(sb, ensure_ascii=False, indent=2), encoding="utf-8")
     print(f"標題：{sb['youtube_title']}｜{len(sb['scenes'])} 個分鏡｜模型 {sb['model']}")
 

@@ -238,12 +238,15 @@ def pick_proven_theme(history: list[dict], today: str = "") -> dict | None:
 
 def pick_topic(history: list[dict], series: list[str] | None = None, attempts: int = 6,
                trends: list[dict] | None = None, themes: list[dict] | None = None, cooldown: int = 7,
-               proven_per_week: int = 2, today: str = "") -> dict:
+               proven_per_week: int = 2, today: str = "", exclude: list[dict] | None = None) -> dict:
     """Pick a topic guaranteed (lexical + semantic checks) not to overlap any previous Short.
     At least `proven_per_week` of every 7 Shorts come from our own best-viewed themes ("proven").
     Otherwise with `themes` (trend mode): today's theme is the most popular trending theme not used in the last
-    `cooldown` days, and the topic is proposed inside it. Without themes: 70% exploit our best series, 30% explore."""
+    `cooldown` days, and the topic is proposed inside it. Without themes: 70% exploit our best series, 30% explore.
+    `exclude`: topics this run already dropped ({topic, concept, series}) because they could not be researched or
+    checked. They are not proposed again, and a trend pick moves to another theme."""
     import random
+    exclude = exclude or []
     theme = pick_proven_theme(history, today) if need_proven(history, proven_per_week) else None
     mode = "proven" if theme else ""
     if theme:
@@ -251,10 +254,12 @@ def pick_topic(history: list[dict], series: list[str] | None = None, attempts: i
         if trend:  # what is hot in that theme on YouTube right now, plus our own winners
             theme["examples"] = theme["examples"] + trend["examples"][:4]
     else:
-        theme = pick_theme(themes, history, cooldown) if themes else None
+        dropped = {d.get("series", "") for d in exclude}
+        others = [t for t in themes or [] if t["theme"] not in dropped]
+        theme = pick_theme(others or themes, history, cooldown) if themes else None
         mode = "trend" if theme else ("exploit" if random.random() < 0.7 else "explore")
     print(f"[Topic] mode: {mode}" + (f" | theme: {theme['theme']} ({theme['median_views']:,} views)" if theme else ""))
-    rejected: list[str] = []
+    rejected: list[str] = [f"{d.get('topic', '')} (could not be verified)" for d in exclude]
     for _ in range(attempts):
         t = (_propose_in_theme(history, theme, rejected) if theme
              else _propose_topic(history, series, rejected, trends or [], mode))
@@ -266,7 +271,7 @@ def pick_topic(history: list[dict], series: list[str] | None = None, attempts: i
             print(f"[Topic] 題目太獵奇，換一個：{t['topic']}")
             rejected.append(t["topic"] + " (too morbid)")
             continue
-        dup = find_duplicate(t["topic"], t.get("concept", ""), history)
+        dup = find_duplicate(t["topic"], t.get("concept", ""), history + exclude)
         if not dup:
             t["mode"] = mode
             return t
@@ -421,6 +426,78 @@ def _wiki_search(q: str, pages: int, chars: int) -> list[str]:
     return [f"[{p['title']}] ({p.get('fullurl', '')})\n{p.get('extract', '')[:chars]}" for p in found if p.get("extract")]
 
 
+# The intro of an article often leaves out the one fact a Short is about. 11/25: the Toothpaste article explains
+# why orange juice tastes bad after brushing in its body, not in its intro, and three drafts were rejected for
+# saying so. The notes therefore also carry the body paragraphs that are about the concept, as long as the notes
+# stay within NOTES_LIMIT, the part of the notes the last check reads.
+NOTES_LIMIT = 12000
+BODY_PARAGRAPHS = 2          # per article
+BODY_PARAGRAPH_CHARS = 800
+
+
+def _wiki_body(title: str) -> str:
+    """Plain text of one whole article (the search only returns intros)."""
+    import requests
+    r = requests.get(WIKI_API, headers=WIKI_HEADERS, timeout=30, params={
+        "action": "query", "format": "json", "prop": "extracts", "explaintext": 1, "redirects": 1, "titles": title})
+    r.raise_for_status()
+    pages = (r.json().get("query") or {}).get("pages", {})
+    return next(iter(pages.values()), {}).get("extract", "") or ""
+
+
+def _trim_paragraph(p: str, keys: set[str], chars: int) -> str:
+    """A long paragraph is cut to whole sentences, starting at the first sentence that mentions the concept."""
+    if len(p) <= chars:
+        return p
+    sentences = re.split(r"(?<=[.!?])\s+", p)
+    while len(sentences) > 1 and not keys & _words(sentences[0]):
+        sentences.pop(0)
+    out = sentences[0][:chars]
+    for s in sentences[1:]:
+        if len(out) + 1 + len(s) > chars:
+            break
+        out += " " + s
+    return out
+
+
+def concept_paragraphs(body: str, keys: set[str], skip: str = "", limit: int = BODY_PARAGRAPHS,
+                       chars: int = BODY_PARAGRAPH_CHARS) -> list[str]:
+    """Paragraphs of an article that are about the concept: they mention at least two of its keywords (or its
+    only keyword). Best matches first, then article order. `skip` is text the notes already have (the intro)."""
+    need = min(2, len(keys))
+    if not need:
+        return []
+    found = []
+    for n, p in enumerate(body.split("\n")):
+        p = p.strip()
+        if len(p) < 80 or p.startswith("=") or p[:80] in skip:
+            continue
+        hits = len(keys & _words(p))
+        if hits >= need:
+            found.append((-hits, n, p))
+    return [_trim_paragraph(p, keys, chars) for _, _, p in sorted(found)[:limit]]
+
+
+def _body_paragraphs(note: str, keys: set[str], room: int) -> list[str]:
+    """The paragraphs to add to one "[Title] (url)\\nintro" note, at most `room` characters in total.
+    Best effort: when the article cannot be read, the note keeps its intro only."""
+    try:
+        title = note[1:note.index("] (")]
+        found = concept_paragraphs(_wiki_body(title), keys, skip=note)
+    except Exception as e:
+        print(f"[Research] article body skipped: {str(e)[:120]}")
+        return []
+    kept = []
+    for p in found:
+        if len(p) + 1 > room:
+            break
+        kept.append(p)
+        room -= len(p) + 1
+    if kept:
+        print(f"[Research] {title}: {len(kept)} more paragraphs about the concept from the article body")
+    return kept
+
+
 def search_words(topic: str, limit: int = 8) -> str:
     """Wikipedia query for a question when no keywords are available: its content words OR-ed together.
     The full question ("Why Do Rocket Launch Pads ...?") usually finds nothing."""
@@ -433,7 +510,8 @@ def search_words(topic: str, limit: int = 8) -> str:
 
 
 def wikipedia_notes(topic: str, pages: int = 3, chars: int = 2500, concept: str = "") -> str:
-    """Free, reliable research source: intro sections of the most relevant Wikipedia articles.
+    """Free, reliable research source: intro sections of the most relevant Wikipedia articles, plus the body
+    paragraphs of those articles that are about the core concept.
     Articles that never mention the core concept are dropped, so a vague question ("this animal") cannot
     pull in an unrelated subject."""
     try:
@@ -448,6 +526,11 @@ def wikipedia_notes(topic: str, pages: int = 3, chars: int = 2500, concept: str 
         notes = [n for n in notes if _mentions(n, keys)]
         if not notes and q != concept:
             notes = [n for n in _wiki_search(concept, pages, chars) if _mentions(n, keys)]
+        room = NOTES_LIMIT - len("\n\n".join(notes))
+        for i, note in enumerate(notes):
+            extra = _body_paragraphs(note, keys, room)
+            room -= sum(len(p) + 1 for p in extra)
+            notes[i] = "\n".join([note] + extra)
     return "\n\n".join(notes)
 
 
@@ -456,7 +539,8 @@ def research(topic: str, concept: str = "") -> str:
     try:
         notes = wikipedia_notes(topic, concept=concept)
         if notes:
-            print(f"[Research] Wikipedia: {notes.count('[')} articles")
+            articles = re.findall(r"^\[.+\] \(", notes, flags=re.M)  # note headers; the text can contain "["
+            print(f"[Research] Wikipedia: {len(articles)} articles")
             return notes
         print("[Research] Wikipedia had no article about the topic")
     except Exception as e:
@@ -770,7 +854,8 @@ def check_consistency(sb: dict, topic: str, concept: str = "", facts: str = "") 
                       f"use only figures the notes give ({notes_figures(facts)})")
             print(f"[Check] figures: {reason}")
             return False, reason
-    notes_block = f"Research notes (the only allowed source of specific claims):\n{facts[:12000]}" if facts else ""
+    notes_block = (f"Research notes (the only allowed source of specific claims):\n{facts[:NOTES_LIMIT]}"
+                   if facts else "")
     claims_rule = ("false if the title, hook, description or narration contains a specific number, percentage, date, "
                    "record or superlative (\"the longest\", \"the loudest\"), named effect / technical term, or a "
                    "claim stated as settled fact that the research notes do not support (or contradict). Common "

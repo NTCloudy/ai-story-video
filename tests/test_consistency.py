@@ -50,7 +50,8 @@ class ConsistencyTest(unittest.TestCase):
     def test_wikipedia_drops_articles_without_the_concept(self):
         notes = ["[Animal cruelty] (u)\nLaws about cruelty to animals.", "[Hairy frog] (u)\nThe hairy frog has claws."]
         with mock.patch.object(shorts.gemini, "call", _no_gemini), \
-                mock.patch.object(shorts, "_wiki_search", return_value=notes):
+                mock.patch.object(shorts, "_wiki_search", return_value=notes), \
+                mock.patch.object(shorts, "_wiki_body", return_value=""):
             out = shorts.wikipedia_notes("Why does this animal break its bones?", concept="hairy frog claws")
         assert "Hairy frog" in out and "Animal cruelty" not in out
 
