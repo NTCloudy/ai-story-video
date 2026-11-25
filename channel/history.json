@@ -815,11 +815,11 @@
   "fb_url": "https://www.facebook.com/reel/2226766685389209/",
   "ig_id": "18098528795159680",
   "ig_url": "https://www.instagram.com/reel/DgBbpEoEubW/",
-  "views": 97,
+  "views": 95,
   "likes": 3,
-  "engaged_views": 41,
-  "avg_view_pct": 67.5,
-  "avg_view_sec": 29,
+  "engaged_views": 44,
+  "avg_view_pct": 65.7,
+  "avg_view_sec": 28,
   "subs_gained": 1,
   "shares": 0
  },
@@ -839,9 +839,9 @@
   "ig_url": "https://www.instagram.com/reel/DgEe0IHGpu_/",
   "views": 63,
   "likes": 1,
-  "engaged_views": 28,
-  "avg_view_pct": 52.0,
-  "avg_view_sec": 24,
+  "engaged_views": 32,
+  "avg_view_pct": 53.3,
+  "avg_view_sec": 25,
   "subs_gained": 0,
   "shares": 0
  },
@@ -859,8 +859,13 @@
   "fb_url": "https://www.facebook.com/reel/1141281818283999/",
   "ig_id": "18160275766525882",
   "ig_url": "https://www.instagram.com/reel/DgGnF1WgH0-/",
-  "views": 97,
-  "likes": 8
+  "views": 112,
+  "likes": 9,
+  "engaged_views": 19,
+  "avg_view_pct": 49.8,
+  "avg_view_sec": 19,
+  "subs_gained": 0,
+  "shares": 0
  },
  {
   "date": "2026-11-25",
@@ -876,7 +881,22 @@
   "fb_url": "https://www.facebook.com/reel/1824093625308328/",
   "ig_id": "18125455780979009",
   "ig_url": "https://www.instagram.com/reel/DgJ4R0syp5N/",
-  "views": 36,
-  "likes": 2
+  "views": 273,
+  "likes": 8
+ },
+ {
+  "date": "2026-11-26",
+  "topic": "Why Would the Sound of the Sun Deafen Everyone on Earth If Space Had Air?",
+  "concept": "solar acoustic waves",
+  "series": "Space",
+  "title": "Could the Sun's Sound Deafen Earth? #shorts",
+  "duration": 38.0,
+  "video_id": "VZpAc2LwHRQ",
+  "privacy": "public",
+  "mode": "proven",
+  "fb_id": "3606299776203149",
+  "fb_url": "https://www.facebook.com/reel/3606299776203149/",
+  "ig_id": "18444263638198469",
+  "ig_url": "https://www.instagram.com/reel/DgLw06-PzSw/"
  }
 ]
