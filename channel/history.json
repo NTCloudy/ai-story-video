@@ -881,7 +881,7 @@
   "fb_url": "https://www.facebook.com/reel/1824093625308328/",
   "ig_id": "18125455780979009",
   "ig_url": "https://www.instagram.com/reel/DgJ4R0syp5N/",
-  "views": 392,
+  "views": 406,
   "likes": 11,
   "engaged_views": 21,
   "avg_view_pct": 56.3,
@@ -903,8 +903,8 @@
   "fb_url": "https://www.facebook.com/reel/3606299776203149/",
   "ig_id": "18444263638198469",
   "ig_url": "https://www.instagram.com/reel/DgLw06-PzSw/",
-  "views": 276,
-  "likes": 5
+  "views": 284,
+  "likes": 6
  },
  {
   "date": "2026-11-27",
@@ -919,6 +919,8 @@
   "fb_id": "947816548266351",
   "fb_url": "https://www.facebook.com/reel/947816548266351/",
   "ig_id": "18139326187792355",
-  "ig_url": "https://www.instagram.com/reel/DgOVce5gLql/"
+  "ig_url": "https://www.instagram.com/reel/DgOVce5gLql/",
+  "views": 10,
+  "likes": 0
  }
 ]
